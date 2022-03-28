@@ -1,14 +1,12 @@
 package com.analysis;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Helper class for parsing JSON NLP-file
@@ -102,5 +100,95 @@ public class NLPFileReader {
             }
         }
         return new IllegalStateException("Incorrect step description!"); //Should never be able to happen
+    }
+
+    public Map<String, List<String>> getPos(String fileName, String stepDesc) {
+        JSONObject stepFile = getFileFromJson(fileName);
+        HashMap<String, List<String>> result = new HashMap<>();
+        JSONObject posInfo = new JSONObject();
+
+        switch (stepDesc.toLowerCase().substring(0, 4)) {
+            case "give":
+                for (Object givenStep : (JSONArray) stepFile.get("given")) {
+                    if ((((JSONObject) givenStep).get("description")).equals(stepDesc)) {
+                        // triple cast to let the compiler know the correct types
+                        posInfo = (JSONObject) ((JSONArray) ((JSONObject) givenStep).get("analysis")).get(0);
+                    }
+                }
+                break;
+            case "when":
+                for (Object whenStep : (JSONArray) stepFile.get("when")) {
+                    if ((((JSONObject) whenStep).get("description")).equals(stepDesc)) {
+                        // triple cast to let the compiler know the correct types
+                        posInfo = (JSONObject) ((JSONArray) ((JSONObject) whenStep).get("analysis")).get(0);
+                    }
+                }
+                break;
+            case "then":
+                for (Object thenStep : (JSONArray) stepFile.get("then")) {
+                    if ((((JSONObject) thenStep).get("description")).equals(stepDesc)) {
+                        // triple cast to let the compiler know the correct types
+                        posInfo = (JSONObject) ((JSONArray) ((JSONObject) thenStep).get("analysis")).get(0);
+                    }
+                }
+                break;
+            default:
+                throw new RuntimeException("Unknown step description");
+        }
+
+        //add nouns to return data structure
+        JSONArray tempNouns = (JSONArray) posInfo.get("nouns");
+        List<String> nouns = new ArrayList<>();
+        for (int i = 0; i < tempNouns.size(); i++) {
+            nouns.add(tempNouns.get(i).toString());
+        }
+        result.put("nouns", nouns);
+
+        //add numbers to return data structure
+        JSONArray cardinals = (JSONArray) posInfo.get("numbers");
+        List<String> numbers = new ArrayList<>();
+        for (int i = 0; i < cardinals.size(); i++) {
+            numbers.add(cardinals.get(i).toString());
+        }
+
+        return result;
+    }
+
+    public Map<String, List<String>> getSrl(String fileName, String stepDesc) {
+        JSONObject stepFile = getFileFromJson(fileName);
+        HashMap<String, List<String>> result = new HashMap<>();
+        JSONArray srlInfo = new JSONArray();
+
+        switch (stepDesc.toLowerCase().substring(0, 4)) {
+            case "when":
+                for (Object whenStep : (JSONArray) stepFile.get("when")) {
+                    if ((((JSONObject) whenStep).get("description")).equals(stepDesc)) {
+                        // triple cast to let the compiler know the correct types
+                        srlInfo = (JSONArray) ((JSONArray) ((JSONObject) whenStep).get("analysis")).get(1);
+                    }
+                }
+                break;
+            case "then":
+                for (Object thenStep : (JSONArray) stepFile.get("then")) {
+                    if ((((JSONObject) thenStep).get("description")).equals(stepDesc)) {
+                        // triple cast to let the compiler know the correct types
+                        srlInfo = (JSONArray) ((JSONArray) ((JSONObject) thenStep).get("analysis")).get(1);
+                    }
+                }
+                break;
+            default:
+                throw new RuntimeException("Unknown step description");
+        }
+
+        for (Object srl : srlInfo) {
+            String verb = (String) ((JSONArray) srl).get(0);
+            List<String> labels = new ArrayList<>();
+            ((JSONArray) ((JSONArray) srl).get(1)).stream().forEach(s -> {
+                labels.add(s.toString());
+            });
+            result.put(verb, labels);
+        }
+        
+        return result;
     }
 }

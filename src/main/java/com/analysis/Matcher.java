@@ -23,20 +23,17 @@ public class Matcher {
         List<String> result = new ArrayList<>();
 
         for (String description : descriptions) {
-            JSONArray nlpAnalysis = (JSONArray) json.getAnalysis(stepFile, description);
-//            System.out.println(nlpAnalysis);
-            System.out.println(description);
-            JSONArray posTagger = (JSONArray) nlpAnalysis.get(0);// Get pos-tagger result
+            Map<String, List<String>> posResult =  json.getPos(stepFile, description);
+//            System.out.println(description);
 
             if (description.startsWith("Given")) {
-                result.add(matchGiven(posTagger, codeAnalysis));
+                result.add(matchGiven(posResult, codeAnalysis));
             } else if (description.startsWith("When")) {
-                JSONArray srlSentence = (JSONArray) nlpAnalysis.get(1);
-                result.add(matchWhen(posTagger, srlSentence, codeAnalysis));
+                Map<String, List<String>> srlSentence = json.getSrl(stepFile, description);
+                result.add(matchWhen(posResult, srlSentence, codeAnalysis));
                 break;
             } else if (description.startsWith("Then")) {
-                JSONArray srlSentence = (JSONArray) nlpAnalysis.get(1);
-                result.add(matchThen(posTagger, srlSentence, codeAnalysis));
+//                result.add(matchThen(posTagger, srlSentence, codeAnalysis));
             } else {
                 System.out.println(description);
             }
@@ -53,16 +50,16 @@ public class Matcher {
 
     /**
      * Helper function to analyze a single given-step
-     * @param posTagger pos-tagger result
+     * @param posResult pos-tagger info -> nouns, numbers, etc
      * @param codeAnalysis code analysis
      * @return info for generator to be able to generate code
      */
-    private String matchGiven(JSONArray posTagger, HashMap<String, List<String>> codeAnalysis) {
+    private String matchGiven(Map<String, List<String>> posResult, HashMap<String, List<String>> codeAnalysis) {
 //        HashMap<String, List<String>> result = new HashMap<>();
-        List<List<String>> posTags = convertToList(posTagger);
-        String[] nouns = extractNouns(posTags).toArray(new String[0]);
-        List<String> numbers = extractNumbers(posTags);
+        List<String> nouns = posResult.get("nouns");
+        List<String> numbers = posResult.get("numbers");
 
+        System.out.println(nouns);
         //for each class compute levenshtein distance
         HashMap<String, String> bestMatchedClass = new HashMap<>(); // {word=[suggested class]}
         for (String noun : nouns) {
@@ -86,21 +83,23 @@ public class Matcher {
         return className;
     }
 
-    private String matchWhen(JSONArray posTagger, JSONArray srlSentence, HashMap<String, List<String>> codeAnalysis) {
+    private String matchWhen(Map<String, List<String>> posResult, Map<String, List<String>> srlSentence, HashMap<String, List<String>> codeAnalysis) {
         //TODO: for each verb analyse using srl
         // use ARG0, ARG1 and ARG2 to see what method is supposed to do
         // then use this to suggest method calls
-        List<List<String>> posTags = convertToList(posTagger);
-        List<String> verbs = extractVerbs(posTags);
-        String[] nouns = extractNouns(posTags).toArray(new String[0]);
-        List<String> numbers = extractNumbers(posTags);
+//        List<List<String>> posTags = convertToList(posTagger);
+//        List<String> verbs = extractVerbs(posTags);
+//        String[] nouns = extractNouns(posTags).toArray(new String[0]);
+//        List<String> numbers = extractNumbers(posTags);
 
-        System.out.println(verbs);
+//        System.out.println(verbs);
 
         return "";
     }
 
-    private String matchThen(JSONArray posTagger, JSONArray srlSentence, HashMap<String, List<String>> codeAnalysis) {
+    private String matchThen(Object posTagger, JSONArray srlSentence, HashMap<String, List<String>> codeAnalysis) {
+        //TODO: analyze on nouns, numbers and verbs
+
         return "";
     }
 
@@ -138,25 +137,6 @@ public class Matcher {
         return arr;
     }
 
-    private List<String> extractNumbers(List<List<String>> posTagger) {
-        List<String> numbers = new ArrayList<>();
-        for (List<String> pair : posTagger) {
-            if (pair.get(1).equals("CD")) { // is a cardinal digit
-                numbers.add(pair.get(0));
-            }
-        }
-        return numbers;
-    }
-
-    private List<String> extractNouns(List<List<String>> posTagger) {
-        List<String> nouns = new ArrayList<>();
-        for (List<String> pair : posTagger) {
-            if (pair.get(1).startsWith("NN")) { // is a noun
-                nouns.add(pair.get(0));
-            }
-        }
-        return nouns;
-    }
 
     private void execute() throws FileNotFoundException {
         File targetDir = new File("src/main/java/com/bank");
