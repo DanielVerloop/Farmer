@@ -1,7 +1,7 @@
 package com.analysis;
 
 import com.analysis.util.LevenshteinDistance;
-import org.json.simple.JSONArray;
+import com.analysis.util.SRLAnalyzer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -24,18 +24,19 @@ public class Matcher {
 
         for (String description : descriptions) {
             Map<String, List<String>> posResult =  json.getPos(stepFile, description);
-//            System.out.println(description);
 
             if (description.startsWith("Given")) {
                 result.add(matchGiven(posResult, codeAnalysis));
             } else if (description.startsWith("When")) {
                 Map<String, List<String>> srlSentence = json.getSrl(stepFile, description);
                 result.add(matchWhen(posResult, srlSentence, codeAnalysis));
-                break;
             } else if (description.startsWith("Then")) {
-//                result.add(matchThen(posTagger, srlSentence, codeAnalysis));
+                Map<String, List<String>> srlSentence = json.getSrl(stepFile, description);
+                result.add(matchThen(posResult, srlSentence, codeAnalysis));
+                break;
             } else {
                 System.out.println(description);
+                throw new IllegalStateException("Unsupported description keyword");
             }
         }
         System.out.println(result);
@@ -43,7 +44,8 @@ public class Matcher {
         //TODO: return datastructure to generate code from
         // example =
         // {
-        //   "description"={Advice="Object instantiation", Type="BankAccount", parameters={0}
+        //   "description"={Advice="Object instantiation", Type="BankAccount", parameters={0}}
+//           "description"={Advice="method call", Class="BankAccount", method="deposit", parameters={100}}
         // }
         return null;
     }
@@ -59,8 +61,88 @@ public class Matcher {
         List<String> nouns = posResult.get("nouns");
         List<String> numbers = posResult.get("numbers");
 
-        System.out.println(nouns);
         //for each class compute levenshtein distance
+        HashMap<String, String> bestMatchedClass = bestMatchedClass(nouns, codeAnalysis);
+
+        //Matched class
+        String className = findMostCommon(bestMatchedClass);
+        //TODO:add parameters for object instantiation
+
+        return className;
+    }
+
+    private String matchWhen(Map<String, List<String>> posResult, Map<String, List<String>> srlSentence, HashMap<String, List<String>> codeAnalysis) {
+        //TODO: for each verb analyse using srl
+        // use ARG0, ARG1 and ARG2 to see what method is supposed to do
+        // then use this to suggest method calls
+        List<String> nouns = posResult.get("nouns");
+        List<String> numbers = posResult.get("numbers");
+        Set<String> verbs = srlSentence.keySet();
+        SRLAnalyzer analyzer = new SRLAnalyzer(srlSentence);
+        Map<String, String> advice = analyzer.generateAdvice();
+
+        //for each class compute levenshtein distance
+        HashMap<String, String> matchedClasses = bestMatchedClass(nouns, codeAnalysis);
+        //get the methods of the most common class
+        List<String> methods = codeAnalysis.get(findMostCommon(matchedClasses));
+        //find the closest method
+        String matchedMethod = matchMethod(numbers, advice, verbs, methods);
+
+        return matchedMethod;
+    }
+
+    private String matchThen(Map<String, List<String>> posResult, Map<String, List<String>> srlSentence, HashMap<String, List<String>> codeAnalysis) {
+        //TODO: analyze on nouns, numbers and verbs
+        List<String> nouns = posResult.get("nouns");
+        List<String> numbers = posResult.get("numbers");
+        Set<String> verbs = srlSentence.keySet();
+        SRLAnalyzer analyzer = new SRLAnalyzer(srlSentence);
+        Map<String, String> advice = analyzer.generateAdvice();
+
+        // get "target" (ARG1) from srl and then find method to match it (high likelihood of class variable or getter)
+        // comparison value is ARG2 (if number this equals numbers list)
+        // as we are in then, we pobably select assert statement based on ARGM maybe (should be, lower, higher, etc)?
+        // needs testing on other projects!
+
+
+        return "";
+    }
+
+    /**
+     * Match method to nlp analysis
+     * @param numbers
+     * @param advice
+     * @param verbs
+     * @param methods
+     * @return method name
+     */
+    private String matchMethod(List<String> numbers, Map<String, String> advice, Set<String> verbs, List<String> methods) {
+        //TODO implement mathcer that uses all 3
+        //simple matcher on the verbs
+        Map<String, Integer> distances = new HashMap<>();
+        for (String verb : verbs) {
+            int smallestDist = Integer.MAX_VALUE;
+            String matchedMethod = "";
+            for (String method : methods) {
+                int dist = new LevenshteinDistance(verb, method).getDistance();
+                if (dist < smallestDist) {
+                    smallestDist = dist;
+                    matchedMethod = method;
+                }
+            }
+            distances.put(matchedMethod, smallestDist);
+        }
+        return distances.entrySet().stream()
+                .min(Comparator.comparingInt(Map.Entry::getValue)).get().getKey();
+    }
+
+    /**
+     *
+     * @param nouns
+     * @param codeAnalysis
+     * @return
+     */
+    private HashMap<String, String> bestMatchedClass(List<String> nouns, HashMap<String, List<String>> codeAnalysis) {
         HashMap<String, String> bestMatchedClass = new HashMap<>(); // {word=[suggested class]}
         for (String noun : nouns) {
             int smallestDist = Integer.MAX_VALUE;
@@ -75,32 +157,7 @@ public class Matcher {
             }
             bestMatchedClass.put(noun, matchedClass);
         }
-
-        //Matched class
-        String className = findMostCommon(bestMatchedClass);
-        //TODO:add parameters for object instantiation
-
-        return className;
-    }
-
-    private String matchWhen(Map<String, List<String>> posResult, Map<String, List<String>> srlSentence, HashMap<String, List<String>> codeAnalysis) {
-        //TODO: for each verb analyse using srl
-        // use ARG0, ARG1 and ARG2 to see what method is supposed to do
-        // then use this to suggest method calls
-//        List<List<String>> posTags = convertToList(posTagger);
-//        List<String> verbs = extractVerbs(posTags);
-//        String[] nouns = extractNouns(posTags).toArray(new String[0]);
-//        List<String> numbers = extractNumbers(posTags);
-
-//        System.out.println(verbs);
-
-        return "";
-    }
-
-    private String matchThen(Object posTagger, JSONArray srlSentence, HashMap<String, List<String>> codeAnalysis) {
-        //TODO: analyze on nouns, numbers and verbs
-
-        return "";
+        return bestMatchedClass;
     }
 
     private String findMostCommon(HashMap<String, String> bestMatchedClass) {
@@ -114,29 +171,6 @@ public class Matcher {
                 .get()
                 .getKey();
     }
-
-    private List<String> extractVerbs(List<List<String>> posTagger) {
-        List<String> verbs = new ArrayList<>();
-        for (List<String> pair : posTagger) {
-            if (pair.get(1).startsWith("VB")) // verb whatever tense
-                verbs.add(pair.get(0));
-        }
-        return verbs;
-    }
-
-    private List<List<String>> convertToList(JSONArray posTagger) {
-        List<List<String>> arr = new ArrayList<>();
-        for (int i = 0; i < posTagger.size(); i++) {
-            JSONArray temp = (JSONArray) posTagger.get(i);
-            List<String> arrTmp = new ArrayList<>();
-            for (int j = 0; j < temp.size(); j++) {
-                arrTmp.add(temp.get(j).toString());
-            }
-            arr.add(arrTmp);
-        }
-        return arr;
-    }
-
 
     private void execute() throws FileNotFoundException {
         File targetDir = new File("src/main/java/com/bank");
