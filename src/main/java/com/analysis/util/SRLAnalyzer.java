@@ -28,8 +28,10 @@ public class SRLAnalyzer {
             switch (role) {
                 case "V":
                     advice.put("action", value);
+                    break;
                 case "ARG0":
                     advice.put("agent", value);
+                    break;
                 case "ARG1":
                     advice.put("target", value);
                     break;

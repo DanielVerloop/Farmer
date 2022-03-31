@@ -150,7 +150,7 @@ public class NLPFileReader {
         for (int i = 0; i < cardinals.size(); i++) {
             numbers.add(cardinals.get(i).toString());
         }
-
+        result.put("numbers", numbers);
         return result;
     }
 

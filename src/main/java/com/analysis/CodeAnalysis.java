@@ -12,11 +12,17 @@ import java.util.HashMap;
 import java.util.List;
 
 public class CodeAnalysis {
-    private HashMap<String, List<String>> mapMethods2Classes = new HashMap<String, List<String>>();
+    private HashMap<String, List<String>> mapMethods2Classes = new HashMap<>();
+    private HashMap<String, List<String>> classFields = new HashMap<>();
     private File[] listFiles;
+    private List<String> classNames;
 
     public HashMap<String, List<String>> getMapMethods2Classes() {
         return mapMethods2Classes;
+    }
+
+    public HashMap<String, List<String>> getClassFields() {
+        return classFields;
     }
 
     /**
@@ -34,8 +40,12 @@ public class CodeAnalysis {
         for (File file: dir.listFiles()) {
                 classNames.addAll(getClassNames(file));
         }
+        this.classNames = classNames;
         for (File file : dir.listFiles()) {
             mapMethods2Classes(file, classNames);
+        }
+        for (File file : dir.listFiles()) {
+            mapClassFields(file);
         }
     }
 
@@ -58,6 +68,25 @@ public class CodeAnalysis {
         return names;
     }
 
+    public void mapClassFields(File file) throws FileNotFoundException {
+        if (classNames.size() < 1) {
+            throw new NullPointerException("No class names found");
+        }
+
+        CompilationUnit cu = StaticJavaParser.parse(file);
+        cu.findAll(ClassOrInterfaceDeclaration.class).forEach(cl -> {
+            if (classNames.contains(cl.getNameAsString())) {
+                List<String> classVars = new ArrayList<>();
+                cl.getFields().forEach(fieldDeclaration -> {
+                    if (fieldDeclaration.getAccessSpecifier().equals(AccessSpecifier.PUBLIC)) {
+                        classVars.add(fieldDeclaration.getVariables().get(0).getNameAsString());
+                    }
+                });
+                classFields.put(cl.getNameAsString(), classVars);
+            }
+        });
+
+    }
     /**
      * maps classes to their methods
      * @param file
@@ -69,7 +98,6 @@ public class CodeAnalysis {
             throw new NullPointerException("names may not be empty");
         }
 
-        //TODO: only return public methods!
         CompilationUnit cu = StaticJavaParser.parse(file);
         cu.findAll(ClassOrInterfaceDeclaration.class).forEach(cl -> {
             if (names.contains(cl.getNameAsString())) {

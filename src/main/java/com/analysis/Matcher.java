@@ -1,5 +1,6 @@
 package com.analysis;
 
+import com.analysis.util.Advice;
 import com.analysis.util.LevenshteinDistance;
 import com.analysis.util.SRLAnalyzer;
 
@@ -13,34 +14,41 @@ import java.util.stream.Collectors;
  * This class should be able to match functions to the step descriptions
  */
 public class Matcher {
+    private Map<String, List<String>> match;
 
+    public Map<String, List<String>> getMatch() {
+        return match;
+    }
+
+    public Matcher(File targetDir, NLPFileReader jsonResult) throws FileNotFoundException {
+        CodeAnalysis analysis = new CodeAnalysis(targetDir);
+        Map<String, List<String>> match = this.match(analysis, jsonResult, jsonResult.getFilenames().get(0));
+    }
     /**
      * Matches all descriptions to code
+     * TODO: idea separate matchThen, when, given into separate classes with interface
      * @return TODO: classname or suggested methods
      */
-    public Map<String, List<String>> match(HashMap<String, List<String>> codeAnalysis, NLPFileReader json, String stepFile) {
+    public Map<String, List<String>> match(CodeAnalysis codeAnalysis, NLPFileReader json, String stepFile) {
         String[] descriptions = json.getSteps(stepFile).toArray(new String[0]);
-        List<String> result = new ArrayList<>();
+        List<List<String>> result = new ArrayList<>();
 
         for (String description : descriptions) {
             Map<String, List<String>> posResult =  json.getPos(stepFile, description);
 
             if (description.startsWith("Given")) {
-                result.add(matchGiven(posResult, codeAnalysis));
+                result.add(matchGiven(posResult, codeAnalysis.getMapMethods2Classes()));
             } else if (description.startsWith("When")) {
                 Map<String, List<String>> srlSentence = json.getSrl(stepFile, description);
-                result.add(matchWhen(posResult, srlSentence, codeAnalysis));
+                result.add(matchWhen(posResult, srlSentence, codeAnalysis.getMapMethods2Classes()));
             } else if (description.startsWith("Then")) {
                 Map<String, List<String>> srlSentence = json.getSrl(stepFile, description);
                 result.add(matchThen(posResult, srlSentence, codeAnalysis));
-                break;
             } else {
                 System.out.println(description);
                 throw new IllegalStateException("Unsupported description keyword");
             }
         }
-        System.out.println(result);
-
         //TODO: return datastructure to generate code from
         // example =
         // {
@@ -56,7 +64,7 @@ public class Matcher {
      * @param codeAnalysis code analysis
      * @return info for generator to be able to generate code
      */
-    private String matchGiven(Map<String, List<String>> posResult, HashMap<String, List<String>> codeAnalysis) {
+    private List<String> matchGiven(Map<String, List<String>> posResult, HashMap<String, List<String>> codeAnalysis) {
 //        HashMap<String, List<String>> result = new HashMap<>();
         List<String> nouns = posResult.get("nouns");
         List<String> numbers = posResult.get("numbers");
@@ -68,10 +76,10 @@ public class Matcher {
         String className = findMostCommon(bestMatchedClass);
         //TODO:add parameters for object instantiation
 
-        return className;
+        return new ArrayList<>(Arrays.asList(className, Advice.OBJECTI.toString()));
     }
 
-    private String matchWhen(Map<String, List<String>> posResult, Map<String, List<String>> srlSentence, HashMap<String, List<String>> codeAnalysis) {
+    private List<String> matchWhen(Map<String, List<String>> posResult, Map<String, List<String>> srlSentence, HashMap<String, List<String>> codeAnalysis) {
         //TODO: for each verb analyse using srl
         // use ARG0, ARG1 and ARG2 to see what method is supposed to do
         // then use this to suggest method calls
@@ -88,11 +96,11 @@ public class Matcher {
         //find the closest method
         String matchedMethod = matchMethod(numbers, advice, verbs, methods);
 
-        return matchedMethod;
+        return new ArrayList<>(Arrays.asList(matchedMethod, findMostCommon(matchedClasses), numbers.get(0)));
     }
 
-    private String matchThen(Map<String, List<String>> posResult, Map<String, List<String>> srlSentence, HashMap<String, List<String>> codeAnalysis) {
-        //TODO: analyze on nouns, numbers and verbs
+    private List<String> matchThen(Map<String, List<String>> posResult, Map<String, List<String>> srlSentence, CodeAnalysis codeAnalysis) {
+        //TODO: analyze on numbers and verbs too
         List<String> nouns = posResult.get("nouns");
         List<String> numbers = posResult.get("numbers");
         Set<String> verbs = srlSentence.keySet();
@@ -101,11 +109,100 @@ public class Matcher {
 
         // get "target" (ARG1) from srl and then find method to match it (high likelihood of class variable or getter)
         // comparison value is ARG2 (if number this equals numbers list)
-        // as we are in then, we pobably select assert statement based on ARGM maybe (should be, lower, higher, etc)?
+        // as we are in then, we probably select assert statement based on ARGM maybe (should be, lower, higher, equal, etc)?
         // needs testing on other projects!
+        String compareValue = "";
+        String assertStmt = "";
 
+        //Create a list of all to be checked nouns
+        List<String> checkNouns = Arrays.stream(advice.get("target").split(" "))
+                .distinct()
+                .filter(nouns::contains)
+                .collect(Collectors.toList());
+        //See if we can find a matching class field or method (if field does not exist)
+        String fieldName = matchVar(codeAnalysis, checkNouns);
+        String methodName = matchGet(numbers, checkNouns, codeAnalysis);
 
-        return "";
+        if (numbers.size() == 1) {
+            //highly likely a number parameter
+            //if arg2 refers to the number then this is highly likely used in assert statement
+            if (advice.get("ARG2").contains(numbers.get(0))) {
+                compareValue = numbers.get(0);
+            }
+            //Get the type of assert statement
+            //TODO:extend cases to include higher and lower
+            if (advice.get("action").equals("be") || advice.get("ARG2").contains(" equal")) {
+                assertStmt = "assertEquals";
+            }
+        } else if (numbers.size() > 1) {
+            //a lot of number parameters
+            //TODO: implement
+
+        } else {
+            //no numbers
+            //TODO: implement
+        }
+        if (fieldName != null) {
+            return new ArrayList<>(Arrays.asList(fieldName, compareValue, assertStmt));
+
+        }
+        return new ArrayList<>(Arrays.asList(methodName, compareValue, assertStmt));
+    }
+
+    private String matchGet(List<String> numbers, List<String> nouns, CodeAnalysis analysis) {
+        HashMap<String, List<String>> mapping = analysis.getMapMethods2Classes();
+        HashMap<String, Integer> distances = new HashMap<>(); //{"cls+method" = dist}
+        //get best matched method per class
+        List<String> methods = new ArrayList<>();
+        mapping.forEach((cls, mtds) -> {
+            String methodName = "";
+            int smallestdist = Integer.MAX_VALUE;
+            for (String noun : nouns) {
+                for (String method : mtds) {
+                    int ldist = new LevenshteinDistance(noun, method).getDistance();
+                    //add bias on getters
+                    if (ldist == smallestdist) {
+                        if (method.contains("get")) {
+                            ldist -= 3;
+                        }
+                    }
+                    if (ldist < smallestdist) {
+                        smallestdist = ldist;
+                        methodName = method;
+                    }
+                }
+            }
+            distances.put(methodName, smallestdist);
+        });
+
+        // return best match
+        return distances.entrySet().stream()
+                .min(Comparator.comparingInt(Map.Entry::getValue)).get().getKey();
+    }
+
+    private String matchVar(CodeAnalysis codeAnalysis, List<String> nouns) {
+        Map<String, Integer> distances = new HashMap<>();
+        HashMap<String, List<String>> classVariables = codeAnalysis.getClassFields();
+        HashMap<String, List<String>> classToMethods = codeAnalysis.getMapMethods2Classes();
+
+        //first look if we can match a class variable
+        //TODO: test on bigger target classes
+        classVariables.forEach((s, vars) -> {
+            for (String noun : nouns) {
+                int smallestDist = Integer.MAX_VALUE;
+                String matchedVar = "";
+                for (String var: vars) {
+                    int dist = new LevenshteinDistance(var, noun).getDistance();
+                    if (dist < smallestDist) {
+                        smallestDist = dist;
+                        matchedVar = var;
+                    }
+                }
+                distances.put(matchedVar, smallestDist);
+            }
+        });
+        return distances.entrySet().stream()
+                .min(Comparator.comparingInt(Map.Entry::getValue)).get().getKey();
     }
 
     /**
@@ -136,12 +233,6 @@ public class Matcher {
                 .min(Comparator.comparingInt(Map.Entry::getValue)).get().getKey();
     }
 
-    /**
-     *
-     * @param nouns
-     * @param codeAnalysis
-     * @return
-     */
     private HashMap<String, String> bestMatchedClass(List<String> nouns, HashMap<String, List<String>> codeAnalysis) {
         HashMap<String, String> bestMatchedClass = new HashMap<>(); // {word=[suggested class]}
         for (String noun : nouns) {
@@ -172,19 +263,18 @@ public class Matcher {
                 .getKey();
     }
 
-    private void execute() throws FileNotFoundException {
-        File targetDir = new File("src/main/java/com/bank");
-        CodeAnalysis analysis = new CodeAnalysis(targetDir);
-        HashMap<String, List<String>> analysisData = analysis.getMapMethods2Classes();
-        NLPFileReader jsonResult = new NLPFileReader("src/main/resources/nlp_results.json");
-        List<String> stepFiles = jsonResult.getFilenames();
-
-        // {description = {matched class + used methods}}
-        Map<String, List<String>> matchResult = match(analysisData, jsonResult, stepFiles.get(0));
-
-    }
-
-    public static void main(String[] args) throws FileNotFoundException {
-        new Matcher().execute();
-    }
+//    private void execute() throws FileNotFoundException {
+//        File targetDir = new File("src/main/java/com/bank");
+//        CodeAnalysis analysis = new CodeAnalysis(targetDir);
+//        NLPFileReader jsonResult = new NLPFileReader("src/main/resources/nlp_results.json");
+//        List<String> stepFiles = jsonResult.getFilenames();
+//
+//        // {description = {matched class + used methods}}
+//        Map<String, List<String>> matchResult =
+//
+//    }
+//
+//    public static void main(String[] args) throws FileNotFoundException {
+//        new Matcher().execute();
+//    }
 }
