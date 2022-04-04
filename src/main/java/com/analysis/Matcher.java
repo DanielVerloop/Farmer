@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 /**
  * Text-to-Code Matcher
- * This class should be able to match functions to the step descriptions
+ * This class should be able to setMatchResult functions to the step descriptions
  */
 public class Matcher {
     private Map<String, List<List<String>>> match;
@@ -31,27 +31,27 @@ public class Matcher {
      * @return mapping of filename + list
      */
     public Map<String, List<List<String>>> match(CodeAnalysis codeAnalysis, NLPFileReader json, String stepFile) {
-        String[] descriptions = json.getSteps(stepFile).toArray(new String[0]);
+//        String[] descriptions = json.getSteps(stepFile).toArray(new String[0]);
         Map<String, List<List<String>>> fileResult = new HashMap<>();
         List<List<String>> result = new ArrayList<>();
 
 
-        for (String description : descriptions) {
-            Map<String, List<String>> posResult =  json.getPos(stepFile, description);
-
-            if (description.startsWith("Given")) {
-                result.add(matchGiven(posResult, codeAnalysis.getMapMethods2Classes()));
-            } else if (description.startsWith("When")) {
-                Map<String, List<String>> srlSentence = json.getSrl(stepFile, description);
-                result.add(matchWhen(posResult, srlSentence, codeAnalysis.getMapMethods2Classes()));
-            } else if (description.startsWith("Then")) {
-                Map<String, List<String>> srlSentence = json.getSrl(stepFile, description);
-                result.add(matchThen(posResult, srlSentence, codeAnalysis));
-            } else {
-                System.out.println(description);
-                throw new IllegalStateException("Unsupported description keyword");
-            }
-        }
+//        for (String description : descriptions) {
+//            Map<String, List<String>> posResult =  json.getPos(stepFile, description);
+//
+//            if (description.startsWith("Given")) {
+//                result.add(matchGiven(posResult, codeAnalysis.getMapMethods2Classes()));
+//            } else if (description.startsWith("When")) {
+//                Map<String, List<String>> srlSentence = json.getSrl(stepFile, description);
+//                result.add(matchWhen(posResult, srlSentence, codeAnalysis.getMapMethods2Classes()));
+//            } else if (description.startsWith("Then")) {
+//                Map<String, List<String>> srlSentence = json.getSrl(stepFile, description);
+//                result.add(matchThen(posResult, srlSentence, codeAnalysis));
+//            } else {
+//                System.out.println(description);
+//                throw new IllegalStateException("Unsupported description keyword");
+//            }
+//        }
         //TODO: return datastructure to generate code from
         // example =
         // {
@@ -112,7 +112,7 @@ public class Matcher {
         SRLAnalyzer analyzer = new SRLAnalyzer(srlSentence);
         Map<String, String> advice = analyzer.generateAdvice();
 
-        // get "target" (ARG1) from srl and then find method to match it (high likelihood of class variable or getter)
+        // get "target" (ARG1) from srl and then find method to setMatchResult it (high likelihood of class variable or getter)
         // comparison value is ARG2 (if number this equals numbers list)
         // as we are in then, we probably select assert statement based on ARGM maybe (should be, lower, higher, equal, etc)?
         // needs testing on other projects!
@@ -182,7 +182,7 @@ public class Matcher {
             distances.put(methodName, smallestdist);
         });
 
-        // return best match
+        // return best setMatchResult
         return distances.entrySet().stream()
                 .min(Comparator.comparingInt(Map.Entry::getValue)).get().getKey();
     }
@@ -192,7 +192,7 @@ public class Matcher {
         HashMap<String, List<String>> classVariables = codeAnalysis.getClassFields();
         HashMap<String, List<String>> classToMethods = codeAnalysis.getMapMethods2Classes();
 
-        //first look if we can match a class variable
+        //first look if we can setMatchResult a class variable
         //TODO: test on bigger target classes
         classVariables.forEach((s, vars) -> {
             for (String noun : nouns) {
@@ -269,7 +269,7 @@ public class Matcher {
 //        List<String> stepFiles = jsonResult.getFilenames();
 //
 //        // {description = {matched class + used methods}}
-//        Map<String, List<String>> matchResult =
+//        Map<String, List<String>> setMatchResult =
 //
 //    }
 //

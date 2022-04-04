@@ -48,13 +48,13 @@ public class Generator {
         File file = new File("src/main/resources" + "/" + className + ".java");
         file.createNewFile();
 
-        //Get match info
+        //Get setMatchResult info
         Map<String, List<List<String>>> matchResult = new Matcher(targetDir, jsonResult).getMatch();
         //Create skeleton template
-        List<String> scenarios = this.createTemplate(className, jsonResult.getSteps("transactions.feature"));
+//        List<String> scenarios = this.createTemplate(className, jsonResult.getSteps("transactions.feature"));
         //TODO:add empty step-functions
         //TODO:fill method bodies
-        this.addImplementation(matchResult, "transactions.feature", scenarios);
+//        this.addImplementation(matchResult, "transactions.feature", scenarios);
 
         //output to file
         FileWriter fw = new FileWriter(file);
