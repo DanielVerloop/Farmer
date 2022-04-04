@@ -3,6 +3,7 @@ package com.analysis;
 import com.analysis.util.Advice;
 import com.analysis.util.LevenshteinDistance;
 import com.analysis.util.SRLAnalyzer;
+import com.analysis.util.StringFormatter;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,24 +15,26 @@ import java.util.stream.Collectors;
  * This class should be able to match functions to the step descriptions
  */
 public class Matcher {
-    private Map<String, List<String>> match;
+    private Map<String, List<List<String>>> match;
 
-    public Map<String, List<String>> getMatch() {
+    public Map<String, List<List<String>>> getMatch() {
         return match;
     }
 
     public Matcher(File targetDir, NLPFileReader jsonResult) throws FileNotFoundException {
         CodeAnalysis analysis = new CodeAnalysis(targetDir);
-        Map<String, List<String>> match = this.match(analysis, jsonResult, jsonResult.getFilenames().get(0));
+        match = this.match(analysis, jsonResult, jsonResult.getFilenames().get(0));
     }
     /**
      * Matches all descriptions to code
      * TODO: idea separate matchThen, when, given into separate classes with interface
-     * @return TODO: classname or suggested methods
+     * @return mapping of filename + list
      */
-    public Map<String, List<String>> match(CodeAnalysis codeAnalysis, NLPFileReader json, String stepFile) {
+    public Map<String, List<List<String>>> match(CodeAnalysis codeAnalysis, NLPFileReader json, String stepFile) {
         String[] descriptions = json.getSteps(stepFile).toArray(new String[0]);
+        Map<String, List<List<String>>> fileResult = new HashMap<>();
         List<List<String>> result = new ArrayList<>();
+
 
         for (String description : descriptions) {
             Map<String, List<String>> posResult =  json.getPos(stepFile, description);
@@ -53,9 +56,10 @@ public class Matcher {
         // example =
         // {
         //   "description"={Advice="Object instantiation", Type="BankAccount", parameters={0}}
-//           "description"={Advice="method call", Class="BankAccount", method="deposit", parameters={100}}
+        //   "description"={Advice="method call", Class="BankAccount", method="deposit", parameters={100}}
         // }
-        return null;
+        fileResult.put(stepFile, result);
+        return fileResult;
     }
 
     /**
@@ -75,8 +79,9 @@ public class Matcher {
         //Matched class
         String className = findMostCommon(bestMatchedClass);
         //TODO:add parameters for object instantiation
+        String params = new StringFormatter().parseParameters(numbers);
 
-        return new ArrayList<>(Arrays.asList(className, Advice.OBJECTI.toString()));
+        return new ArrayList<>(Arrays.asList(Advice.OBJECTI.toString(), className, params));
     }
 
     private List<String> matchWhen(Map<String, List<String>> posResult, Map<String, List<String>> srlSentence, HashMap<String, List<String>> codeAnalysis) {
@@ -96,7 +101,7 @@ public class Matcher {
         //find the closest method
         String matchedMethod = matchMethod(numbers, advice, verbs, methods);
 
-        return new ArrayList<>(Arrays.asList(matchedMethod, findMostCommon(matchedClasses), numbers.get(0)));
+        return new ArrayList<>(Arrays.asList(Advice.METHODI.toString(), matchedMethod, findMostCommon(matchedClasses), numbers.get(0)));
     }
 
     private List<String> matchThen(Map<String, List<String>> posResult, Map<String, List<String>> srlSentence, CodeAnalysis codeAnalysis) {
@@ -130,10 +135,12 @@ public class Matcher {
                 compareValue = numbers.get(0);
             }
             //Get the type of assert statement
-            //TODO:extend cases to include higher and lower
-            if (advice.get("action").equals("be") || advice.get("ARG2").contains(" equal")) {
-                assertStmt = "assertEquals";
+            if (advice.get("ARG2").contains("higher")) assertStmt = "higher";
+            else if (advice.get("ARG2").contains("lower")) assertStmt = "lower";
+            else if (advice.get("action").equals("be") || advice.get("ARG2").contains(" equal")) {
+                assertStmt = "equals";
             }
+
         } else if (numbers.size() > 1) {
             //a lot of number parameters
             //TODO: implement
@@ -143,10 +150,10 @@ public class Matcher {
             //TODO: implement
         }
         if (fieldName != null) {
-            return new ArrayList<>(Arrays.asList(fieldName, compareValue, assertStmt));
+            return new ArrayList<>(Arrays.asList(Advice.ASSERT.toString(), fieldName, compareValue, assertStmt));
 
         }
-        return new ArrayList<>(Arrays.asList(methodName, compareValue, assertStmt));
+        return new ArrayList<>(Arrays.asList(Advice.ASSERT.toString(), methodName, compareValue, assertStmt));
     }
 
     private String matchGet(List<String> numbers, List<String> nouns, CodeAnalysis analysis) {
@@ -205,14 +212,6 @@ public class Matcher {
                 .min(Comparator.comparingInt(Map.Entry::getValue)).get().getKey();
     }
 
-    /**
-     * Match method to nlp analysis
-     * @param numbers
-     * @param advice
-     * @param verbs
-     * @param methods
-     * @return method name
-     */
     private String matchMethod(List<String> numbers, Map<String, String> advice, Set<String> verbs, List<String> methods) {
         //TODO implement mathcer that uses all 3
         //simple matcher on the verbs

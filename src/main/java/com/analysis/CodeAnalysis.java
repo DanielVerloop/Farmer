@@ -62,7 +62,6 @@ public class CodeAnalysis {
         CompilationUnit cu = StaticJavaParser.parse(file);
         cu.findAll(ClassOrInterfaceDeclaration.class).forEach(cl -> {
             names.add(cl.getNameAsString());
-//            System.out.println(cl.getConstructors().get(0).getParameters().get(0).getType());
         });
         mapMethods2Classes(file, names);
         return names;

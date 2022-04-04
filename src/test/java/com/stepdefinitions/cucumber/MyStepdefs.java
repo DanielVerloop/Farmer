@@ -2,9 +2,12 @@ package com.stepdefinitions.cucumber;
 
 import com.bank.BankAccount;
 
+import com.github.javaparser.ast.expr.AssignExpr;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.junit.Assert;
 
 import static org.junit.Assert.assertEquals;
 
@@ -23,7 +26,7 @@ public class MyStepdefs {
 
     @Then("the balance should be {int}")
     public void theBalanceShouldBe(int arg0) {
-        assertEquals(bankAccount.getBalance(), arg0);
+        Assert.assertEquals(bankAccount.getBalance(), arg0);
     }
 
     @When("we withdraw {int} pounds from the account")
@@ -35,4 +38,5 @@ public class MyStepdefs {
     public void aBankAccountWithBalanceOf(int arg0) {
         bankAccount = new BankAccount(arg0);
     }
+
 }
