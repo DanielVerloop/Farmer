@@ -1,5 +1,7 @@
 package com.analysis.structures.steps;
 
+import com.analysis.structures.Visitor;
+
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +12,12 @@ public class GivenStep extends Step {
     }
 
     @Override
-    public void setMatchResult() {
-        System.out.println("setMatchResult given step!");
+    public void visit(Visitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
     }
 }

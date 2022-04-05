@@ -1,5 +1,7 @@
 package com.analysis.structures.steps;
 
+import com.analysis.structures.Visitor;
+
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +13,7 @@ public abstract class Step {
     private final List<String> nouns;
     private final List<String> numbers;
     private final List<String> parameters;
+    private List<String> matchResult;
 
     public Step(String description, Map<String, List<String>> posResult) {
         this.description = description;
@@ -38,6 +41,40 @@ public abstract class Step {
 
     /**
      * Method to set match result of each specific step
+     * @param match
      */
-    public abstract void setMatchResult();
+    public void setMatchResult(List<String> match) {
+        this.matchResult = match;
+    }
+
+    /**
+     * Method get match result
+     * @return
+     */
+    public List<String> getMatchResult() {
+        return matchResult;
+    }
+
+    /**
+     * Visitor method
+     *
+     * @param visitor
+     */
+    public void visit(Visitor visitor) {
+        visitor.visit(this);
+    }
+
+    /**
+     * toString() for pretty printing
+     * @return Stringyfied object
+     */
+    @Override
+    public String toString() {
+        return "Step{" +
+                "description='" + description + '\'' +
+                ", nouns=" + nouns +
+                ", numbers=" + numbers +
+                ", parameters=" + parameters +
+                '}';
+    }
 }

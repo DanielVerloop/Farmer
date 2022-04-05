@@ -2,7 +2,7 @@ package com.analysis;
 
 import com.analysis.structures.Scenario;
 import com.analysis.structures.steps.GivenStep;
-import com.analysis.structures.steps.Step;
+import com.analysis.structures.steps.ThenStep;
 import com.analysis.structures.steps.WhenStep;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -69,7 +69,7 @@ public class NLPFileReader {
                     (String) ((JSONObject) scenario.get("given")).get("description"), posResultGiven);
             WhenStep whenStep = new WhenStep(
                     (String) ((JSONObject) scenario.get("when")).get("description"), posResultWhen, srlWhen);
-            WhenStep thenStep = new WhenStep(
+            ThenStep thenStep = new ThenStep(
                     (String) ((JSONObject) scenario.get("then")).get("description"), posResultThen, srlThen);
             //TODO: handle AND steps
             //Add created steps to scenario
@@ -101,16 +101,23 @@ public class NLPFileReader {
      * @return map of the result
      */
     public Map<String, List<String>> getPos(JSONObject step) {
-        String stepDesc = (String) step.get("description");
+        JSONObject pos = (JSONObject) ((JSONArray) step.get("analysis")).get(0);//Get the pos result
+
         Map<String, List<String>> result = new HashMap<>();
-
-        //Get the pos result
-        JSONObject pos = (JSONObject) ((JSONArray) step.get("analysis")).get(0);
         //add to map
-        result.put("numbers", (List<String>) pos.get("numbers"));
-        result.put("nouns", (List<String>) pos.get("nouns"));
-        result.put("parameters", (List<String>) pos.get("parameters"));
+        result.put("numbers", transform2List((JSONArray) pos.get("numbers")));
+        result.put("nouns", transform2List((JSONArray) pos.get("nouns")));
+        result.put("parameters", transform2List((JSONArray) pos.get("parameters")));
 
+        return result;
+    }
+
+    private List<String> transform2List(JSONArray arr) {
+        if (arr == null) return null;
+        List<String> result = new ArrayList<>();
+        for(int i=0; i< arr.size(); i++){
+            result.add(arr.get(i).toString());
+        }
         return result;
     }
 
@@ -128,12 +135,5 @@ public class NLPFileReader {
         }
 
         return result;
-    }
-
-    public static void main(String[] args) {
-        NLPFileReader jsonResult = new NLPFileReader("src/main/resources/nlp_results_new.json");
-        String name = jsonResult.getFilenames().get(0);
-//        jsonResult.getScenariosFromFile(name);
-        jsonResult.getScenarios(name);
     }
 }

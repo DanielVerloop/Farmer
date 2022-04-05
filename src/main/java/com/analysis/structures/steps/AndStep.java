@@ -1,5 +1,6 @@
 package com.analysis.structures.steps;
 
+import com.analysis.structures.Visitor;
 import com.analysis.util.SRLAnalyzer;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class AndStep extends Step {
     }
 
     @Override
-    public void setMatchResult() {
-        System.out.println("setMatchResult And step!");
+    public void visit(Visitor visitor) {
+        visitor.visit(this);
     }
 }

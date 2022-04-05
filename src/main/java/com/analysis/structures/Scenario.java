@@ -1,7 +1,6 @@
 package com.analysis.structures;
 
 
-import com.analysis.structures.steps.GivenStep;
 import com.analysis.structures.steps.Step;
 
 import java.util.List;
@@ -30,6 +29,10 @@ public class Scenario {
 
     public List<Step> getSteps() {
         return steps;
+    }
+
+    public void visit(Visitor visitor) {
+        visitor.visit(this);
     }
 
 }

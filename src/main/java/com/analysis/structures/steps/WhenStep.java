@@ -1,5 +1,6 @@
 package com.analysis.structures.steps;
 
+import com.analysis.structures.Visitor;
 import com.analysis.util.SRLAnalyzer;
 
 import java.util.List;
@@ -29,7 +30,19 @@ public class WhenStep extends Step {
     }
 
     @Override
-    public void setMatchResult() {
-        System.out.println("match result when-step!");
+    public void visit(Visitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
+    public String toString() {
+        return "WhenStep{" +
+                "description='" + getDescription() + '\'' +
+                ", nouns=" + getNouns() +
+                ", numbers=" + getNumbers() +
+                ", parameters=" + getParameters() +
+                ", verbs=" + verbs +
+                ", advice=" + advice +
+                '}';
     }
 }

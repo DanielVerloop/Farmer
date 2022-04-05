@@ -1,5 +1,6 @@
 package com.analysis.structures.steps;
 
+import com.analysis.structures.Visitor;
 import com.analysis.util.SRLAnalyzer;
 
 import java.util.List;
@@ -20,12 +21,28 @@ public class ThenStep extends Step {
         return verbs;
     }
 
+    public Map<String, String> getAdvice() {
+        return this.advice;
+    }
+
     public String getAdvice(String key) {
         return advice.get(key);
     }
 
     @Override
-    public void setMatchResult() {
-        System.out.println("something unique!");
+    public void visit(Visitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
+    public String toString() {
+        return "ThenStep{" +
+                "description='" + getDescription() + '\'' +
+                ", nouns=" + getNouns() +
+                ", numbers=" + getNumbers() +
+                ", parameters=" + getParameters() +
+                ", verbs=" + verbs +
+                ", advice=" + advice +
+                '}';
     }
 }
