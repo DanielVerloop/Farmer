@@ -1,5 +1,9 @@
 package com.analysis;
 
+import com.analysis.structures.Scenario;
+import com.analysis.structures.steps.GivenStep;
+import com.analysis.structures.steps.ThenStep;
+import com.analysis.structures.steps.WhenStep;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -40,31 +44,51 @@ public class NLPFileReader {
     }
 
     /**
-     * returns all step descriptions
-     * @param fileName
-     * @return
+     * Processes JSON of a feature file
+     * @param fileName name of feature file
+     * @return a list of Scenarios
      */
-    public List<String> getSteps(String fileName) {
-        JSONObject stepFile = getFileFromJson(fileName);
+    public List<Scenario> getScenarios(String fileName) {
+        JSONArray scenariosFromFile = getScenariosFromFile(fileName);
+        List<Scenario> scenarios = new ArrayList<>();
 
-        // iterate over the Given, When, Then and extract the step descriptions
-        List<String> descriptions = new ArrayList<String>();
-        for (Object givenStep : (JSONArray) stepFile.get("given")) descriptions.add((String) ((JSONObject) givenStep).get("description"));
-        for (Object whenStep : (JSONArray) stepFile.get("when")) descriptions.add((String) ((JSONObject) whenStep).get("description"));
-        for (Object thenStep : (JSONArray) stepFile.get("then")) descriptions.add((String) ((JSONObject) thenStep).get("description"));
+        for (Object o : scenariosFromFile) {
+            JSONObject scenario = (JSONObject) o;
+            Scenario s = new Scenario();
 
-        return descriptions;
+            //Get the pos-tagger results
+            Map<String, List<String>> posResultGiven = this.getPos((JSONObject) scenario.get("given"));
+            Map<String, List<String>> posResultWhen = this.getPos((JSONObject) scenario.get("when"));
+            Map<String, List<String>> posResultThen = this.getPos((JSONObject) scenario.get("then"));
+            //Get the SRL result
+            Map<String, List<String>> srlWhen = this.getSRL((JSONObject) scenario.get("when"));
+            Map<String, List<String>> srlThen = this.getSRL((JSONObject) scenario.get("then"));
+
+            //Add every step type to scenario
+            GivenStep givenStep = new GivenStep(
+                    (String) ((JSONObject) scenario.get("given")).get("description"), posResultGiven);
+            WhenStep whenStep = new WhenStep(
+                    (String) ((JSONObject) scenario.get("when")).get("description"), posResultWhen, srlWhen);
+            ThenStep thenStep = new ThenStep(
+                    (String) ((JSONObject) scenario.get("then")).get("description"), posResultThen, srlThen);
+            //TODO: handle AND steps
+            //Add created steps to scenario
+            s.setSteps(Arrays.asList(givenStep, whenStep, thenStep));
+            scenarios.add(s);
+        }
+
+        return scenarios;
     }
 
-    private JSONObject getFileFromJson(String fileName) {
+    private JSONArray getScenariosFromFile(String fileName) {
         JSONArray allFiles = (JSONArray) this.jsonFile.get("files");
 
-        JSONObject stepFile = null;
+        JSONArray stepFile = null;
         // Get the JSONObject of the correct file
         for (Object allFile : allFiles) {
             JSONObject file = (JSONObject) allFile;
             if (file.get("name").equals(fileName)) {
-                stepFile = (JSONObject) file.get("scenarios");
+                stepFile = (JSONArray) file.get("scenarios");
                 break;
             }
         }
@@ -72,113 +96,34 @@ public class NLPFileReader {
     }
 
     /**
-     * Get NLP analysis of a specific step
-     *
-     * @param fileName name of file step belongs to
-     * @param stepDesc description of step
-     * @returns NLP analysis
+     * Get pos-tagger result from given, when and then steps
+     * @param step JSONObject of Step of type given, when, then
+     * @return map of the result
      */
-    public Object getAnalysis(String fileName, String stepDesc) {
-        JSONObject stepFile = getFileFromJson(fileName);
+    public Map<String, List<String>> getPos(JSONObject step) {
+        JSONObject pos = (JSONObject) ((JSONArray) step.get("analysis")).get(0);//Get the pos result
 
-        if (stepDesc.startsWith("Given")) {
-            for (Object givenStep : (JSONArray) stepFile.get("given")) {
-                if ((((JSONObject) givenStep).get("description")).equals(stepDesc))
-                    return ((JSONObject) givenStep).get("analysis");
-            }
-        }
-        if (stepDesc.startsWith("When")) {
-            for (Object whenStep : (JSONArray) stepFile.get("when")) {
-                if ((((JSONObject) whenStep).get("description")).equals(stepDesc))
-                    return ((JSONObject) whenStep).get("analysis");
-            }
-        }
-        if (stepDesc.startsWith("Then")) {
-            for (Object thenStep : (JSONArray) stepFile.get("then")) {
-                if ((((JSONObject) thenStep).get("description")).equals(stepDesc))
-                    return ((JSONObject) thenStep).get("analysis");
-            }
-        }
-        return new IllegalStateException("Incorrect step description!"); //Should never be able to happen
-    }
+        Map<String, List<String>> result = new HashMap<>();
+        //add to map
+        result.put("numbers", transform2List((JSONArray) pos.get("numbers")));
+        result.put("nouns", transform2List((JSONArray) pos.get("nouns")));
+        result.put("parameters", transform2List((JSONArray) pos.get("parameters")));
 
-    public Map<String, List<String>> getPos(String fileName, String stepDesc) {
-        JSONObject stepFile = getFileFromJson(fileName);
-        HashMap<String, List<String>> result = new HashMap<>();
-        JSONObject posInfo = new JSONObject();
-
-        switch (stepDesc.toLowerCase().substring(0, 4)) {
-            case "give":
-                for (Object givenStep : (JSONArray) stepFile.get("given")) {
-                    if ((((JSONObject) givenStep).get("description")).equals(stepDesc)) {
-                        // triple cast to let the compiler know the correct types
-                        posInfo = (JSONObject) ((JSONArray) ((JSONObject) givenStep).get("analysis")).get(0);
-                    }
-                }
-                break;
-            case "when":
-                for (Object whenStep : (JSONArray) stepFile.get("when")) {
-                    if ((((JSONObject) whenStep).get("description")).equals(stepDesc)) {
-                        // triple cast to let the compiler know the correct types
-                        posInfo = (JSONObject) ((JSONArray) ((JSONObject) whenStep).get("analysis")).get(0);
-                    }
-                }
-                break;
-            case "then":
-                for (Object thenStep : (JSONArray) stepFile.get("then")) {
-                    if ((((JSONObject) thenStep).get("description")).equals(stepDesc)) {
-                        // triple cast to let the compiler know the correct types
-                        posInfo = (JSONObject) ((JSONArray) ((JSONObject) thenStep).get("analysis")).get(0);
-                    }
-                }
-                break;
-            default:
-                throw new RuntimeException("Unknown step description");
-        }
-
-        //add nouns to return data structure
-        JSONArray tempNouns = (JSONArray) posInfo.get("nouns");
-        List<String> nouns = new ArrayList<>();
-        for (int i = 0; i < tempNouns.size(); i++) {
-            nouns.add(tempNouns.get(i).toString());
-        }
-        result.put("nouns", nouns);
-
-        //add numbers to return data structure
-        JSONArray cardinals = (JSONArray) posInfo.get("numbers");
-        List<String> numbers = new ArrayList<>();
-        for (int i = 0; i < cardinals.size(); i++) {
-            numbers.add(cardinals.get(i).toString());
-        }
-        result.put("numbers", numbers);
         return result;
     }
 
-    public Map<String, List<String>> getSrl(String fileName, String stepDesc) {
-        JSONObject stepFile = getFileFromJson(fileName);
-        HashMap<String, List<String>> result = new HashMap<>();
-        JSONArray srlInfo = new JSONArray();
-
-        switch (stepDesc.toLowerCase().substring(0, 4)) {
-            case "when":
-                for (Object whenStep : (JSONArray) stepFile.get("when")) {
-                    if ((((JSONObject) whenStep).get("description")).equals(stepDesc)) {
-                        // triple cast to let the compiler know the correct types
-                        srlInfo = (JSONArray) ((JSONArray) ((JSONObject) whenStep).get("analysis")).get(1);
-                    }
-                }
-                break;
-            case "then":
-                for (Object thenStep : (JSONArray) stepFile.get("then")) {
-                    if ((((JSONObject) thenStep).get("description")).equals(stepDesc)) {
-                        // triple cast to let the compiler know the correct types
-                        srlInfo = (JSONArray) ((JSONArray) ((JSONObject) thenStep).get("analysis")).get(1);
-                    }
-                }
-                break;
-            default:
-                throw new RuntimeException("Unknown step description");
+    private List<String> transform2List(JSONArray arr) {
+        if (arr == null) return null;
+        List<String> result = new ArrayList<>();
+        for(int i=0; i< arr.size(); i++){
+            result.add(arr.get(i).toString());
         }
+        return result;
+    }
+
+    private Map<String, List<String>> getSRL(JSONObject step) {
+        Map<String, List<String>> result = new HashMap<>();
+        JSONArray srlInfo = (JSONArray) ((JSONArray) step.get("analysis")).get(1);
 
         for (Object srl : srlInfo) {
             String verb = (String) ((JSONArray) srl).get(0);
@@ -188,7 +133,7 @@ public class NLPFileReader {
             });
             result.put(verb, labels);
         }
-        
+
         return result;
     }
 }

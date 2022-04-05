@@ -1,0 +1,228 @@
+{
+  "files": [
+    {
+      "name": "transactions.feature",
+      "scenarios": [
+        {
+          "given": {
+            "description": "Given a bank account with initial balance of 0",
+            "analysis": [
+              {
+                "nouns": [
+                  "bank account",
+                  "account",
+                  "balance"
+                ],
+                "numbers": [
+                  0
+                ],
+                "parameters": [
+                  "0"
+                ]
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When we deposit 100 pounds into the account",
+            "analysis": [
+              {
+                "nouns": [
+                  "account"
+                ],
+                "numbers": [
+                  100
+                ]
+              },
+              [
+                [
+                  "deposit",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: we",
+                    "V: deposit",
+                    "ARG1: 100 pounds",
+                    "ARG2: into the account"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the balance should be 100",
+            "analysis": [
+              {
+                "nouns": [
+                  "balance"
+                ],
+                "numbers": [
+                  100
+                ]
+              },
+              [
+                [
+                  "be",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG1: the balance",
+                    "ARGM-MOD: should",
+                    "V: be",
+                    "ARG2: 100"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        },
+        {
+          "given": {
+            "description": "Given a bank account with initial balance of 1000",
+            "analysis": [
+              {
+                "nouns": [
+                  "bank account",
+                  "account",
+                  "balance"
+                ],
+                "numbers": [
+                  1000
+                ],
+                "parameters": [
+                  "1000"
+                ]
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When we withdraw 100 pounds from the account",
+            "analysis": [
+              {
+                "nouns": [
+                  "account"
+                ],
+                "numbers": [
+                  100
+                ]
+              },
+              [
+                [
+                  "withdraw",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: we",
+                    "V: withdraw",
+                    "ARG1: 100 pounds",
+                    "ARG2: from the account"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the balance should be 900",
+            "analysis": [
+              {
+                "nouns": [
+                  "balance"
+                ],
+                "numbers": [
+                  900
+                ]
+              },
+              [
+                [
+                  "be",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG1: the balance",
+                    "ARGM-MOD: should",
+                    "V: be",
+                    "ARG2: 900"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        },
+        {
+          "given": {
+            "description": "Given a bank account with balance of 100",
+            "analysis": [
+              {
+                "nouns": [
+                  "bank account",
+                  "account",
+                  "balance"
+                ],
+                "numbers": [
+                  100
+                ],
+                "parameters": [
+                  "100"
+                ]
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When we deposit 20 pounds into the account",
+            "analysis": [
+              {
+                "nouns": [
+                  "account"
+                ],
+                "numbers": [
+                  20
+                ]
+              },
+              [
+                [
+                  "deposit",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: we",
+                    "V: deposit",
+                    "ARG1: 20 pounds",
+                    "ARG2: into the account"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the balance should be 120",
+            "analysis": [
+              {
+                "nouns": [
+                  "balance"
+                ],
+                "numbers": [
+                  120
+                ]
+              },
+              [
+                [
+                  "be",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG1: the balance",
+                    "ARGM-MOD: should",
+                    "V: be",
+                    "ARG2: 120"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        }
+      ]
+    }
+  ]
+}
