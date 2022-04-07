@@ -1,7 +1,5 @@
 package com.analysis.structures.steps;
 
-import com.analysis.structures.Visitor;
-
 import java.util.List;
 import java.util.Map;
 
@@ -53,15 +51,6 @@ public abstract class Step {
      */
     public List<String> getMatchResult() {
         return matchResult;
-    }
-
-    /**
-     * Visitor method
-     *
-     * @param visitor
-     */
-    public void visit(Visitor visitor) {
-        visitor.visit(this);
     }
 
     /**

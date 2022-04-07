@@ -1,6 +1,5 @@
 package com.analysis.structures.steps;
 
-import com.analysis.structures.Visitor;
 import com.analysis.util.SRLAnalyzer;
 
 import java.util.List;
@@ -27,11 +26,6 @@ public class WhenStep extends Step {
 
     public Map<String, String> getAdvice() {
         return advice;
-    }
-
-    @Override
-    public void visit(Visitor visitor) {
-        visitor.visit(this);
     }
 
     @Override

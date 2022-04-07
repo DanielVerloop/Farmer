@@ -1,6 +1,7 @@
 package com.analysis;
 
 import com.analysis.structures.Scenario;
+import com.analysis.structures.steps.AndStep;
 import com.analysis.structures.steps.GivenStep;
 import com.analysis.structures.steps.ThenStep;
 import com.analysis.structures.steps.WhenStep;
@@ -71,13 +72,40 @@ public class NLPFileReader {
                     (String) ((JSONObject) scenario.get("when")).get("description"), posResultWhen, srlWhen);
             ThenStep thenStep = new ThenStep(
                     (String) ((JSONObject) scenario.get("then")).get("description"), posResultThen, srlThen);
-            //TODO: handle AND steps
             //Add created steps to scenario
-            s.setSteps(Arrays.asList(givenStep, whenStep, thenStep));
+            s.addStep(givenStep);
+            s.addStep(whenStep);
+            s.addStep(thenStep);
+
+            //Handle all and steps
+            if (scenario.get("gAnd") != null) {
+                handleAndStep(scenario, whenStep, s);
+            }
+            if (scenario.get("wAnd") != null) {
+                handleAndStep(scenario, whenStep, s);
+            }
+            if (scenario.get("tAnd") != null) {
+                handleAndStep(scenario, whenStep, s);
+            }
+
             scenarios.add(s);
         }
 
         return scenarios;
+    }
+
+    private void handleAndStep(JSONObject scenario, WhenStep whenStep, Scenario s) {
+        JSONArray steps = (JSONArray) scenario.get("wAnd");
+        for (Object ob: steps) {
+            JSONObject step = (JSONObject) ob;
+            AndStep andStep = new AndStep(
+                    (String) step.get("description"),
+                    getPos(step),
+                    getSRL(step),
+                    whenStep
+            );
+            s.addStep(andStep);
+        }
     }
 
     private JSONArray getScenariosFromFile(String fileName) {
@@ -135,5 +163,11 @@ public class NLPFileReader {
         }
 
         return result;
+    }
+
+    public static void main(String[] args) {
+        List<Scenario> result = new NLPFileReader("src/main/resources/nlp_results.json")
+                .getScenarios("vendingMachine.feature");
+        System.out.println(result);
     }
 }

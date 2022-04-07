@@ -20,7 +20,7 @@ public class bankAccountStepDefs {
 
     @Then("the balance should be 100")
     public void theBalanceShouldBe100() {
-        Assert.assertTrue(balance == 100);
+        Assert.assertTrue(bankaccount.balance == 100);
     }
 
     @Given("a bank account with initial balance of 1000")
@@ -35,7 +35,7 @@ public class bankAccountStepDefs {
 
     @Then("the balance should be 900")
     public void theBalanceShouldBe900() {
-        Assert.assertTrue(balance == 900);
+        Assert.assertTrue(bankaccount.balance == 900);
     }
 
     @Given("a bank account with balance of 100")
@@ -50,6 +50,6 @@ public class bankAccountStepDefs {
 
     @Then("the balance should be 120")
     public void theBalanceShouldBe120() {
-        Assert.assertTrue(balance == 120);
+        Assert.assertTrue(bankaccount.balance == 120);
     }
 }

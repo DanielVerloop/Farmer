@@ -2,9 +2,9 @@
   "files": [
     {
       "name": "transactions.feature",
-      "scenarios": {
-        "given": [
-          {
+      "scenarios": [
+        {
+          "given": {
             "description": "Given a bank account with initial balance of 0",
             "analysis": [
               {
@@ -22,45 +22,8 @@
               }
             ]
           },
-          {
-            "description": "Given a bank account with initial balance of 1000",
-            "analysis": [
-              {
-                "nouns": [
-                  "bank account",
-                  "account",
-                  "balance"
-                ],
-                "numbers": [
-                  1000
-                ],
-                "parameters": [
-                  "1000"
-                ]
-              }
-            ]
-          },
-          {
-            "description": "Given a bank account with balance of 100",
-            "analysis": [
-              {
-                "nouns": [
-                  "bank account",
-                  "account",
-                  "balance"
-                ],
-                "numbers": [
-                  100
-                ],
-                "parameters": [
-                  "100"
-                ]
-              }
-            ]
-          }
-        ],
-        "when": [
-          {
+          "gAnd": [],
+          "when": {
             "description": "When we deposit 100 pounds into the account",
             "analysis": [
               {
@@ -85,59 +48,8 @@
               ]
             ]
           },
-          {
-            "description": "When we withdraw 100 pounds from the account",
-            "analysis": [
-              {
-                "nouns": [
-                  "account"
-                ],
-                "numbers": [
-                  100
-                ]
-              },
-              [
-                [
-                  "withdraw",
-                  [
-                    "ARGM-TMP: When",
-                    "ARG0: we",
-                    "V: withdraw",
-                    "ARG1: 100 pounds",
-                    "ARG2: from the account"
-                  ]
-                ]
-              ]
-            ]
-          },
-          {
-            "description": "When we deposit 20 pounds into the account",
-            "analysis": [
-              {
-                "nouns": [
-                  "account"
-                ],
-                "numbers": [
-                  20
-                ]
-              },
-              [
-                [
-                  "deposit",
-                  [
-                    "ARGM-TMP: When",
-                    "ARG0: we",
-                    "V: deposit",
-                    "ARG1: 20 pounds",
-                    "ARG2: into the account"
-                  ]
-                ]
-              ]
-            ]
-          }
-        ],
-        "then": [
-          {
+          "wAnd": [],
+          "then": {
             "description": "Then the balance should be 100",
             "analysis": [
               {
@@ -162,7 +74,55 @@
               ]
             ]
           },
-          {
+          "tAnd": []
+        },
+        {
+          "given": {
+            "description": "Given a bank account with initial balance of 1000",
+            "analysis": [
+              {
+                "nouns": [
+                  "bank account",
+                  "account",
+                  "balance"
+                ],
+                "numbers": [
+                  1000
+                ],
+                "parameters": [
+                  "1000"
+                ]
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When we withdraw 100 pounds from the account",
+            "analysis": [
+              {
+                "nouns": [
+                  "account"
+                ],
+                "numbers": [
+                  100
+                ]
+              },
+              [
+                [
+                  "withdraw",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: we",
+                    "V: withdraw",
+                    "ARG1: 100 pounds",
+                    "ARG2: from the account"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
             "description": "Then the balance should be 900",
             "analysis": [
               {
@@ -187,7 +147,55 @@
               ]
             ]
           },
-          {
+          "tAnd": []
+        },
+        {
+          "given": {
+            "description": "Given a bank account with balance of 100",
+            "analysis": [
+              {
+                "nouns": [
+                  "bank account",
+                  "account",
+                  "balance"
+                ],
+                "numbers": [
+                  100
+                ],
+                "parameters": [
+                  "100"
+                ]
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When we deposit 20 pounds into the account",
+            "analysis": [
+              {
+                "nouns": [
+                  "account"
+                ],
+                "numbers": [
+                  20
+                ]
+              },
+              [
+                [
+                  "deposit",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: we",
+                    "V: deposit",
+                    "ARG1: 20 pounds",
+                    "ARG2: into the account"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
             "description": "Then the balance should be 120",
             "analysis": [
               {
@@ -211,9 +219,334 @@
                 ]
               ]
             ]
-          }
-        ]
-      }
+          },
+          "tAnd": []
+        }
+      ]
+    },
+    {
+      "name": "vendingMachine.feature",
+      "scenarios": [
+        {
+          "given": {
+            "description": "Given user want to buy <product>",
+            "analysis": [
+              {
+                "nouns": [
+                  "product >",
+                  ">"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When user insert the <money> dollars",
+            "analysis": [
+              {
+                "nouns": [
+                  "user",
+                  "money"
+                ],
+                "numbers": []
+              },
+              [
+                [
+                  "insert",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: user",
+                    "V: insert",
+                    "ARG1: the  money  dollars"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [
+            {
+              "description": "And press the button with the code",
+              "analysis": [
+                {
+                  "nouns": [
+                    "button",
+                    "code"
+                  ],
+                  "numbers": []
+                },
+                [
+                  [
+                    "press",
+                    [
+                      "ARGM-DIS: And",
+                      "V: press",
+                      "ARG1: the button with the code"
+                    ]
+                  ]
+                ]
+              ]
+            },
+            {
+              "description": "And the user does something else",
+              "analysis": [
+                {
+                  "nouns": [
+                    "user",
+                    "something"
+                  ],
+                  "numbers": []
+                },
+                [
+                  [
+                    "does",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: the user",
+                      "V: does",
+                      "ARG1: something else"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ],
+          "then": {
+            "description": "Then The <product> leaves the machine and the stock reduces in 1unit",
+            "analysis": [
+              {
+                "nouns": [
+                  "product >",
+                  ">",
+                  "machine",
+                  "stock"
+                ],
+                "numbers": []
+              },
+              [
+                [
+                  "leaves",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG0: The  product",
+                    "V: leaves",
+                    "ARG1: the machine",
+                    "and the stock reduces in 1unit"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        },
+        {
+          "given": {
+            "description": "Given user want to buy <product>",
+            "analysis": [
+              {
+                "nouns": [
+                  "product >",
+                  ">"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When user insert the <money> dollars",
+            "analysis": [
+              {
+                "nouns": [
+                  "user",
+                  "money"
+                ],
+                "numbers": []
+              },
+              [
+                [
+                  "insert",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: user",
+                    "V: insert",
+                    "ARG1: the  money  dollars"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [
+            {
+              "description": "And press the button with the code",
+              "analysis": [
+                {
+                  "nouns": [
+                    "button",
+                    "code"
+                  ],
+                  "numbers": []
+                },
+                [
+                  [
+                    "press",
+                    [
+                      "ARGM-DIS: And",
+                      "V: press",
+                      "ARG1: the button with the code"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ],
+          "then": {
+            "description": "Then The <product> leaves the machine and the stock reduces in 1unit",
+            "analysis": [
+              {
+                "nouns": [
+                  "product >",
+                  ">",
+                  "machine",
+                  "stock"
+                ],
+                "numbers": []
+              },
+              [
+                [
+                  "leaves",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG0: The  product",
+                    "V: leaves",
+                    "ARG1: the machine",
+                    "and the stock reduces in 1unit"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": [
+            {
+              "description": "And VM give <change> back",
+              "analysis": [
+                {
+                  "nouns": [
+                    "change"
+                  ],
+                  "numbers": []
+                },
+                [
+                  [
+                    "give",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: VM",
+                      "V: give",
+                      "ARG1:  change",
+                      "back"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "given": {
+            "description": "Given user want to buy <product>",
+            "analysis": [
+              {
+                "nouns": [
+                  "product >",
+                  ">"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When user insert the <money> dollars",
+            "analysis": [
+              {
+                "nouns": [
+                  "user",
+                  "money"
+                ],
+                "numbers": []
+              },
+              [
+                [
+                  "insert",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: user",
+                    "V: insert",
+                    "ARG1: the  money  dollars"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [
+            {
+              "description": "And press the button with the code",
+              "analysis": [
+                {
+                  "nouns": [
+                    "button",
+                    "code"
+                  ],
+                  "numbers": []
+                },
+                [
+                  [
+                    "press",
+                    [
+                      "ARGM-DIS: And",
+                      "V: press",
+                      "ARG1: the button with the code"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ],
+          "then": {
+            "description": "Then The VM ask for \"still missing this amount: \" <missing> dollars",
+            "analysis": [
+              {
+                "nouns": [
+                  "ask",
+                  "amount"
+                ],
+                "numbers": []
+              },
+              [
+                [
+                  "missing",
+                  [
+                    "Then The VM ask for \" still missing this amount : \"  V: missing",
+                    "ARG1: dollars"
+                  ]
+                ],
+                [
+                  "missing",
+                  [
+                    "Then The VM ask for \" still missing this amount : \"  V: missing",
+                    "ARG1: dollars"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        }
+      ]
     }
   ]
 }

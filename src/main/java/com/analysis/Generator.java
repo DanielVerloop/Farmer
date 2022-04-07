@@ -18,10 +18,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 
 public class Generator {
@@ -50,7 +48,7 @@ public class Generator {
         file.createNewFile();
 
         //Get setMatchResult info
-        List<Scenario> matchResult = new Matcher(targetDir, jsonResult.getScenarios("transactions.feature")).getMatch();
+        List<Scenario> matchResult = new LevenshteinMatcher(targetDir, jsonResult.getScenarios("transactions.feature")).getMatch();
         //Create skeleton template
         this.createTemplate(className);
         //TODO:add empty step-functions
@@ -70,10 +68,7 @@ public class Generator {
      */
     private void addImplementation(List<Scenario> matchResult, String fileName) throws FileNotFoundException {
         CompilationUnit cu = getCU();
-        CompilationUnit cuTest = StaticJavaParser.parse(new File("src/test/java/com/stepdefinitions/cucumber/MyStepdefs.java"));
-        System.out.println(cuTest);
 
-        //TODO: implement the new strucure
         ClassOrInterfaceDeclaration declaration = cu.getClassByName(className).get();
         for (Scenario scenario : matchResult) {
             for (Step step : scenario.getSteps()) {
@@ -109,7 +104,6 @@ public class Generator {
                     this.addFieldToClass(objectName, varName);
                     break;
                 case METHODI:
-                    //TODO need more info for accurate variable
                     String var = new StringFormatter().camelCase(info.get(2));
 
                     //code block variable and add it to the method
@@ -124,20 +118,20 @@ public class Generator {
                     block.addStatement(methodCallExpr);
                     break;
                 case ASSERT:
-                    //TODO: Get info from previous steps
-
                     //code block variable and add it to the method
                     block = new BlockStmt();
                     method.setBody(block);
+                    var = new StringFormatter().camelCase(info.get(1));
 
                     //add assert call to block-statement
                     MethodCallExpr assertCallExpr = new MethodCallExpr(
                             new NameExpr("Assert"),
                             "assertTrue");
                     assertCallExpr.addArgument(
-                            info.get(1) + " "
-                                    + this.operator(info.get(3)) + " "
-                                    + info.get(2)
+                                    var + "."
+                                    + info.get(2) + " "
+                                    + this.operator(info.get(4)) + " "
+                                    + info.get(3)
                     );
                     block.addStatement(assertCallExpr);
                     break;

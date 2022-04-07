@@ -4,18 +4,21 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.AccessSpecifier;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CodeAnalysis {
     private HashMap<String, List<String>> mapMethods2Classes = new HashMap<>();
     private HashMap<String, List<String>> classFields = new HashMap<>();
     private File[] listFiles;
     private List<String> classNames;
+    private Map<String, CompilationUnit> className2CU = new HashMap<>();//TODO: make all methods use this for perfomance optimization
 
     public HashMap<String, List<String>> getMapMethods2Classes() {
         return mapMethods2Classes;
@@ -26,11 +29,6 @@ public class CodeAnalysis {
     }
 
     /**
-     * Default
-     */
-    public CodeAnalysis() {     }
-
-    /**
      * analyse a complete directory
      * @param dir path to directory
      */
@@ -39,6 +37,7 @@ public class CodeAnalysis {
         ArrayList<String> classNames = new ArrayList<>();
         for (File file: dir.listFiles()) {
                 classNames.addAll(getClassNames(file));
+                mapClass2CU(file, classNames);
         }
         this.classNames = classNames;
         for (File file : dir.listFiles()) {
@@ -46,6 +45,13 @@ public class CodeAnalysis {
         }
         for (File file : dir.listFiles()) {
             mapClassFields(file);
+        }
+    }
+
+    private void mapClass2CU(File file, ArrayList<String> classNames) throws FileNotFoundException {
+        for (String name : classNames) {
+            CompilationUnit cu = StaticJavaParser.parse(file);
+            className2CU.put(name, cu);
         }
     }
 
@@ -109,5 +115,26 @@ public class CodeAnalysis {
                 mapMethods2Classes.put(cl.getNameAsString(), methods);
             }
         });
+    }
+
+    /**
+     * Gets a list of all parameter combinations of constructors of {@code className}
+     * @param className name of class
+     * @return all combinations
+     * TODO:check case of no parameter constructor
+     */
+    public List<List<Parameter>> getConstructors(String className) {
+        CompilationUnit cu = className2CU.get(className);
+        List<List<Parameter>> result = new ArrayList<>();
+
+        //Get Lists of all constructor parameter combinations
+        cu.getClassByName(className).get().getConstructors().stream().forEach(constructorDeclaration -> {
+            List<Parameter> temp = new ArrayList<>();
+            //Create list of parameters for constructor
+            constructorDeclaration.getParameters().forEach(parameter -> temp.add(parameter));
+            result.add(temp); //add to result
+        });
+
+        return null;
     }
 }

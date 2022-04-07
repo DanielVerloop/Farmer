@@ -21,6 +21,7 @@ public class SRLAnalyzer {
         Map<String, String> advice = new HashMap<>();
         ArrayList<String> labels = getLabels(verbs.iterator().next());
         for (String label : labels) {
+            if (!label.contains(":")) continue; //TODO: this means the NLP was faulty, for now ignore
             String role = label.split(":")[0].trim();
             String value = label.split(":")[1].trim();
 
