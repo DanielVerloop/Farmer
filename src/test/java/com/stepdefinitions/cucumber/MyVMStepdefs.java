@@ -26,7 +26,7 @@ public class MyVMStepdefs {
     }
 
     @And("VM give <change> back")
-    public void vmGiveChangeBack() {
+    public void vmGiveChangeBack(int change) {
 
     }
 

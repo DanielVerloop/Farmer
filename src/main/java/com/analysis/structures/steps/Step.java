@@ -1,5 +1,7 @@
 package com.analysis.structures.steps;
 
+import com.analysis.structures.Rule;
+
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +13,7 @@ public abstract class Step {
     private final List<String> nouns;
     private final List<String> numbers;
     private final List<String> parameters;
-    private List<String> matchResult;
+    private Rule matchResult;
 
     public Step(String description, Map<String, List<String>> posResult) {
         this.description = description;
@@ -41,7 +43,7 @@ public abstract class Step {
      * Method to set match result of each specific step
      * @param match
      */
-    public void setMatchResult(List<String> match) {
+    public void setMatchResult(Rule match) {
         this.matchResult = match;
     }
 
@@ -49,7 +51,7 @@ public abstract class Step {
      * Method get match result
      * @return
      */
-    public List<String> getMatchResult() {
+    public Rule getMatchResult() {
         return matchResult;
     }
 

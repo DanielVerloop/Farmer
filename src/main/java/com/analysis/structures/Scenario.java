@@ -27,4 +27,11 @@ public class Scenario {
     public List<Step> getSteps() {
         return steps;
     }
+
+    @Override
+    public String toString() {
+        return "Scenario{" +
+                "steps=" + steps +
+                '}';
+    }
 }

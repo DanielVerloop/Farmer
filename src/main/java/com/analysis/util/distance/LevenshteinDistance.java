@@ -1,4 +1,4 @@
-package com.analysis.util;
+package com.analysis.util.distance;
 // Java implementation of Levenshtein distance calculation
 // Using Dynamic Programming (Optimised solution)
 

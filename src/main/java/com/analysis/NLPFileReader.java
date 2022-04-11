@@ -78,14 +78,14 @@ public class NLPFileReader {
             s.addStep(thenStep);
 
             //Handle all and steps
-            if (scenario.get("gAnd") != null) {
-                handleAndStep(scenario, whenStep, s);
+            if (((JSONArray) scenario.get("gAnd")).size() != 0) {
+                handleAndStep(scenario, whenStep, s, "gAnd");
             }
-            if (scenario.get("wAnd") != null) {
-                handleAndStep(scenario, whenStep, s);
+            if (((JSONArray) scenario.get("wAnd")).size() != 0) {
+                handleAndStep(scenario, whenStep, s, "wAnd");
             }
-            if (scenario.get("tAnd") != null) {
-                handleAndStep(scenario, whenStep, s);
+            if (((JSONArray) scenario.get("tAnd")).size() != 0) {
+                handleAndStep(scenario, whenStep, s, "tAnd");
             }
 
             scenarios.add(s);
@@ -94,8 +94,8 @@ public class NLPFileReader {
         return scenarios;
     }
 
-    private void handleAndStep(JSONObject scenario, WhenStep whenStep, Scenario s) {
-        JSONArray steps = (JSONArray) scenario.get("wAnd");
+    private void handleAndStep(JSONObject scenario, WhenStep whenStep, Scenario s, String type) {
+        JSONArray steps = (JSONArray) scenario.get(type);
         for (Object ob: steps) {
             JSONObject step = (JSONObject) ob;
             AndStep andStep = new AndStep(
@@ -165,9 +165,9 @@ public class NLPFileReader {
         return result;
     }
 
-    public static void main(String[] args) {
-        List<Scenario> result = new NLPFileReader("src/main/resources/nlp_results.json")
-                .getScenarios("vendingMachine.feature");
-        System.out.println(result);
-    }
+//    public static void main(String[] args) {
+//        List<Scenario> result = new NLPFileReader("src/main/resources/nlp_results.json")
+//                .getScenarios("vendingMachine.feature");
+//        System.out.println(result);
+//    }
 }

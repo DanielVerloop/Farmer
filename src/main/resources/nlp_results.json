@@ -16,9 +16,7 @@
                 "numbers": [
                   0
                 ],
-                "parameters": [
-                  "0"
-                ]
+                "parameters": []
               }
             ]
           },
@@ -32,7 +30,8 @@
                 ],
                 "numbers": [
                   100
-                ]
+                ],
+                "parameters": []
               },
               [
                 [
@@ -58,7 +57,8 @@
                 ],
                 "numbers": [
                   100
-                ]
+                ],
+                "parameters": []
               },
               [
                 [
@@ -89,9 +89,7 @@
                 "numbers": [
                   1000
                 ],
-                "parameters": [
-                  "1000"
-                ]
+                "parameters": []
               }
             ]
           },
@@ -105,7 +103,8 @@
                 ],
                 "numbers": [
                   100
-                ]
+                ],
+                "parameters": []
               },
               [
                 [
@@ -131,7 +130,8 @@
                 ],
                 "numbers": [
                   900
-                ]
+                ],
+                "parameters": []
               },
               [
                 [
@@ -162,9 +162,7 @@
                 "numbers": [
                   100
                 ],
-                "parameters": [
-                  "100"
-                ]
+                "parameters": []
               }
             ]
           },
@@ -178,7 +176,8 @@
                 ],
                 "numbers": [
                   20
-                ]
+                ],
+                "parameters": []
               },
               [
                 [
@@ -204,7 +203,8 @@
                 ],
                 "numbers": [
                   120
-                ]
+                ],
+                "parameters": []
               },
               [
                 [
@@ -229,37 +229,42 @@
       "scenarios": [
         {
           "given": {
-            "description": "Given user want to buy <product>",
+            "description": "Given The user wants to buy product",
             "analysis": [
               {
                 "nouns": [
-                  "product >",
-                  ">"
+                  "user",
+                  "product"
                 ],
                 "numbers": [],
-                "parameters": []
+                "parameters": [
+                  "product"
+                ]
               }
             ]
           },
           "gAnd": [],
           "when": {
-            "description": "When user insert the <money> dollars",
+            "description": "When The user inserts the money pounds",
             "analysis": [
               {
                 "nouns": [
                   "user",
                   "money"
                 ],
-                "numbers": []
+                "numbers": [],
+                "parameters": [
+                  "money"
+                ]
               },
               [
                 [
-                  "insert",
+                  "inserts",
                   [
                     "ARGM-TMP: When",
-                    "ARG0: user",
-                    "V: insert",
-                    "ARG1: the  money  dollars"
+                    "ARG0: The user",
+                    "V: inserts",
+                    "ARG1: the  money  pounds"
                   ]
                 ]
               ]
@@ -267,21 +272,23 @@
           },
           "wAnd": [
             {
-              "description": "And press the button with the code",
+              "description": "And The user presses the button with the code",
               "analysis": [
                 {
                   "nouns": [
                     "button",
                     "code"
                   ],
-                  "numbers": []
+                  "numbers": [],
+                  "parameters": []
                 },
                 [
                   [
-                    "press",
+                    "presses",
                     [
                       "ARGM-DIS: And",
-                      "V: press",
+                      "ARG0: The user",
+                      "V: presses",
                       "ARG1: the button with the code"
                     ]
                   ]
@@ -289,23 +296,26 @@
               ]
             },
             {
-              "description": "And the user does something else",
+              "description": "And The product leaves the machine",
               "analysis": [
                 {
                   "nouns": [
-                    "user",
-                    "something"
+                    "product",
+                    "machine"
                   ],
-                  "numbers": []
+                  "numbers": [],
+                  "parameters": [
+                    "product"
+                  ]
                 },
                 [
                   [
-                    "does",
+                    "leaves",
                     [
                       "ARGM-DIS: And",
-                      "ARG0: the user",
-                      "V: does",
-                      "ARG1: something else"
+                      "ARG0: The  product",
+                      "V: leaves",
+                      "ARG1: the machine"
                     ]
                   ]
                 ]
@@ -313,65 +323,59 @@
             }
           ],
           "then": {
-            "description": "Then The <product> leaves the machine and the stock reduces in 1unit",
+            "description": "Then The stock reduces in 1 unit",
             "analysis": [
               {
                 "nouns": [
-                  "product >",
-                  ">",
-                  "machine",
-                  "stock"
+                  "stock",
+                  "unit"
                 ],
-                "numbers": []
+                "numbers": [
+                  1
+                ],
+                "parameters": []
               },
-              [
-                [
-                  "leaves",
-                  [
-                    "ARGM-TMP: Then",
-                    "ARG0: The  product",
-                    "V: leaves",
-                    "ARG1: the machine",
-                    "and the stock reduces in 1unit"
-                  ]
-                ]
-              ]
+              []
             ]
           },
           "tAnd": []
         },
         {
           "given": {
-            "description": "Given user want to buy <product>",
+            "description": "Given user wants to buy product",
             "analysis": [
               {
                 "nouns": [
-                  "product >",
-                  ">"
+                  "product"
                 ],
                 "numbers": [],
-                "parameters": []
+                "parameters": [
+                  "product"
+                ]
               }
             ]
           },
           "gAnd": [],
           "when": {
-            "description": "When user insert the <money> dollars",
+            "description": "When user inserts the money dollars",
             "analysis": [
               {
                 "nouns": [
                   "user",
                   "money"
                 ],
-                "numbers": []
+                "numbers": [],
+                "parameters": [
+                  "money"
+                ]
               },
               [
                 [
-                  "insert",
+                  "inserts",
                   [
                     "ARGM-TMP: When",
                     "ARG0: user",
-                    "V: insert",
+                    "V: inserts",
                     "ARG1: the  money  dollars"
                   ]
                 ]
@@ -380,22 +384,49 @@
           },
           "wAnd": [
             {
-              "description": "And press the button with the code",
+              "description": "And presses the button with the code",
               "analysis": [
                 {
                   "nouns": [
                     "button",
                     "code"
                   ],
-                  "numbers": []
+                  "numbers": [],
+                  "parameters": []
                 },
                 [
                   [
-                    "press",
+                    "presses",
                     [
                       "ARGM-DIS: And",
-                      "V: press",
+                      "V: presses",
                       "ARG1: the button with the code"
+                    ]
+                  ]
+                ]
+              ]
+            },
+            {
+              "description": "And The product leaves the machine",
+              "analysis": [
+                {
+                  "nouns": [
+                    "product",
+                    "machine"
+                  ],
+                  "numbers": [],
+                  "parameters": [
+                    "product"
+                  ]
+                },
+                [
+                  [
+                    "leaves",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: The  product",
+                      "V: leaves",
+                      "ARG1: the machine"
                     ]
                   ]
                 ]
@@ -403,48 +434,41 @@
             }
           ],
           "then": {
-            "description": "Then The <product> leaves the machine and the stock reduces in 1unit",
+            "description": "Then the stock reduces in 1 unit",
             "analysis": [
               {
                 "nouns": [
-                  "product >",
-                  ">",
-                  "machine",
-                  "stock"
+                  "stock",
+                  "unit"
                 ],
-                "numbers": []
+                "numbers": [
+                  1
+                ],
+                "parameters": []
               },
-              [
-                [
-                  "leaves",
-                  [
-                    "ARGM-TMP: Then",
-                    "ARG0: The  product",
-                    "V: leaves",
-                    "ARG1: the machine",
-                    "and the stock reduces in 1unit"
-                  ]
-                ]
-              ]
+              []
             ]
           },
           "tAnd": [
             {
-              "description": "And VM give <change> back",
+              "description": "And vending machine gives change back",
               "analysis": [
                 {
                   "nouns": [
-                    "change"
+                    "machine"
                   ],
-                  "numbers": []
+                  "numbers": [],
+                  "parameters": [
+                    "change"
+                  ]
                 },
                 [
                   [
-                    "give",
+                    "gives",
                     [
                       "ARGM-DIS: And",
-                      "ARG0: VM",
-                      "V: give",
+                      "ARG0: vending machine",
+                      "V: gives",
                       "ARG1:  change",
                       "back"
                     ]
@@ -456,28 +480,32 @@
         },
         {
           "given": {
-            "description": "Given user want to buy <product>",
+            "description": "Given user want to buy product",
             "analysis": [
               {
                 "nouns": [
-                  "product >",
-                  ">"
+                  "product"
                 ],
                 "numbers": [],
-                "parameters": []
+                "parameters": [
+                  "product"
+                ]
               }
             ]
           },
           "gAnd": [],
           "when": {
-            "description": "When user insert the <money> dollars",
+            "description": "When user insert the money dollars",
             "analysis": [
               {
                 "nouns": [
                   "user",
                   "money"
                 ],
-                "numbers": []
+                "numbers": [],
+                "parameters": [
+                  "money"
+                ]
               },
               [
                 [
@@ -501,7 +529,8 @@
                     "button",
                     "code"
                   ],
-                  "numbers": []
+                  "numbers": [],
+                  "parameters": []
                 },
                 [
                   [
@@ -517,28 +546,26 @@
             }
           ],
           "then": {
-            "description": "Then The VM ask for \"still missing this amount: \" <missing> dollars",
+            "description": "Then The vending machine asks for missing dollars",
             "analysis": [
               {
                 "nouns": [
-                  "ask",
-                  "amount"
+                  "vending machine",
+                  "machine"
                 ],
-                "numbers": []
+                "numbers": [],
+                "parameters": [
+                  "missing"
+                ]
               },
               [
                 [
-                  "missing",
+                  "asks",
                   [
-                    "Then The VM ask for \" still missing this amount : \"  V: missing",
-                    "ARG1: dollars"
-                  ]
-                ],
-                [
-                  "missing",
-                  [
-                    "Then The VM ask for \" still missing this amount : \"  V: missing",
-                    "ARG1: dollars"
+                    "ARGM-TMP: Then",
+                    "ARG0: The vending machine",
+                    "V: asks",
+                    "ARG1: for  missing  dollars"
                   ]
                 ]
               ]

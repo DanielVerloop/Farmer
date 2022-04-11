@@ -6,5 +6,5 @@ package com.analysis.util;
 public enum Advice {
     OBJECTI, //"object instantiation"
     METHODI,
-    ASSERT,
+    ASSERT, Pass,
 }

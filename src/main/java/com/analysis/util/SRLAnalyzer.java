@@ -16,6 +16,9 @@ public class SRLAnalyzer {
      * @return mapped advice
      */
     public Map<String, String> generateAdvice() {
+        if (srlLabels == null || srlLabels.isEmpty()) {
+            return null;
+        }
         //TODO implement for all verbs
         //TODO test if sanitation is needed on values (remove useless words: the, a, an, I, we, etc...)
         Map<String, String> advice = new HashMap<>();
@@ -28,13 +31,13 @@ public class SRLAnalyzer {
             //find all important roles and map them
             switch (role) {
                 case "V":
-                    advice.put("action", value);
+                    advice.put("V", value);
                     break;
                 case "ARG0":
-                    advice.put("agent", value);
+                    advice.put("ARG0", value);
                     break;
                 case "ARG1":
-                    advice.put("target", value);
+                    advice.put("ARG1", value);
                     break;
                 case "ARG2":
                     advice.put("ARG2", value);

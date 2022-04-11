@@ -1,8 +1,9 @@
 package com.analysis;
 
+import com.analysis.structures.Rule;
 import com.analysis.structures.Scenario;
 import com.analysis.structures.steps.Step;
-import com.analysis.util.Advice;
+import com.analysis.util.ParameterParser;
 import com.analysis.util.StringFormatter;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -10,14 +11,14 @@ import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.*;
+import com.github.javaparser.ast.expr.AssignExpr;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,20 +41,20 @@ public class Generator {
      * TODO: add multifile generation
      */
     public void generate() throws IOException {
-        NLPFileReader jsonResult = new NLPFileReader("src/main/resources/nlp_results_new.json");
-        File targetDir = new File("src/main/java/com/bank");
+        NLPFileReader jsonResult = new NLPFileReader("src/main/resources/nlp_results.json");
+        File targetDir = new File("src/main/java/com/vendingMachine");
         cu = new CompilationUnit();
-        className = "bankAccountStepDefs";
+        className = "vmStepDefs";
         File file = new File("src/main/resources" + "/" + className + ".java");
         file.createNewFile();
 
         //Get setMatchResult info
-        List<Scenario> matchResult = new LevenshteinMatcher(targetDir, jsonResult.getScenarios("transactions.feature")).getMatch();
+        List<Scenario> matchResult = new LevenshteinMatcher(
+                targetDir, jsonResult.getScenarios("vendingMachine.feature")).getMatch();
         //Create skeleton template
         this.createTemplate(className);
-        //TODO:add empty step-functions
         //TODO:fill method bodies
-        this.addImplementation(matchResult, "transactions.feature");
+        this.addImplementation(matchResult);
 
         //output to file
         FileWriter fw = new FileWriter(file);
@@ -64,10 +65,10 @@ public class Generator {
     /**
      * Add step function implementations of a single step file
      * @param matchResult
-     * @param fileName
      */
-    private void addImplementation(List<Scenario> matchResult, String fileName) throws FileNotFoundException {
+    private void addImplementation(List<Scenario> matchResult) throws FileNotFoundException {
         CompilationUnit cu = getCU();
+        ParameterParser typeSolver = new ParameterParser(new File("src/test/resources/features/vendingMachine.feature"));
 
         ClassOrInterfaceDeclaration declaration = cu.getClassByName(className).get();
         for (Scenario scenario : matchResult) {
@@ -76,16 +77,28 @@ public class Generator {
                 String name = new StringFormatter().camelCase(annotation[1]);
 
                 // create the step method
-                MethodDeclaration method = declaration.addMethod(name, Modifier.Keyword.PUBLIC);
-                method.addSingleMemberAnnotation(annotation[0], new StringLiteralExpr(annotation[1]));
+                MethodDeclaration method;
+                if (step.getParameters().size() > 0) {
+                    method = declaration.addMethod(name, Modifier.Keyword.PUBLIC);
+                    for (String param : step.getParameters()) {
+                        method.addParameter(typeSolver.getParameterType(param), param);
+                        String varType = "{"+typeSolver.getParameterType(param).toLowerCase()+"}";
+                        annotation[1] = annotation[1].replace(param, varType);
+                    }
+                    method.addSingleMemberAnnotation(annotation[0], new StringLiteralExpr(annotation[1]));
+                } else {
+                    method = declaration.addMethod(name, Modifier.Keyword.PUBLIC);
+                    method.addSingleMemberAnnotation(annotation[0], new StringLiteralExpr(annotation[1]));
+                }
 
-                List<String> info = step.getMatchResult();
+
+                Rule info = step.getMatchResult();
                 BlockStmt block;
-                switch (Advice.valueOf(info.get(0))) { //switch on first parameter
+                switch (info.getAdvice()) { //switch on first parameter
                 case OBJECTI:
-                    String objectName = info.get(1);
+                    String objectName = info.getClassName();
                     String varName = new StringFormatter().camelCase(objectName);
-                    String params = info.get(2);
+                    String params = new StringFormatter().parseParameters(info.getParameters());
                     //code block variable and add it to the method
                     block = new BlockStmt();
                     method.setBody(block);
@@ -104,7 +117,7 @@ public class Generator {
                     this.addFieldToClass(objectName, varName);
                     break;
                 case METHODI:
-                    String var = new StringFormatter().camelCase(info.get(2));
+                    String var = new StringFormatter().camelCase(info.getClassName());
 
                     //code block variable and add it to the method
                     block = new BlockStmt();
@@ -113,26 +126,37 @@ public class Generator {
                     //add method call to block-statement
                     MethodCallExpr methodCallExpr = new MethodCallExpr(
                             new NameExpr(var),
-                            info.get(1));
-                    methodCallExpr.addArgument(info.get(3));
+                            info.getMethodName());
+                    //TODO: handle parameters
+//                    methodCallExpr.addArgument(info.get(3));
                     block.addStatement(methodCallExpr);
                     break;
                 case ASSERT:
                     //code block variable and add it to the method
-                    block = new BlockStmt();
+                   block = new BlockStmt();
                     method.setBody(block);
-                    var = new StringFormatter().camelCase(info.get(1));
+                    var = new StringFormatter().camelCase(info.getClassName());
 
                     //add assert call to block-statement
                     MethodCallExpr assertCallExpr = new MethodCallExpr(
                             new NameExpr("Assert"),
                             "assertTrue");
-                    assertCallExpr.addArgument(
-                                    var + "."
-                                    + info.get(2) + " "
-                                    + this.operator(info.get(4)) + " "
-                                    + info.get(3)
-                    );
+                    if (info.getFieldName() != null) {
+                        assertCallExpr.addArgument(
+                                var + "."
+                                + info.getFieldName() + " "
+                                + this.operator(info.getAssertExpr()) + " "
+                                + info.getCompareValue()
+                        );
+                    } else {
+                        assertCallExpr.addArgument(
+                                var + "."
+                                + info.getMethodName() + " "
+                                + this.operator(info.getAssertExpr()) + " "
+                                + info.getCompareValue()
+                        );
+                    }
+
                     block.addStatement(assertCallExpr);
                     break;
             }
@@ -203,7 +227,7 @@ public class Generator {
      * @param analysisNLP location of json of nlp analysis (from src dir)
      */
     public void generate(File targetDir, NLPFileReader analysisNLP) {
-        System.out.printf("Generating for directory %s%n:", targetDir.getPath());
+        System.out.printf("Generating over directory %s%n:", targetDir.getPath());
         System.out.println();
     }
 
