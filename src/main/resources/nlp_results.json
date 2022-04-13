@@ -229,12 +229,14 @@
       "scenarios": [
         {
           "given": {
-            "description": "Given The user wants to buy product",
+            "description": "Given the user wants to buy product from the vending machine",
             "analysis": [
               {
                 "nouns": [
                   "user",
-                  "product"
+                  "product",
+                  "vending machine",
+                  "machine"
                 ],
                 "numbers": [],
                 "parameters": [
@@ -342,11 +344,14 @@
         },
         {
           "given": {
-            "description": "Given user wants to buy product",
+            "description": "Given the user wants to buy product from the vending machine",
             "analysis": [
               {
                 "nouns": [
-                  "product"
+                  "user",
+                  "product",
+                  "vending machine",
+                  "machine"
                 ],
                 "numbers": [],
                 "parameters": [
@@ -464,6 +469,14 @@
                 },
                 [
                   [
+                    "vending",
+                    [
+                      "And V: vending",
+                      "ARG0: machine",
+                      "gives  change  back"
+                    ]
+                  ],
+                  [
                     "gives",
                     [
                       "ARGM-DIS: And",
@@ -480,11 +493,14 @@
         },
         {
           "given": {
-            "description": "Given user want to buy product",
+            "description": "Given the user wants to buy product from the vending machine",
             "analysis": [
               {
                 "nouns": [
-                  "product"
+                  "user",
+                  "product",
+                  "vending machine",
+                  "machine"
                 ],
                 "numbers": [],
                 "parameters": [

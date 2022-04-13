@@ -18,8 +18,10 @@ import java.util.*;
  */
 public class NLPFileReader {
     JSONObject jsonFile;
+    String featureFile;
 
-    public NLPFileReader(String filepath) {
+    public NLPFileReader(String filepath, String featurePath) {
+        this.featureFile = featurePath;
         Object parsedJSONFile = null;
         try {
             parsedJSONFile = new JSONParser().parse(new FileReader(filepath));
@@ -49,13 +51,14 @@ public class NLPFileReader {
      * @param fileName name of feature file
      * @return a list of Scenarios
      */
-    public List<Scenario> getScenarios(String fileName) {
+    public List<Scenario> getScenarios(String fileName) throws FileNotFoundException {
         JSONArray scenariosFromFile = getScenariosFromFile(fileName);
         List<Scenario> scenarios = new ArrayList<>();
 
         for (Object o : scenariosFromFile) {
             JSONObject scenario = (JSONObject) o;
-            Scenario s = new Scenario();
+            Scenario s = new Scenario(this.featureFile);
+
 
             //Get the pos-tagger results
             Map<String, List<String>> posResultGiven = this.getPos((JSONObject) scenario.get("given"));
@@ -67,11 +70,11 @@ public class NLPFileReader {
 
             //Add every step type to scenario
             GivenStep givenStep = new GivenStep(
-                    (String) ((JSONObject) scenario.get("given")).get("description"), posResultGiven);
+                    (String) ((JSONObject) scenario.get("given")).get("description"), posResultGiven, s);
             WhenStep whenStep = new WhenStep(
-                    (String) ((JSONObject) scenario.get("when")).get("description"), posResultWhen, srlWhen);
+                    (String) ((JSONObject) scenario.get("when")).get("description"), posResultWhen, srlWhen, s);
             ThenStep thenStep = new ThenStep(
-                    (String) ((JSONObject) scenario.get("then")).get("description"), posResultThen, srlThen);
+                    (String) ((JSONObject) scenario.get("then")).get("description"), posResultThen, srlThen, s);
             //Add created steps to scenario
             s.addStep(givenStep);
             s.addStep(whenStep);
@@ -102,7 +105,8 @@ public class NLPFileReader {
                     (String) step.get("description"),
                     getPos(step),
                     getSRL(step),
-                    whenStep
+                    whenStep,
+                    s
             );
             s.addStep(andStep);
         }

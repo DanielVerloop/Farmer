@@ -41,19 +41,25 @@ public class Generator {
      * TODO: add multifile generation
      */
     public void generate() throws IOException {
-        NLPFileReader jsonResult = new NLPFileReader("src/main/resources/nlp_results.json");
+        NLPFileReader jsonResult = new NLPFileReader("src/main/resources/nlp_results.json",
+                "src/test/resources/features/vendingMachine.feature");
+//        "src/test/resources/features/BankAccount.feature"
         File targetDir = new File("src/main/java/com/vendingMachine");
-        cu = new CompilationUnit();
-        className = "vmStepDefs";
+//        File targetDir = new File("src/main/java/com/bank");
+        this.cu = new CompilationUnit();
+//        this.className = "vmStepDefs";
+        this.className = "bankStepDefs";
         File file = new File("src/main/resources" + "/" + className + ".java");
         file.createNewFile();
 
         //Get setMatchResult info
         List<Scenario> matchResult = new LevenshteinMatcher(
                 targetDir, jsonResult.getScenarios("vendingMachine.feature")).getMatch();
+//        List<Scenario> matchResult = new LevenshteinMatcher(
+//                targetDir, jsonResult.getScenarios("transactions.feature")).getMatch();
         //Create skeleton template
         this.createTemplate(className);
-        //TODO:fill method bodies
+        //fill method bodies
         this.addImplementation(matchResult);
 
         //output to file
@@ -66,9 +72,8 @@ public class Generator {
      * Add step function implementations of a single step file
      * @param matchResult
      */
-    private void addImplementation(List<Scenario> matchResult) throws FileNotFoundException {
+    private void addImplementation(List<Scenario> matchResult) {
         CompilationUnit cu = getCU();
-        ParameterParser typeSolver = new ParameterParser(new File("src/test/resources/features/vendingMachine.feature"));
 
         ClassOrInterfaceDeclaration declaration = cu.getClassByName(className).get();
         for (Scenario scenario : matchResult) {
@@ -81,8 +86,8 @@ public class Generator {
                 if (step.getParameters().size() > 0) {
                     method = declaration.addMethod(name, Modifier.Keyword.PUBLIC);
                     for (String param : step.getParameters()) {
-                        method.addParameter(typeSolver.getParameterType(param), param);
-                        String varType = "{"+typeSolver.getParameterType(param).toLowerCase()+"}";
+                        method.addParameter(step.getParent().getTypeSolver().getParameterType(param), param);
+                        String varType = "{"+step.getParent().getTypeSolver().getParameterType(param).toLowerCase()+"}";
                         annotation[1] = annotation[1].replace(param, varType);
                     }
                     method.addSingleMemberAnnotation(annotation[0], new StringLiteralExpr(annotation[1]));
@@ -105,11 +110,20 @@ public class Generator {
 
                     //add code to code block
                     ExpressionStmt stmt = new ExpressionStmt();
-                    AssignExpr assignExpr = new AssignExpr(
-                            new NameExpr(varName),
-                            new NameExpr("new " + objectName +"(" + params + ")"),
-                            AssignExpr.Operator.ASSIGN
-                    );
+                    AssignExpr assignExpr;
+                    if (params == null) {
+                        assignExpr = new AssignExpr(
+                                new NameExpr(varName),
+                                new NameExpr("new " + objectName +"()"),
+                                AssignExpr.Operator.ASSIGN
+                        );
+                    } else {
+                        assignExpr = new AssignExpr(
+                                new NameExpr(varName),
+                                new NameExpr("new " + objectName +"(" + params + ")"),
+                                AssignExpr.Operator.ASSIGN
+                        );
+                    }
                     stmt.setExpression(assignExpr);
                     block.addStatement(stmt);
 
@@ -141,7 +155,7 @@ public class Generator {
                     MethodCallExpr assertCallExpr = new MethodCallExpr(
                             new NameExpr("Assert"),
                             "assertTrue");
-                    if (info.getFieldName() != null) {
+                    if (info.getFieldName() != null && !info.getFieldName().equals("")) {
                         assertCallExpr.addArgument(
                                 var + "."
                                 + info.getFieldName() + " "
@@ -151,7 +165,7 @@ public class Generator {
                     } else {
                         assertCallExpr.addArgument(
                                 var + "."
-                                + info.getMethodName() + " "
+                                + info.getMethodName() + "() "
                                 + this.operator(info.getAssertExpr()) + " "
                                 + info.getCompareValue()
                         );

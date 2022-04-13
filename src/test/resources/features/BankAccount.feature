@@ -6,7 +6,8 @@ Feature: Transactions
 
   Scenario Outline: deposit money to empty account
     Given a bank account with initial balance of 0
-    And a bank account with 0 balance
+    And the bank account is from RaboBank
+    And is not illegal
     When we deposit 100 pounds into the account
     Then the balance should be 100
     Examples:

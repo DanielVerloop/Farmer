@@ -4,7 +4,7 @@ Feature: Vending Machine
 
   @tag1
   Scenario Outline: Have Product and user have exact amount of money
-    Given The user wants to buy <product>
+    Given The user wants to buy <product> From the vending machine
     When The user inserts the <money> pounds
     And The user presses the button with the code
     And The <product> leaves the machine

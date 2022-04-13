@@ -4,7 +4,10 @@ import com.analysis.structures.Rule;
 import com.analysis.structures.Scenario;
 import com.analysis.structures.steps.*;
 import com.analysis.util.Advice;
+import com.analysis.util.ParameterParser;
 import com.analysis.util.distance.LevenshteinDistance;
+import com.github.javaparser.ast.body.Parameter;
+import info.debatty.java.stringsimilarity.Cosine;
 import info.debatty.java.stringsimilarity.Levenshtein;
 
 import java.io.File;
@@ -30,13 +33,12 @@ public class LevenshteinMatcher implements Matcher{
     }
 
     @Override
-    public List<Scenario> match(List<Scenario> scenarios, CodeAnalysis analysis) {
+    public List<Scenario> match(List<Scenario> scenarios, CodeAnalysis analysis) throws FileNotFoundException {
         for (Scenario scenario : scenarios) {
             List<Rule> context = new ArrayList<>();
             List<Step> steps = scenario.getSteps();
             int i = 4;
             for (Step step : steps) {
-                //TODO: add And Step support!
                 if (GivenStep.class.equals(step.getClass())) {
                     Rule result = matchGiven((GivenStep) step, analysis, context);
                     step.setMatchResult(result);
@@ -64,7 +66,7 @@ public class LevenshteinMatcher implements Matcher{
     }
 
     //TODO: implement
-    private Rule MatchAnd(AndStep step, CodeAnalysis analysis, List<Rule> context) {
+    private Rule MatchAnd(AndStep step, CodeAnalysis analysis, List<Rule> context) throws FileNotFoundException {
         if (GivenStep.class.equals(((AndStep) step).getLinkedStep().getClass())) {
             return matchGiven(step, analysis, context);
         } else if (WhenStep.class.equals(((AndStep) step).getLinkedStep().getClass())) {
@@ -90,17 +92,14 @@ public class LevenshteinMatcher implements Matcher{
         }
     }
 
-    private Rule matchGiven(Step step, CodeAnalysis analysis, List<Rule> context) {
-        //for each class compute levenshtein distance
-        HashMap<String, String> bestMatchedClass = matchClass(step.getNouns(), analysis.getMapMethods2Classes());
-        
+    private Rule matchGiven(Step step, CodeAnalysis analysis, List<Rule> context) throws FileNotFoundException {
         //Matched class
-        String className = findBestMatch(bestMatchedClass);
+        String bestMatchedClass = findBestMatch(matchClass(step.getNouns(), analysis.getMapMethods2Classes()));
 
         //TODO:add parameters for object instantiation
-//        String params = new StringFormatter().parseParameters();
+        String ConstructorResolver = MatchConstructor(bestMatchedClass, analysis, step);
 
-        return new Rule(Advice.OBJECTI, className, step.getParameters());
+        return new Rule(Advice.OBJECTI, bestMatchedClass, step.getParameters());
     }
 
     private Rule matchWhen(WhenStep step, CodeAnalysis analysis, List<Rule> context) {
@@ -113,6 +112,7 @@ public class LevenshteinMatcher implements Matcher{
         //get the methods of the most common class
         List<String> methods = analysis.getMapMethods2Classes().get(matchedClass);
         //find the closest method
+        //TODO: integrate parameters into method selection!
         String matchedMethod = matchMethod(step.getNumbers(), step.getAdvice(), step.getVerbs(), methods);
 
         List<String> param = new ArrayList<>();
@@ -177,10 +177,12 @@ public class LevenshteinMatcher implements Matcher{
                     }
                 }
                 //TODO: find a matching method
-                methodName = "get" + compareValue;
+                assertStmt = "equals";
+                methodName = matchMethod(step.getNumbers(), step.getAdvice(), step.getVerbs(),
+                        analysis.getMapMethods2Classes().get(context.get(0).getClassName()));
             }
         }
-        if (fieldName != null || fieldName != "") {
+        if (fieldName != null && fieldName != "") {
             return new Rule(Advice.ASSERT, context.get(0).getClassName(), fieldName, compareValue, assertStmt);
         }
         return new Rule(Advice.ASSERT, context.get(0).getClassName(), methodName, parameters, compareValue, assertStmt);
@@ -269,7 +271,7 @@ public class LevenshteinMatcher implements Matcher{
             String matchedClass = "";
             for (Map.Entry<String, List<String>> entry : codeAnalysis.entrySet()) {
                 String s = entry.getKey();
-                double dist = new Levenshtein().distance(s, noun);
+                double dist = new Cosine().distance(s, noun);
                 if (dist < smallestDist) {
                     smallestDist = dist;
                     matchedClass = s;
@@ -278,6 +280,32 @@ public class LevenshteinMatcher implements Matcher{
             bestMatchedClass.put(noun, matchedClass);
         }
         return bestMatchedClass;
+    }
+
+    private String MatchConstructor(String bestMatchedClass, CodeAnalysis analysis, Step step) throws FileNotFoundException {
+        //TODO:implement
+        //idea:
+        //Get list of constructors
+        //TODO:implement real param-parser
+        ParameterParser parameterParser = new ParameterParser(new File("src/test/resources/features/vendingMachine.feature"));
+//        parameterParser.getTypes();
+        List<String> paramParserResult = new ArrayList<>();
+//        parameterParser.getParameterType();
+        List<List<Parameter>> constructors = analysis.getConstructors(bestMatchedClass);
+        //get parameters and see if they are a primitive type (int, double, string) or we can match a class
+        System.out.println();
+        for (List<Parameter> constructor : constructors) {
+            for (Parameter parameter: constructor) {
+                if (parameter.getType().getChildNodes().size() > 1) { //case List or Array
+                    System.out.println();
+                }
+            }
+        }
+
+
+        //then match the resolved type to initial constructor
+        //resulting in multiple lines of code
+        return null;
     }
 
     private String findBestMatch(HashMap<String, String> bestMatchedClass) {
@@ -296,7 +324,8 @@ public class LevenshteinMatcher implements Matcher{
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        List<Scenario> scenarios = new NLPFileReader("src/main/resources/nlp_results.json")
+        List<Scenario> scenarios = new NLPFileReader("src/main/resources/nlp_results.json",
+                "src/test/resources/features/vendingMachine.feature")
                 .getScenarios("vendingMachine.feature");
         LevenshteinMatcher matcher = new LevenshteinMatcher(
                 new File("src/main/java/com/vendingmachine"), scenarios);

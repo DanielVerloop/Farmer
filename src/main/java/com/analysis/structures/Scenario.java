@@ -2,7 +2,10 @@ package com.analysis.structures;
 
 
 import com.analysis.structures.steps.Step;
+import com.analysis.util.ParameterParser;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,13 +14,14 @@ import java.util.List;
  */
 public class Scenario {
     private List<Step> steps = new ArrayList<>();
+    private ParameterParser typeSolver;
 
     public Scenario() {
 
     }
 
-    public Scenario(List<Step> steps) {
-        this.steps = steps;
+    public Scenario(String featureFile) throws FileNotFoundException {
+        this.typeSolver = new ParameterParser(new File(featureFile));
     }
 
     public void addStep(Step step) {
@@ -33,5 +37,9 @@ public class Scenario {
         return "Scenario{" +
                 "steps=" + steps +
                 '}';
+    }
+
+    public ParameterParser getTypeSolver() {
+        return typeSolver;
     }
 }

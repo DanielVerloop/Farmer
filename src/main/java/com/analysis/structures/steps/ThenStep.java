@@ -1,5 +1,6 @@
 package com.analysis.structures.steps;
 
+import com.analysis.structures.Scenario;
 import com.analysis.util.SRLAnalyzer;
 
 import java.util.List;
@@ -10,8 +11,9 @@ public class ThenStep extends Step {
     private Set<String> verbs;
     private Map<String, String> advice;
 
-    public ThenStep(String description, Map<String, List<String>> posResult, Map<String, List<String>> srlSentence) {
-        super(description, posResult);
+    public ThenStep(String description, Map<String, List<String>> posResult,
+                    Map<String, List<String>> srlSentence, Scenario parent) {
+        super(description, posResult, parent);
         this.verbs = srlSentence.keySet();
         this.advice = new SRLAnalyzer(srlSentence).generateAdvice();
     }

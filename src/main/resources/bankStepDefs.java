@@ -4,7 +4,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.And;
 import org.junit.Assert;
 
-public class vmStepDefs {
+public class bankStepDefs {
 
     @Given("the user wants to buy {string} from the vending machine")
     public void theUserWantsToBuyProductFromTheVendingMachine(String product) {

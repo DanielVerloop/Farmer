@@ -36,6 +36,9 @@ public class StringFormatter {
     }
 
     public String parseParameters(List<String> params) {
+        if (params.size() == 0) {
+            return null;
+        }
         String paramString="";
         for (int i = 0; i < params.size(); i++) {
             paramString += params.get(i) + ", ";

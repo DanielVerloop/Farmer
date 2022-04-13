@@ -1,25 +1,28 @@
 package com.analysis.structures.steps;
 
 import com.analysis.structures.Rule;
+import com.analysis.structures.Scenario;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * base interface
+ * base Step interface
  */
 public abstract class Step {
     private final String description;
     private final List<String> nouns;
     private final List<String> numbers;
     private final List<String> parameters;
+    private final Scenario parent;
     private Rule matchResult;
 
-    public Step(String description, Map<String, List<String>> posResult) {
+    public Step(String description, Map<String, List<String>> posResult, Scenario parent) {
         this.description = description;
         this.nouns = posResult.get("nouns");
         this.numbers = posResult.get("numbers");
         this.parameters = posResult.get("parameters");
+        this.parent = parent;
     }
 
     //All class getters
@@ -67,5 +70,9 @@ public abstract class Step {
                 ", numbers=" + numbers +
                 ", parameters=" + parameters +
                 '}';
+    }
+
+    public Scenario getParent() {
+        return parent;
     }
 }

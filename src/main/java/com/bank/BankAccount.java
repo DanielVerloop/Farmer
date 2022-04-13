@@ -24,13 +24,5 @@ public class BankAccount {
         this.balance -= amount;
         return this.balance;
     }
-
-//    public static void main(String[] args) {
-//        BankAccount account = new BankAccount(10);
-//        account.withdraw(10);
-//        account.deposit(5);
-//        account.getBalance();
-//        account.setBalance(100);
-//    }
 }
 

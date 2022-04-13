@@ -1,11 +1,11 @@
 package com.analysis.structures.steps;
 
+import com.analysis.structures.Scenario;
 import com.analysis.util.SRLAnalyzer;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.MatchResult;
 
 /**
  * Gherkin And step
@@ -28,8 +28,9 @@ public class AndStep extends Step {
         return linkedStep;
     }
 
-    public AndStep(String description, Map<String, List<String>> posResult, Map<String, List<String>> srlSentence, Step linkedStep) {
-        super(description, posResult);
+    public AndStep(String description, Map<String, List<String>> posResult, Map<String,
+            List<String>> srlSentence, Step linkedStep, Scenario parent) {
+        super(description, posResult, parent);
         this.verbs = srlSentence.keySet();
         this.advice = new SRLAnalyzer(srlSentence).generateAdvice();
         this.linkedStep = linkedStep;

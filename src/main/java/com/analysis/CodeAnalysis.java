@@ -135,6 +135,6 @@ public class CodeAnalysis {
             result.add(temp); //add to result
         });
 
-        return null;
+        return result;
     }
 }
