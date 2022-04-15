@@ -6,78 +6,95 @@ import org.junit.Assert;
 
 public class vmStepDefs {
 
-    @Given("the user wants to buy {string} from the vending machine")
-    public void theUserWantsToBuyProductFromTheVendingMachine(String product) {
-        vendingmachine = new VendingMachine(product);
+    @Given("there exists a vending machine")
+    public void thereExistsAVendingMachine() {
+        vendingmachine = new VendingMachine();
     }
 
     VendingMachine vendingmachine;
 
-    @When("The user inserts the {double} pounds")
-    public void theUserInsertsTheMoneyPounds(double money) {
-        vendingmachine.getProduct();
+    @And("it has 10 {string} in its inventory")
+    public void itHas10ProductInItsInventory(String product) {
+        vendingmachine = new VendingMachine();
     }
 
-    @Then("The stock reduces in 1 unit")
-    public void theStockReducesIn1Unit() {
+    @When("inserts the {double} pounds")
+    public void insertsTheMoneyPounds(double money) {
+        vendingmachine.setAmount(money);
     }
 
-    @And("The user presses the button with the code")
-    public void theUserPressesTheButtonWithTheCode() {
-        vendingmachine.getProduct();
-    }
-
-    @And("The {string} leaves the machine")
-    public void theProductLeavesTheMachine(String product) {
-        vendingmachine.getChange();
-    }
-
-    @Given("the user wants to buy {string} from the vending machine")
-    public void theUserWantsToBuyProductFromTheVendingMachine(String product) {
-        vendingmachine = new VendingMachine(product);
-    }
-
-    @When("user inserts the {double} dollars")
-    public void userInsertsTheMoneyDollars(double money) {
-        vendingmachine.getProduct();
+    @And("presses the button with the code for {string}")
+    public void pressesTheButtonWithTheCodeForProduct(String product) {
+        vendingmachine.setAmount(money);
     }
 
     @Then("the stock reduces in 1 unit")
     public void theStockReducesIn1Unit() {
+        Assert.assertTrue(vendingmachine.getPrice() == 1);
     }
 
-    @And("presses the button with the code")
-    public void pressesTheButtonWithTheCode() {
-        vendingmachine.getProduct();
-    }
-
-    @And("The {string} leaves the machine")
+    @And("the {string} leaves the machine")
     public void theProductLeavesTheMachine(String product) {
-        vendingmachine.getChange();
+        Assert.assertTrue(vendingmachine.getPrice() == 1);
+    }
+
+    @Given("there exists a vending machine")
+    public void thereExistsAVendingMachine() {
+        vendingmachine = new VendingMachine();
+    }
+
+    @And("it has 10 {string} in its inventory")
+    public void itHas10ProductInItsInventory(String product) {
+        vendingmachine = new VendingMachine();
+    }
+
+    @When("user inserts the {double} dollars")
+    public void userInsertsTheMoneyDollars(double money) {
+        vendingmachine.setAmount(money);
+    }
+
+    @And("presses the button with the code for the product")
+    public void pressesTheButtonWithTheCodeForTheProduct() {
+        vendingmachine.setAmount(money);
+    }
+
+    @And("the {string} leaves the machine")
+    public void theProductLeavesTheMachine(String product) {
+        vendingmachine.setAmount(money);
+    }
+
+    @Then("the stock reduces in 1 unit")
+    public void theStockReducesIn1Unit() {
+        Assert.assertTrue(vendingmachine.getPrice() == 1);
     }
 
     @And("vending machine gives {double} back")
     public void vendingMachineGivesChangeBack(double change) {
-        vendingmachine.getChange();
+        Assert.assertTrue(vendingmachine.getPrice() == 1);
     }
 
-    @Given("the user wants to buy {string} from the vending machine")
-    public void theUserWantsToBuyProductFromTheVendingMachine(String product) {
-        vendingmachine = new VendingMachine(product);
+    @Given("there exists a vending machine")
+    public void thereExistsAVendingMachine() {
+        vendingmachine = new VendingMachine();
     }
 
-    @When("user insert the {double} dollars")
-    public void userInsertTheMoneyDollars(double money) {
-        vendingmachine.getProduct();
+    @And("it has 10 {string} in its inventory")
+    public void itHas10ProductInItsInventory(String product) {
+        vendingmachine = new VendingMachine();
     }
 
-    @Then("The vending machine asks for {string} dollars")
+    @When("the user insert the {double} dollars")
+    public void theUserInsertTheMoneyDollars(double money) {
+        vendingmachine.setAmount(money);
+    }
+
+    @And("presses the button with the code for the product")
+    public void pressesTheButtonWithTheCodeForTheProduct() {
+        vendingmachine.setAmount(money);
+    }
+
+    @Then("the vending machine asks for {string} dollars")
     public void theVendingMachineAsksForMissingDollars(String missing) {
-        Assert.assertTrue(vendingmachine.getChange() == missing);
-    }
-
-    @And("press the button with the code")
-    public void pressTheButtonWithTheCode() {
-        vendingmachine.getProduct();
+        Assert.assertTrue(vendingmachine.getPrice().equals(missing));
     }
 }

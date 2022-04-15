@@ -12,8 +12,8 @@ public class ThenStep extends Step {
     private Map<String, String> advice;
 
     public ThenStep(String description, Map<String, List<String>> posResult,
-                    Map<String, List<String>> srlSentence, Scenario parent) {
-        super(description, posResult, parent);
+                    Map<String, List<String>> srlSentence, Scenario parent, List<Step> andSteps) {
+        super(description, posResult, parent, andSteps);
         this.verbs = srlSentence.keySet();
         this.advice = new SRLAnalyzer(srlSentence).generateAdvice();
     }

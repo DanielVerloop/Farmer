@@ -14,7 +14,7 @@ public class Rule {
     private String methodName;
 
     /**
-     * Default Rule typ
+     * Default Rule type
      * @param advice
      * @param className
      * @param parameters

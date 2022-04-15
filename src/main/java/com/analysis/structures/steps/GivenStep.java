@@ -7,8 +7,8 @@ import java.util.Map;
 
 public class GivenStep extends Step {
 
-    public GivenStep(String description, Map<String, List<String>> posResult, Scenario parent) {
-        super(description, posResult, parent);
+    public GivenStep(String description, Map<String, List<String>> posResult, Scenario parent, List<Step> andSteps) {
+        super(description, posResult, parent, andSteps);
     }
 
     @Override

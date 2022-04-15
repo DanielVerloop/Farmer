@@ -17,9 +17,12 @@ import java.util.stream.Collectors;
 
 /**
  * Text-to-Code Matcher
- * This class should be able to setMatchResult functions to the step descriptions
+ * This class uses String distance as base for matching text to code
  */
-public class LevenshteinMatcher implements Matcher{
+public class DistanceMatcher implements Matcher{
+    private Levenshtein matchAlgMethod = new Levenshtein();//All other text-code matching
+    private Cosine matchAlgClass = new Cosine();//Used for class matching
+    private ParameterParser parameterParser = new ParameterParser(new File("src/test/resources/features/vendingMachine.feature"));//TODO: move instantiation to constructor!
     private List<Scenario> match;
 
     @Override
@@ -27,7 +30,7 @@ public class LevenshteinMatcher implements Matcher{
         return match;
     }
 
-    public LevenshteinMatcher(File targetDir, List<Scenario> scenarios) throws FileNotFoundException {
+    public DistanceMatcher(File targetDir, List<Scenario> scenarios) throws FileNotFoundException {
         CodeAnalysis analysis = new CodeAnalysis(targetDir);
         match = this.match(scenarios, analysis);
     }
@@ -39,24 +42,39 @@ public class LevenshteinMatcher implements Matcher{
             List<Step> steps = scenario.getSteps();
             int i = 4;
             for (Step step : steps) {
-                if (GivenStep.class.equals(step.getClass())) {
+                if (step instanceof GivenStep) {
                     Rule result = matchGiven((GivenStep) step, analysis, context);
                     step.setMatchResult(result);
                     context.add(result);
-                } else if (WhenStep.class.equals(step.getClass())) {
+                    if (step.getAndSteps() != null && step.getAndSteps().size() > 0) {
+                        for (Step sp: step.getAndSteps()) {
+                            Rule andResult = matchGiven(step, analysis, context);
+                            sp.setMatchResult(result);
+                            context.add(result);
+                        }
+                    }
+                } else if (step instanceof WhenStep) {
                     Rule result = matchWhen((WhenStep) step, analysis, context);
                     step.setMatchResult(result);
                     context.add(result);
-                } else if (ThenStep.class.equals(step.getClass())) {
+                    if (step.getAndSteps() != null && step.getAndSteps().size() > 0) {
+                        for (Step sp: step.getAndSteps()) {
+                            Rule andResult = matchWhen((WhenStep) step, analysis, context);
+                            sp.setMatchResult(result);
+                            context.add(result);
+                        }
+                    }
+                } else if (step instanceof ThenStep) {
                     Rule result = matchThen((ThenStep) step, analysis, context);
                     step.setMatchResult(result);
                     context.add(result);
-                } else if (AndStep.class.equals(step.getClass())) {
-                    Rule result = null;
-                    result = MatchAnd((AndStep) step, analysis, context);
-                    step.setMatchResult(result);
-                    context.add(result);
-                    i++;
+                    if (step.getAndSteps() != null && step.getAndSteps().size() > 0) {
+                        for (Step sp: step.getAndSteps()) {
+                            Rule andResult = matchThen((ThenStep) step, analysis, context);
+                            sp.setMatchResult(result);
+                            context.add(result);
+                        }
+                    }
                 } else {
                     throw new IllegalStateException("Unsupported step type!");
                 }
@@ -65,41 +83,19 @@ public class LevenshteinMatcher implements Matcher{
         return scenarios;
     }
 
-    //TODO: implement
-    private Rule MatchAnd(AndStep step, CodeAnalysis analysis, List<Rule> context) throws FileNotFoundException {
-        if (GivenStep.class.equals(((AndStep) step).getLinkedStep().getClass())) {
-            return matchGiven(step, analysis, context);
-        } else if (WhenStep.class.equals(((AndStep) step).getLinkedStep().getClass())) {
-            //Get class from given step
-            String matchedClass = context.get(0).getClassName();//get class from given-step
-            //get the methods of the most common class
-            List<String> methods = analysis.getMapMethods2Classes().get(matchedClass);
-            //find the closest method
-            String matchedMethod = matchMethod(step.getNumbers(), step.getAdvice(), step.getVerbs(), methods);
-
-            List<String> param = new ArrayList<>();
-            if (step.getNumbers().size() > 0) {
-                param.add(step.getNumbers().get(0));
-            } else {
-                param = null;
-            }
-
-            return new Rule(Advice.METHODI, matchedClass, param, matchedMethod);
-        } else if (ThenStep.class.equals(((AndStep) step).getLinkedStep().getClass())) {
-            return new Rule(Advice.ASSERT, context.get(0).getClassName(), "something", "0", "equals");
-        } else {
-            throw new IllegalStateException("Unsupported step type!");
-        }
-    }
-
     private Rule matchGiven(Step step, CodeAnalysis analysis, List<Rule> context) throws FileNotFoundException {
         //Matched class
         String bestMatchedClass = findBestMatch(matchClass(step.getNouns(), analysis.getMapMethods2Classes()));
 
         //TODO:add parameters for object instantiation
-        String ConstructorResolver = MatchConstructor(bestMatchedClass, analysis, step);
-
-        return new Rule(Advice.OBJECTI, bestMatchedClass, step.getParameters());
+        String constructorResolver = MatchConstructor(bestMatchedClass, analysis, step);
+        if (constructorResolver == null) {//something went wrong, default to no params
+            new Rule(Advice.OBJECTI, bestMatchedClass, step.getParameters());
+        } else if (constructorResolver.equals("")) {//no param-constructor
+            new Rule(Advice.OBJECTI, bestMatchedClass, step.getParameters());
+        }
+        // we were able to match parameters with a constructor
+        return new Rule(Advice.OBJECTI, bestMatchedClass, step.getParameters(), constructorResolver);
     }
 
     private Rule matchWhen(WhenStep step, CodeAnalysis analysis, List<Rule> context) {
@@ -112,14 +108,20 @@ public class LevenshteinMatcher implements Matcher{
         //get the methods of the most common class
         List<String> methods = analysis.getMapMethods2Classes().get(matchedClass);
         //find the closest method
-        //TODO: integrate parameters into method selection!
-        String matchedMethod = matchMethod(step.getNumbers(), step.getAdvice(), step.getVerbs(), methods);
+        String matchedMethod = matchMethod(step.getAdvice(), step.getVerbs(), step, analysis, matchedClass);
 
+        //Add parameters
+        //TODO: check ordering of parameters!
         List<String> param = new ArrayList<>();
-        if (step.getNumbers().size() > 0) {
-            param.add(step.getNumbers().get(0));
-        } else {
-            param = null;
+        if (step.getParameters().size() > 0){
+            for (String parameter : step.getParameters()) {
+                param.add(parameter);
+            }
+        }
+        if (step.getNumbers().size() > 0) { // numbers are present
+            for (String number : step.getNumbers()) {
+                param.add(number);
+            }
         }
 
         return new Rule(Advice.METHODI,matchedClass, param, matchedMethod);
@@ -127,15 +129,16 @@ public class LevenshteinMatcher implements Matcher{
 
     private Rule matchThen(ThenStep step, CodeAnalysis analysis, List<Rule> context) {
         String compareValue = "";
-        String assertStmt = "";
+        String assertStmt = "equals";
         List<String> parameters = new ArrayList<>();
+        String matchedClass = context.get(0).getClassName();
 
         if (step.getAdvice() == null) {
             return new Rule(Advice.Pass, context.get(0).getClassName(), "", compareValue, assertStmt);
         }
         //See if we can find a matching class field or method (if field does not exist)
         String fieldName = matchVar(analysis, step.getNouns());
-        String methodName = matchGet(step.getNumbers(), step.getNouns(), analysis);
+        String methodName = matchGet(step.getAdvice(), step.getVerbs(), analysis, step, context.get(0).getClassName());
 
         if (step.getNumbers().size() == 1) {
             //highly likely a number parameter
@@ -177,9 +180,8 @@ public class LevenshteinMatcher implements Matcher{
                     }
                 }
                 //TODO: find a matching method
-                assertStmt = "equals";
-                methodName = matchMethod(step.getNumbers(), step.getAdvice(), step.getVerbs(),
-                        analysis.getMapMethods2Classes().get(context.get(0).getClassName()));
+                assertStmt = "sequals";
+                methodName = matchGet(step.getAdvice(), step.getVerbs(), analysis, step, context.get(0).getClassName());
             }
         }
         if (fieldName != null && fieldName != "") {
@@ -188,7 +190,7 @@ public class LevenshteinMatcher implements Matcher{
         return new Rule(Advice.ASSERT, context.get(0).getClassName(), methodName, parameters, compareValue, assertStmt);
     }
 
-    private String matchGet(List<String> numbers, List<String> nouns, CodeAnalysis analysis) {
+    private String matchGet(Map<String, String> advice, Set<String> verbs, CodeAnalysis analysis, Step step, String className) {
         HashMap<String, List<String>> mapping = analysis.getMapMethods2Classes();
         HashMap<String, Integer> distances = new HashMap<>(); //{"cls+method" = dist}
         //get best matched method per class
@@ -196,7 +198,7 @@ public class LevenshteinMatcher implements Matcher{
         mapping.forEach((cls, mtds) -> {
             String methodName = "";
             int smallestdist = Integer.MAX_VALUE;
-            for (String noun : nouns) {
+            for (String noun : step.getNouns()) {
                 for (String method : mtds) {
                     int ldist = new LevenshteinDistance(noun, method).getDistance();
                     //add bias on getters
@@ -231,7 +233,7 @@ public class LevenshteinMatcher implements Matcher{
                 double smallestDist = Integer.MAX_VALUE;
                 String matchedVar = "";
                 for (String var: vars) {
-                    double dist = new Levenshtein().distance(var, noun);
+                    double dist = this.matchAlgMethod.distance(var, noun);
                     if (dist < smallestDist) {
                         smallestDist = dist;
                         matchedVar = var;
@@ -244,15 +246,33 @@ public class LevenshteinMatcher implements Matcher{
                 .min(Comparator.comparingDouble(Map.Entry::getValue)).get().getKey();
     }
 
-    private String matchMethod(List<String> numbers, Map<String, String> advice, Set<String> verbs, List<String> methods) {
-        //TODO implement mathcer that uses all 3
-        //simple matcher on the verbs
+    //TODO implement mathcer that uses all available numbers + params + advice + verbs + nouns
+    private String matchMethod(Map<String, String> advice, Set<String> verbs, Step step, CodeAnalysis analysis, String matchedClass) {
         Map<String, Double> distances = new HashMap<>();
+        List<String> methods = analysis.getMapMethods2Classes().get(matchedClass);
+
+
+        if (step.getParameters().size() > 0) {//tables are used
+            ArrayList<String> paramTypes = new ArrayList<>();
+            for (String param : step.getParameters()) {
+                paramTypes.add(parameterParser.getParameterType(param));
+            }
+            //filter methods
+            methods = analysis.filterMethodsOnParams(matchedClass, paramTypes);
+            if (methods.size() == 0) {
+                methods = analysis.getMapMethods2Classes().get(matchedClass);
+            }
+        } else if (step.getNumbers().size() > 0) {//numbers are present but no tables
+            //TODO: filter methods on double, int parameters
+
+        }
+        //only verbs left to match on
+        //TODO: use advice variable
         for (String verb : verbs) {
             double smallestDist = Integer.MAX_VALUE;
             String matchedMethod = "";
             for (String method : methods) {
-                double dist = new Levenshtein().distance(verb, method);
+                double dist = this.matchAlgClass.distance(verb, method);
                 if (dist < smallestDist) {
                     smallestDist = dist;
                     matchedMethod = method;
@@ -260,6 +280,8 @@ public class LevenshteinMatcher implements Matcher{
             }
             distances.put(matchedMethod, smallestDist);
         }
+
+
         return distances.entrySet().stream()
                 .min(Comparator.comparingDouble(Map.Entry::getValue)).get().getKey();
     }
@@ -271,7 +293,7 @@ public class LevenshteinMatcher implements Matcher{
             String matchedClass = "";
             for (Map.Entry<String, List<String>> entry : codeAnalysis.entrySet()) {
                 String s = entry.getKey();
-                double dist = new Cosine().distance(s, noun);
+                double dist = this.matchAlgClass.distance(s, noun);
                 if (dist < smallestDist) {
                     smallestDist = dist;
                     matchedClass = s;
@@ -282,31 +304,60 @@ public class LevenshteinMatcher implements Matcher{
         return bestMatchedClass;
     }
 
+    /**
+     *
+     * @param bestMatchedClass
+     * @param analysis
+     * @param step
+     * @return null if no match could be made, "" if we have no parameters in constructor, else constructor parameters
+     * @throws FileNotFoundException
+     */
     private String MatchConstructor(String bestMatchedClass, CodeAnalysis analysis, Step step) throws FileNotFoundException {
-        //TODO:implement
-        //idea:
         //Get list of constructors
-        //TODO:implement real param-parser
-        ParameterParser parameterParser = new ParameterParser(new File("src/test/resources/features/vendingMachine.feature"));
-//        parameterParser.getTypes();
         List<String> paramParserResult = new ArrayList<>();
-//        parameterParser.getParameterType();
         List<List<Parameter>> constructors = analysis.getConstructors(bestMatchedClass);
         //get parameters and see if they are a primitive type (int, double, string) or we can match a class
-        System.out.println();
-        for (List<Parameter> constructor : constructors) {
-            for (Parameter parameter: constructor) {
-                if (parameter.getType().getChildNodes().size() > 1) { //case List or Array
-                    System.out.println();
+        for (int i = 0; i < constructors.size(); i++) {
+            if (constructors.get(i).size() == step.getParameters().size()) {
+                //case no parameters
+                if (constructors.get(i).size() == 0) {
+                    return "";
                 }
+                //case 1 parameter
+                if (constructors.get(i).size() == 1) {
+                    if (constructors.get(i).get(0).getType().toString().equals(parameterParser.getParameterType(step.getParameters().get(0)))) {
+                        return constructors.get(i).get(0).getType().toString();
+                    } else if (constructors.get(i).get(0).getType().getChildNodes().size() == 2){ //List, Array, Set parameter
+                        if (Arrays.asList("String", "int", "double").contains(constructors.get(i).get(0).getType().getChildNodes().get(1))){
+                            String type = parameterParser.getParameterType(step.getParameters().get(0));
+
+                            if (constructors.get(i).get(0).getType().getChildNodes().get(1).equals(type)) {
+                                return constructors.get(i).get(0).getType().getChildNodes().get(0).toString() + type;
+                            }
+                        } else { //find constructor of class object and make recursive call
+                            String objectName = constructors.get(i).get(0).getType().getChildNodes().get(1).toString();
+                            System.out.println(MatchConstructor(objectName, analysis, step));
+                        }
+                    }
+                }
+                if (constructors.get(i).size() > 2) {//multiple parameters
+                    //TODO: test
+                    String result = "";
+                    for (Parameter p : constructors.get(i)) {
+                        result += MatchConstructor(p.getType().toString(), analysis, step);
+                    }
+                    System.out.println(result);
+                    return result;
+                }
+            } else {
+                //TODO: match on number values if no params present!
+
+
             }
         }
-
-
-        //then match the resolved type to initial constructor
-        //resulting in multiple lines of code
         return null;
     }
+
 
     private String findBestMatch(HashMap<String, String> bestMatchedClass) {
         //if no parameters match only on nouns
@@ -327,10 +378,7 @@ public class LevenshteinMatcher implements Matcher{
         List<Scenario> scenarios = new NLPFileReader("src/main/resources/nlp_results.json",
                 "src/test/resources/features/vendingMachine.feature")
                 .getScenarios("vendingMachine.feature");
-        LevenshteinMatcher matcher = new LevenshteinMatcher(
+        DistanceMatcher matcher = new DistanceMatcher(
                 new File("src/main/java/com/vendingmachine"), scenarios);
-
-        System.out.println(matcher.getMatch());
-
     }
 }

@@ -15,14 +15,16 @@ public abstract class Step {
     private final List<String> numbers;
     private final List<String> parameters;
     private final Scenario parent;
+    private final List<Step> andSteps;
     private Rule matchResult;
 
-    public Step(String description, Map<String, List<String>> posResult, Scenario parent) {
+    public Step(String description, Map<String, List<String>> posResult, Scenario parent, List<Step> andSteps) {
         this.description = description;
         this.nouns = posResult.get("nouns");
         this.numbers = posResult.get("numbers");
         this.parameters = posResult.get("parameters");
         this.parent = parent;
+        this.andSteps = andSteps;
     }
 
     //All class getters
@@ -74,5 +76,9 @@ public abstract class Step {
 
     public Scenario getParent() {
         return parent;
+    }
+
+    public List<Step> getAndSteps() {
+        return andSteps;
     }
 }

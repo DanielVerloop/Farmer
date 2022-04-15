@@ -3,9 +3,7 @@ package com.analysis;
 import com.analysis.structures.Rule;
 import com.analysis.structures.Scenario;
 import com.analysis.structures.steps.Step;
-import com.analysis.util.ParameterParser;
 import com.analysis.util.StringFormatter;
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -47,13 +45,13 @@ public class Generator {
         File targetDir = new File("src/main/java/com/vendingMachine");
 //        File targetDir = new File("src/main/java/com/bank");
         this.cu = new CompilationUnit();
-//        this.className = "vmStepDefs";
-        this.className = "bankStepDefs";
+        this.className = "vmStepDefs";
+//        this.className = "bankStepDefs";
         File file = new File("src/main/resources" + "/" + className + ".java");
         file.createNewFile();
 
         //Get setMatchResult info
-        List<Scenario> matchResult = new LevenshteinMatcher(
+        List<Scenario> matchResult = new DistanceMatcher(
                 targetDir, jsonResult.getScenarios("vendingMachine.feature")).getMatch();
 //        List<Scenario> matchResult = new LevenshteinMatcher(
 //                targetDir, jsonResult.getScenarios("transactions.feature")).getMatch();
@@ -77,7 +75,8 @@ public class Generator {
 
         ClassOrInterfaceDeclaration declaration = cu.getClassByName(className).get();
         for (Scenario scenario : matchResult) {
-            for (Step step : scenario.getSteps()) {
+            List<Step> steps = getAllSteps(scenario.getSteps());
+            for (Step step : steps) {
                 String[] annotation = step.getDescription().split("\\s", 2);
                 String name = new StringFormatter().camelCase(annotation[1]);
 
@@ -117,6 +116,12 @@ public class Generator {
                                 new NameExpr("new " + objectName +"()"),
                                 AssignExpr.Operator.ASSIGN
                         );
+                    } else if (info.getMethodName() == null) {
+                        assignExpr = new AssignExpr(
+                                new NameExpr(varName),
+                                new NameExpr("new " + objectName +"()"),
+                                AssignExpr.Operator.ASSIGN
+                        );
                     } else {
                         assignExpr = new AssignExpr(
                                 new NameExpr(varName),
@@ -141,13 +146,17 @@ public class Generator {
                     MethodCallExpr methodCallExpr = new MethodCallExpr(
                             new NameExpr(var),
                             info.getMethodName());
-                    //TODO: handle parameters
-//                    methodCallExpr.addArgument(info.get(3));
+                    //handle method parameters
+                    if (info.getParameters() != null && info.getParameters().size() > 0) {
+                        for (String param : info.getParameters()) {
+                            methodCallExpr.addArgument(param);
+                        }
+                    }
                     block.addStatement(methodCallExpr);
                     break;
                 case ASSERT:
                     //code block variable and add it to the method
-                   block = new BlockStmt();
+                    block = new BlockStmt();
                     method.setBody(block);
                     var = new StringFormatter().camelCase(info.getClassName());
 
@@ -155,29 +164,63 @@ public class Generator {
                     MethodCallExpr assertCallExpr = new MethodCallExpr(
                             new NameExpr("Assert"),
                             "assertTrue");
+                    String assertCompareVal;
+                    if (info.getParameters().contains(info.getCompareValue())) {//if we compare parameters
+                        String compareType = step.getParent().getTypeSolver().getParameterType(info.getCompareValue());
+                        if (compareType == "String") {
+                            assertCompareVal = ".equals(" + info.getCompareValue() + ")";
+                        } else {
+                            assertCompareVal = " " + info.getCompareValue();
+                        }
+                    } else {
+                        assertCompareVal = info.getCompareValue();
+                    }
                     if (info.getFieldName() != null && !info.getFieldName().equals("")) {
                         assertCallExpr.addArgument(
                                 var + "."
                                 + info.getFieldName() + " "
                                 + this.operator(info.getAssertExpr()) + " "
-                                + info.getCompareValue()
+                                + assertCompareVal
                         );
                     } else {
                         assertCallExpr.addArgument(
                                 var + "."
                                 + info.getMethodName() + "() "
-                                + this.operator(info.getAssertExpr()) + " "
-                                + info.getCompareValue()
+                                + this.operator(info.getAssertExpr())
+                                + assertCompareVal
                         );
                     }
 
                     block.addStatement(assertCallExpr);
                     break;
-            }
+                case Pass: //not able to create code
+                    block = new BlockStmt();
+                    method.setBody(block);
+
+                    block.addStatement("pass;");
+                }
 
 
             }
         }
+    }
+
+    /**
+     * Gets all steps in the correct ordering
+     * @param steps
+     * @return Ordered list of all steps in a scenario
+     */
+    private List<Step> getAllSteps(List<Step> steps) {
+        List<Step> result = new ArrayList<>();
+        for (int i = 0; i < steps.size(); i++) {
+            result.add(steps.get(i));
+            if (steps.get(i).getAndSteps() != null && steps.get(i).getAndSteps().size() > 0) {
+                for (Step andStep : steps.get(i).getAndSteps()) {
+                    result.add(andStep);
+                }
+            }
+        }
+        return result;
     }
 
     private String operator(String s) {
@@ -188,6 +231,8 @@ public class Generator {
                 return ">";
             case "lower":
                 return "<";
+            case "sequals":
+                return "";
             default:
                 return s;
         }

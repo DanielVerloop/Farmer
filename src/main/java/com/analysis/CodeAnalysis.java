@@ -8,15 +8,11 @@ import com.github.javaparser.ast.body.Parameter;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CodeAnalysis {
     private HashMap<String, List<String>> mapMethods2Classes = new HashMap<>();
     private HashMap<String, List<String>> classFields = new HashMap<>();
-    private File[] listFiles;
     private List<String> classNames;
     private Map<String, CompilationUnit> className2CU = new HashMap<>();//TODO: make all methods use this for perfomance optimization
 
@@ -33,11 +29,10 @@ public class CodeAnalysis {
      * @param dir path to directory
      */
     public CodeAnalysis(File dir) throws FileNotFoundException {
-        this.listFiles = dir.listFiles();
         ArrayList<String> classNames = new ArrayList<>();
         for (File file: dir.listFiles()) {
                 classNames.addAll(getClassNames(file));
-                mapClass2CU(file, classNames);
+                mapClass2CU(file);
         }
         this.classNames = classNames;
         for (File file : dir.listFiles()) {
@@ -48,9 +43,10 @@ public class CodeAnalysis {
         }
     }
 
-    private void mapClass2CU(File file, ArrayList<String> classNames) throws FileNotFoundException {
+    private void mapClass2CU(File file) throws FileNotFoundException {
+        CompilationUnit cu = StaticJavaParser.parse(file);
+        List<String> classNames = getClassNames(file);
         for (String name : classNames) {
-            CompilationUnit cu = StaticJavaParser.parse(file);
             className2CU.put(name, cu);
         }
     }
@@ -137,4 +133,37 @@ public class CodeAnalysis {
 
         return result;
     }
+
+    /**
+     * Reduces the method search space for a class
+     * @param className
+     * @param parameters list of parameter types
+     * @return
+     */
+    public List<String> filterMethodsOnParams(String className, List<String> parameters) {
+        CompilationUnit cu = className2CU.get(className);
+        Set<String> set = new LinkedHashSet<>();//to only keep distinct values
+        List<String> result = new ArrayList<>();
+
+        //TODO: fine-tune filter accuracy
+        cu.getClassByName(className).get().getMethods().stream().forEach(methodDeclaration -> {
+            if (methodDeclaration.getParameters().size() >= parameters.size()) {
+                for (Parameter param : methodDeclaration.getParameters()) {
+                    for (String type : parameters) {
+                        if (param.getType().toString().equals(type)) {
+                            set.add(methodDeclaration.getNameAsString());
+                        }
+                    }
+                    if (!set.contains(methodDeclaration.getNameAsString())
+                            && Arrays.asList("int", "double").contains(param.getType())) {
+                        set.add(methodDeclaration.getNameAsString());
+                    }
+                }
+            }
+        });
+        //return a list
+        result.addAll(set);
+        return result;
+    }
+
 }

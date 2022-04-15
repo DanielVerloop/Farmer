@@ -4,11 +4,12 @@ Feature: Vending Machine
 
   @tag1
   Scenario Outline: Have Product and user have exact amount of money
-    Given The user wants to buy <product> From the vending machine
-    When The user inserts the <money> pounds
-    And The user presses the button with the code
-    And The <product> leaves the machine
-    Then The stock reduces in 1 unit
+    Given there exists a vending machine
+    And it has 10 <product> in its inventory
+    When inserts the <money> pounds
+    And presses the button with the code for <product>
+    Then the stock reduces in 1 unit
+    And the <product> leaves the machine
 
     Examples:
       | product     | money |
@@ -23,10 +24,11 @@ Feature: Vending Machine
 
   @tag2
   Scenario Outline: Have Product and user to receive change
-    Given user wants to buy <product>
+    Given there exists a vending machine
+    And it has 10 <product> in its inventory
     When user inserts the <money> dollars
-    And presses the button with the code
-    And The <product> leaves the machine
+    And presses the button with the code for the product
+    And the <product> leaves the machine
     Then the stock reduces in 1 unit
     And vending machine gives <change> back
 
@@ -42,11 +44,12 @@ Feature: Vending Machine
       | "pepsi"     |  2.25 |   0.00 |
 
   @tag3
-  Scenario Outline: User give less money then price
-    Given user want to buy <product>
-    When user insert the <money> dollars
-    And press the button with the code
-    Then The vending machine asks for <missing> dollars
+  Scenario Outline: user give less money than the price of the product
+    Given there exists a vending machine
+    And it has 10 <product> in its inventory
+    When the user insert the <money> dollars
+    And presses the button with the code for the product
+    Then the vending machine asks for <missing> dollars
 #    "still missing this amount: "
 
     Examples:

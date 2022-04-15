@@ -12,8 +12,8 @@ public class WhenStep extends Step {
     private Map<String, String> advice;
 
     public WhenStep(String description, Map<String, List<String>> posResult, Map<String,
-            List<String>> srlSentence, Scenario parent) {
-        super(description, posResult, parent);
+            List<String>> srlSentence, Scenario parent, List<Step> andSteps) {
+        super(description, posResult, parent, andSteps);
         this.verbs = srlSentence.keySet();
         this.advice = new SRLAnalyzer(srlSentence).generateAdvice();
     }
