@@ -30,3 +30,5 @@ hs_err_pid*
 # Maven
 log/
 target/
+
+src/main/resources/enwiki-20130403-word2vec-lm-mwl-lc-sim/

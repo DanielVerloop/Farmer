@@ -259,7 +259,19 @@
                   "parameters": [
                     "product"
                   ]
-                }
+                },
+                [
+                  [
+                    "ha",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: it",
+                      "V: has",
+                      "ARG1: 10  product",
+                      "ARGM-LOC: in its inventory"
+                    ]
+                  ]
+                ]
               ]
             }
           ],
@@ -278,7 +290,7 @@
               },
               [
                 [
-                  "inserts",
+                  "insert",
                   [
                     "ARGM-TMP: When",
                     "V: inserts",
@@ -305,7 +317,7 @@
                 },
                 [
                   [
-                    "presses",
+                    "press",
                     [
                       "ARGM-DIS: And",
                       "V: presses",
@@ -332,7 +344,7 @@
               },
               [
                 [
-                  "reduces",
+                  "reduc",
                   [
                     "ARGM-TMP: Then",
                     "ARG1: the stock",
@@ -359,7 +371,7 @@
                 },
                 [
                   [
-                    "leaves",
+                    "leav",
                     [
                       "ARGM-DIS: And",
                       "ARG0: the  product",
@@ -401,12 +413,24 @@
                   "parameters": [
                     "product"
                   ]
-                }
+                },
+                [
+                  [
+                    "ha",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: it",
+                      "V: has",
+                      "ARG1: 10  product",
+                      "ARGM-LOC: in its inventory"
+                    ]
+                  ]
+                ]
               ]
             }
           ],
           "when": {
-            "description": "When user inserts the money dollars",
+            "description": "When the user inserts the money dollars",
             "analysis": [
               {
                 "nouns": [
@@ -421,10 +445,10 @@
               },
               [
                 [
-                  "inserts",
+                  "insert",
                   [
                     "ARGM-TMP: When",
-                    "ARG0: user",
+                    "ARG0: the user",
                     "V: inserts",
                     "ARG1: the  money  dollars"
                   ]
@@ -434,24 +458,24 @@
           },
           "wAnd": [
             {
-              "description": "And presses the button with the code for the product",
+              "description": "And selects the product",
               "analysis": [
                 {
                   "nouns": [
-                    "button",
-                    "code",
                     "product"
                   ],
                   "numbers": [],
-                  "parameters": []
+                  "parameters": [
+                    "product"
+                  ]
                 },
                 [
                   [
-                    "presses",
+                    "select",
                     [
                       "ARGM-DIS: And",
-                      "V: presses",
-                      "ARG1: the button with the code for the product"
+                      "V: selects",
+                      "ARG1: the  product"
                     ]
                   ]
                 ]
@@ -472,7 +496,7 @@
                 },
                 [
                   [
-                    "leaves",
+                    "leav",
                     [
                       "ARGM-DIS: And",
                       "ARG0: the  product",
@@ -485,27 +509,28 @@
             }
           ],
           "then": {
-            "description": "Then the stock reduces in 1 unit",
+            "description": "Then the inventory stock must be 9 units",
             "analysis": [
               {
                 "nouns": [
-                  "stock reduces",
-                  "reduces",
-                  "unit"
+                  "inventory stock",
+                  "stock",
+                  "units"
                 ],
                 "numbers": [
-                  1
+                  9
                 ],
                 "parameters": []
               },
               [
                 [
-                  "reduces",
+                  "be",
                   [
                     "ARGM-TMP: Then",
-                    "ARG1: the stock",
-                    "V: reduces",
-                    "ARG2: in 1 unit"
+                    "ARG1: the inventory stock",
+                    "ARGM-MOD: must",
+                    "V: be",
+                    "ARG2: 9 units"
                   ]
                 ]
               ]
@@ -513,10 +538,11 @@
           },
           "tAnd": [
             {
-              "description": "And vending machine gives change back",
+              "description": "And the vending machine gives change back",
               "analysis": [
                 {
                   "nouns": [
+                    "vending machine",
                     "machine"
                   ],
                   "numbers": [],
@@ -526,18 +552,10 @@
                 },
                 [
                   [
-                    "vending",
-                    [
-                      "And V: vending",
-                      "ARG0: machine",
-                      "gives  change  back"
-                    ]
-                  ],
-                  [
-                    "gives",
+                    "give",
                     [
                       "ARGM-DIS: And",
-                      "ARG0: vending machine",
+                      "ARG0: the vending machine",
                       "V: gives",
                       "ARG1:  change",
                       "back"
@@ -577,18 +595,29 @@
                   "parameters": [
                     "product"
                   ]
-                }
+                },
+                [
+                  [
+                    "ha",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: it",
+                      "V: has",
+                      "ARG1: 10  product",
+                      "ARGM-LOC: in its inventory"
+                    ]
+                  ]
+                ]
               ]
             }
           ],
           "when": {
-            "description": "When the user insert the money dollars",
+            "description": "When the user insert the money",
             "analysis": [
               {
                 "nouns": [
                   "user",
-                  "money dollars",
-                  "dollars"
+                  "money"
                 ],
                 "numbers": [],
                 "parameters": [
@@ -602,7 +631,7 @@
                     "ARGM-TMP: When",
                     "ARG0: the user",
                     "V: insert",
-                    "ARG1: the  money  dollars"
+                    "ARG1: the  money"
                   ]
                 ]
               ]
@@ -623,7 +652,7 @@
                 },
                 [
                   [
-                    "presses",
+                    "press",
                     [
                       "ARGM-DIS: And",
                       "V: presses",
@@ -650,7 +679,7 @@
               },
               [
                 [
-                  "asks",
+                  "ask",
                   [
                     "ARGM-TMP: Then",
                     "ARG0: the vending machine",

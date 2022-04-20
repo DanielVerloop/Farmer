@@ -134,6 +134,20 @@ public class CodeAnalysis {
         return result;
     }
 
+  public List<String> getMethodsWithReturnType(String className, String type) {
+        CompilationUnit cu = className2CU.get(className);
+        List<String> result = new ArrayList<>();
+
+        //get all methods that have a return type containing type
+        cu.getClassByName(className).get().getMethods().stream().forEach(methodDeclaration -> {
+            if (methodDeclaration.getType().toString().contains(type)) {
+                result.add(methodDeclaration.getNameAsString());
+            }
+        });
+
+        return result;
+    }
+
     /**
      * Reduces the method search space for a class
      * @param className
@@ -148,14 +162,14 @@ public class CodeAnalysis {
         //TODO: fine-tune filter accuracy
         cu.getClassByName(className).get().getMethods().stream().forEach(methodDeclaration -> {
             if (methodDeclaration.getParameters().size() >= parameters.size()) {
+                set.add(methodDeclaration.getNameAsString());
                 for (Parameter param : methodDeclaration.getParameters()) {
                     for (String type : parameters) {
                         if (param.getType().toString().equals(type)) {
                             set.add(methodDeclaration.getNameAsString());
                         }
                     }
-                    if (!set.contains(methodDeclaration.getNameAsString())
-                            && Arrays.asList("int", "double").contains(param.getType())) {
+                    if (Arrays.asList("int", "double").contains(param.getType())) {
                         set.add(methodDeclaration.getNameAsString());
                     }
                 }

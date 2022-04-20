@@ -15,6 +15,8 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
+import de.linguatools.disco.CorruptConfigFileException;
+import de.linguatools.disco.WrongWordspaceTypeException;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -38,7 +40,7 @@ public class Generator {
      * TODO: remove method
      * TODO: add multifile generation
      */
-    public void generate() throws IOException {
+    public void generate() throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
         NLPFileReader jsonResult = new NLPFileReader("src/main/resources/nlp_results.json",
                 "src/test/resources/features/vendingMachine.feature");
 //        "src/test/resources/features/BankAccount.feature"
@@ -165,7 +167,8 @@ public class Generator {
                             new NameExpr("Assert"),
                             "assertTrue");
                     String assertCompareVal;
-                    if (info.getParameters().contains(info.getCompareValue())) {//if we compare parameters
+                    if (info.getParameters() != null &&
+                            info.getParameters().contains(info.getCompareValue())) {//if we compare parameters
                         String compareType = step.getParent().getTypeSolver().getParameterType(info.getCompareValue());
                         if (compareType == "String") {
                             assertCompareVal = ".equals(" + info.getCompareValue() + ")";
@@ -290,7 +293,7 @@ public class Generator {
         System.out.println();
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
         new Generator().generate();
     }
 }

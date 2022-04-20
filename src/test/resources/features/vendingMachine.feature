@@ -26,11 +26,22 @@ Feature: Vending Machine
   Scenario Outline: Have Product and user to receive change
     Given there exists a vending machine
     And it has 10 <product> in its inventory
-    When user inserts the <money> dollars
-    And presses the button with the code for the product
+    When the user inserts the <money> dollars
+    And selects the <product>
     And the <product> leaves the machine
-    Then the stock reduces in 1 unit
-    And vending machine gives <change> back
+    Then the inventory stock must be 9 units
+    And the vending machine gives <change> back
+
+    Examples:
+      | product     | money | change |
+      | "chips"     |  2.50 |   0.50 |
+      | "chocolate" |  3.50 |   1.00 |
+      | "cookie"    |  2.00 |   0.25 |
+      | "candy"     |  2.00 |   0.50 |
+      | "juice"     |  5.00 |   1.75 |
+      | "water"     |  3.00 |   1.50 |
+      | "coke"      |  3.00 |   0.75 |
+      | "pepsi"     |  2.25 |   0.00 |
 
     Examples:
       | product     | money | change |
@@ -47,10 +58,9 @@ Feature: Vending Machine
   Scenario Outline: user give less money than the price of the product
     Given there exists a vending machine
     And it has 10 <product> in its inventory
-    When the user insert the <money> dollars
+    When the user insert the <money>
     And presses the button with the code for the product
     Then the vending machine asks for <missing> dollars
-#    "still missing this amount: "
 
     Examples:
       | product     | money |                           missing |

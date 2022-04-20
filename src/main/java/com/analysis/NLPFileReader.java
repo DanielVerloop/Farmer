@@ -104,11 +104,11 @@ public class NLPFileReader {
             Step andStep;
             switch (type) {
                 case "gAnd":
-                    andStep = new GivenStep(
+                    andStep = new AndStep(
                             (String) step.get("description"),
                             getPos(step),
-                            s,
-                            null
+                            getSRL(step),
+                            s
                     );
                     result.add(andStep);
                     break;

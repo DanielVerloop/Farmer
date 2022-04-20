@@ -45,4 +45,10 @@ public class StringFormatter {
         }
         return paramString.substring(0, paramString.length() - 2);
     }
+
+    public String splitMethodName(String name) {
+        String[] split = name.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])");
+        String result = String.join(" ", split);
+        return result.toLowerCase();
+    }
 }

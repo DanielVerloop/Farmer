@@ -53,6 +53,6 @@ public class CosineSimilarity {
     }
 
     public double getResult() {
-        return result;
+        return 1-result;
     }
 }
