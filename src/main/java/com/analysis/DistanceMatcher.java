@@ -91,7 +91,7 @@ public class DistanceMatcher implements Matcher{
         String bestMatchedClass = findBestMatch(matchClass(step.getNouns(), analysis.getMapMethods2Classes()));
 
         String constructorResolver = MatchConstructor(bestMatchedClass, analysis, step);
-
+        System.out.println(constructorResolver);
         if (constructorResolver == null) {//something went wrong, default to no params
             new Rule(Advice.OBJECTI, bestMatchedClass, step.getParameters());
         } else if (constructorResolver.equals("")) {//no param-constructor
@@ -105,14 +105,23 @@ public class DistanceMatcher implements Matcher{
         //Matched class
         String bestMatchedClass = findBestMatch(matchClass(step.getNouns(), analysis.getMapMethods2Classes()));
 
+        //Get the matched parameter variables
         String constructorResolver = MatchConstructor(bestMatchedClass, analysis, step);
-        if (constructorResolver == null) {//something went wrong, default to no params
-            new Rule(Advice.OBJECTI, bestMatchedClass, step.getParameters());
-        } else if (constructorResolver.equals("")) {//no param-constructor
-            new Rule(Advice.OBJECTI, bestMatchedClass, step.getParameters());
+        System.out.println(constructorResolver);
+        if (constructorResolver == null || constructorResolver.equals("")) {//no parameters
+            return new Rule(Advice.OBJECTI, bestMatchedClass, new ArrayList<>());
         }
         // we were able to match parameters with a constructor
-        return new Rule(Advice.OBJECTI, bestMatchedClass, step.getParameters(), constructorResolver);
+        //TODO:add parameters for object instantiation in case of only nouns
+        //fix parameters of constructor
+        List<String> params = new ArrayList<>();
+        if (step.getParameters().size() > 0)
+            params.addAll(step.getParameters());
+        if (step.getNumbers().size() > 0)
+            params.addAll(step.getNumbers());
+
+
+        return new Rule(Advice.OBJECTI, bestMatchedClass, params, constructorResolver);
     }
 
     private Rule matchWhen(WhenStep step, CodeAnalysis analysis, List<Rule> context) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
@@ -339,7 +348,7 @@ public class DistanceMatcher implements Matcher{
             String matchedClass = "";
             for (Map.Entry<String, List<String>> entry : codeAnalysis.entrySet()) {
                 String s = entry.getKey();
-                double dist = this.cosine.distance(s, noun);
+                double dist = this.cosine.distance(s, noun) + this.levenshtein.distance(s, noun);
                 if (dist < smallestDist) {
                     smallestDist = dist;
                     matchedClass = s;
@@ -356,7 +365,7 @@ public class DistanceMatcher implements Matcher{
      * @param bestMatchedClass
      * @param analysis
      * @param step
-     * @return null if no match could be made, "" if we have no parameters in constructor, else constructor parameters
+     * @return null if no match could be made, or if we have no parameters in constructor, else constructor parameter variables
      */
     private String MatchConstructor(String bestMatchedClass, CodeAnalysis analysis, Step step) {
         //Get list of constructors
@@ -367,7 +376,7 @@ public class DistanceMatcher implements Matcher{
             if (constructors.get(i).size() == step.getParameters().size()) {
                 //case no parameters
                 if (constructors.get(i).size() == 0) {
-                    return "";
+                    return null;
                 }
                 //case 1 parameter
                 if (constructors.get(i).size() == 1) {
@@ -387,13 +396,14 @@ public class DistanceMatcher implements Matcher{
                     }
                 }
                 if (constructors.get(i).size() > 2) {//multiple parameters
-                    //TODO: test
-                    String result = "";
-                    for (Parameter p : constructors.get(i)) {
-                        result += MatchConstructor(p.getType().toString(), analysis, step);
-                    }
-                    System.out.println(result);
-                    return result;
+                    //TODO: implement
+                    return null;
+//                    String result = "";
+//                    for (Parameter p : constructors.get(i)) {
+//                        result += MatchConstructor(p.getType().toString(), analysis, step);
+//                    }
+//                    System.out.println(result);
+//                    return result;
                 }
             } else {
                 //TODO: match on number values if no params present!

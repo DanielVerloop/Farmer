@@ -43,26 +43,27 @@ public class Generator {
     public void generate() throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
         NLPFileReader jsonResult = new NLPFileReader("src/main/resources/nlp_results.json",
                 "src/test/resources/features/vendingMachine.feature");
-//        "src/test/resources/features/BankAccount.feature"
+//        "src/test/resources/features/BankAccount.feature");
         File targetDir = new File("src/main/java/com/vendingMachine");
 //        File targetDir = new File("src/main/java/com/bank");
         this.cu = new CompilationUnit();
         this.className = "vmStepDefs";
 //        this.className = "bankStepDefs";
-        File file = new File("src/main/resources" + "/" + className + ".java");
-        file.createNewFile();
 
         //Get setMatchResult info
         List<Scenario> matchResult = new DistanceMatcher(
                 targetDir, jsonResult.getScenarios("vendingMachine.feature")).getMatch();
-//        List<Scenario> matchResult = new LevenshteinMatcher(
+//        List<Scenario> matchResult = new DistanceMatcher(
 //                targetDir, jsonResult.getScenarios("transactions.feature")).getMatch();
+
         //Create skeleton template
         this.createTemplate(className);
         //fill method bodies
         this.addImplementation(matchResult);
 
         //output to file
+        File file = new File("src/main/resources" + "/" + className + ".java");
+        file.createNewFile();
         FileWriter fw = new FileWriter(file);
         fw.write(this.getCU().toString());
         fw.close();
@@ -261,7 +262,6 @@ public class Generator {
      */
     private void createTemplate(String className) {
         CompilationUnit cu = getCU();//create empty ast object
-        List<String> scenarioFunctions = new ArrayList<>();
         //Add standard template of gherkin
         cu.addClass(className);
         cu.addImport("io.cucumber.java.en.Given");
@@ -270,16 +270,6 @@ public class Generator {
         cu.addImport("io.cucumber.java.en.And");
         cu.addImport("org.junit.Assert");
 
-//        //Add function for each description
-//        for (String description : descriptions) {
-//            String[] annotation = description.split("\\s", 2);
-//            String name = new StringFormatter().camelCase(annotation[1]);
-//            cu.getClassByName(className).get().addMethod(name, Modifier.Keyword.PUBLIC);
-//            cu.getClassByName(className).get()
-//                    .getMethodsByName(name).get(0)
-//                    .addSingleMemberAnnotation(annotation[0], new StringLiteralExpr(annotation[1]));
-//            scenarioFunctions.add(name);
-//        }
         this.setCU(cu);
     }
 
