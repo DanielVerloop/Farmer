@@ -4,6 +4,9 @@ import com.analysis.util.Advice;
 
 import java.util.List;
 
+/**
+ * Rule record class representing a match-result
+ */
 public class Rule {
     private Advice advice;//Used to distinguish
     private String className;

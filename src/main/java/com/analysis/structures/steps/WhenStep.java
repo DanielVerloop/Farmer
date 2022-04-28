@@ -9,13 +9,13 @@ import java.util.Set;
 
 public class WhenStep extends Step {
     private Set<String> verbs;
-    private Map<String, String> advice;
+    private Map<String, String> srlLabels;
 
     public WhenStep(String description, Map<String, List<String>> posResult, Map<String,
             List<String>> srlSentence, Scenario parent, List<Step> andSteps) {
         super(description, posResult, parent, andSteps);
         this.verbs = srlSentence.keySet();
-        this.advice = new SRLAnalyzer(srlSentence).generateAdvice();
+        this.srlLabels = new SRLAnalyzer(srlSentence).generateAdvice();
     }
 
     public Set<String> getVerbs() {
@@ -23,11 +23,11 @@ public class WhenStep extends Step {
     }
 
     public String getAdvice(String key) {
-        return advice.get(key);
+        return srlLabels.get(key);
     }
 
-    public Map<String, String> getAdvice() {
-        return advice;
+    public Map<String, String> getSrlLabels() {
+        return srlLabels;
     }
 
     @Override
@@ -38,7 +38,7 @@ public class WhenStep extends Step {
                 ", numbers=" + getNumbers() +
                 ", parameters=" + getParameters() +
                 ", verbs=" + verbs +
-                ", advice=" + advice +
+                ", advice=" + srlLabels +
                 '}';
     }
 }

@@ -133,7 +133,7 @@ public class DistanceMatcher implements Matcher{
         //get the methods of the most common class
         List<String> methods = analysis.getMapMethods2Classes().get(matchedClass);
         //find the closest method
-        String matchedMethod = matchMethod(step.getAdvice(), step.getVerbs(), step, analysis, matchedClass);
+        String matchedMethod = matchMethod(step.getSrlLabels(), step.getVerbs(), step, analysis, matchedClass);
 
         //Add parameters
         //TODO: check ordering of parameters!
@@ -158,24 +158,24 @@ public class DistanceMatcher implements Matcher{
         List<String> parameters = new ArrayList<>();
         String matchedClass = context.get(0).getClassName();
 
-        if (step.getAdvice() == null) {
+        if (step.getSrlLabels() == null) {
             return new Rule(Advice.Pass, context.get(0).getClassName(), "", compareValue, assertStmt);
         }
         //See if we can find a matching class field or method (if field does not exist)
         String fieldName = matchVar(analysis, step.getNouns());
-        String methodName = matchGet(step.getAdvice(), step.getVerbs(), step, analysis, matchedClass);
+        String methodName = matchGet(step.getSrlLabels(), step.getVerbs(), step, analysis, matchedClass);
 
         if (step.getNumbers().size() == 1) {
             //highly likely a number parameter
             //if arg2 refers to the number then this is highly likely used in assert statement
-            if (step.getAdvice().get("ARG2") != null) {
-                if (step.getAdvice().get("ARG2").contains(step.getNumbers().get(0))) {
+            if (step.getSrlLabels().get("ARG2") != null) {
+                if (step.getSrlLabels().get("ARG2").contains(step.getNumbers().get(0))) {
                     compareValue = step.getNumbers().get(0);
                 }
                 //Get the type of assert statement
-                if (step.getAdvice().get("ARG2").contains("higher")) assertStmt = "higher";
-                else if (step.getAdvice().get("ARG2").contains("lower")) assertStmt = "lower";
-                else if (step.getAdvice().get("V").equals("be") || step.getAdvice().get("ARG2").contains(" equal")) {
+                if (step.getSrlLabels().get("ARG2").contains("higher")) assertStmt = "higher";
+                else if (step.getSrlLabels().get("ARG2").contains("lower")) assertStmt = "lower";
+                else if (step.getSrlLabels().get("V").equals("be") || step.getSrlLabels().get("ARG2").contains(" equal")) {
                     assertStmt = "equals";
                 }
             } else {
@@ -205,7 +205,7 @@ public class DistanceMatcher implements Matcher{
                     }
                 }
                 //TODO: check type of parameter for comparator
-                methodName = matchGet(step.getAdvice(), step.getVerbs(), step, analysis, matchedClass);
+                methodName = matchGet(step.getSrlLabels(), step.getVerbs(), step, analysis, matchedClass);
                 if (Arrays.asList("double", "int").contains(step.getParent().getTypeSolver().getParameterType(compareValue))) {
                     assertStmt = "equals";
                 } else {//string comparison
@@ -219,6 +219,15 @@ public class DistanceMatcher implements Matcher{
         return new Rule(Advice.ASSERT, context.get(0).getClassName(), methodName, parameters, compareValue, assertStmt);
     }
 
+    /**
+     * Match a method in the context of assert statement
+     * @param advice
+     * @param verbs
+     * @param step
+     * @param analysis
+     * @param className
+     * @return matched method name
+     */
     private String matchGet(Map<String, String> advice, Set<String> verbs, Step step, CodeAnalysis analysis, String className) throws WrongWordspaceTypeException, IOException {
         HashMap<String, Double> distances = new HashMap<>(); //{"cls+method" = dist}
         Set<String> methods = new HashSet<>();
@@ -275,7 +284,7 @@ public class DistanceMatcher implements Matcher{
                 double smallestDist = Integer.MAX_VALUE;
                 String matchedVar = "";
                 for (String var: vars) {
-                    double dist = this.cosine.distance(var, noun);
+                    double dist = this.levenshtein.distance(var, noun);
                     if (dist < smallestDist) {
                         smallestDist = dist;
                         matchedVar = var;

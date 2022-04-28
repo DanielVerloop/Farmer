@@ -43,7 +43,6 @@ public class VendingMachine {
 
     public boolean checkForChange() {
         return (amount > product.getPrice());
-
     }
 
     public Double getChange() {
@@ -61,6 +60,11 @@ public class VendingMachine {
         } else {
             return null;
         }
+    }
+
+    public void addProductToInventory(Product product, int quantity) {
+        InventoryItem item = new InventoryItem(product, quantity);
+        this.inventory.add(item);
     }
 
     public void removeInventory(String product) {
