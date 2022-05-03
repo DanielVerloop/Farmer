@@ -62,8 +62,7 @@ public class VendingMachine {
         }
     }
 
-    public void addProductToInventory(Product product, int quantity) {
-        InventoryItem item = new InventoryItem(product, quantity);
+    public void addItemToInventory(InventoryItem item) {
         this.inventory.add(item);
     }
 

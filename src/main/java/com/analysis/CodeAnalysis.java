@@ -1,9 +1,11 @@
 package com.analysis;
 
+import com.analysis.structures.constructor.ConstructorPair;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.AccessSpecifier;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 
 import java.io.File;
@@ -134,7 +136,13 @@ public class CodeAnalysis {
         return result;
     }
 
-  public List<String> getMethodsWithReturnType(String className, String type) {
+    /**
+     * Get all methods that are not of type void
+     * @param className
+     * @param type
+     * @return
+     */
+    public List<String> getMethodsWithReturnType(String className, String type) {
         CompilationUnit cu = className2CU.get(className);
         List<String> result = new ArrayList<>();
 
@@ -180,4 +188,72 @@ public class CodeAnalysis {
         return result;
     }
 
+    /**
+     * Simplifies constructor parameters to native types
+     * @param className
+     * @return a list of all possible combinations of native type parameters
+     */
+    public List<ConstructorPair> constructorParamResolver(String className) {
+        Set<ConstructorPair> result = new HashSet<>();
+
+        for (ConstructorDeclaration constructorDeclaration : className2CU.get(className).getClassByName(className).get().getConstructors()) {
+            if (constructorDeclaration.getParameters().size() == 0) {//handle no param constructors
+                result.add(
+                        new ConstructorPair(constructorDeclaration.getParameters(),
+                                constructorDeclaration.getParameters())
+                );
+            }
+            List<Parameter> parameters = constructorDeclaration.getParameters();
+            for (Parameter parameter : parameters) {
+                List<Parameter> finalParams = new ArrayList<>();//fix for concurrency errors
+                finalParams.addAll(parameters);
+                if (classNames.contains(parameter.getTypeAsString())) {//parameter is of custom class type
+                    int index = finalParams.indexOf(parameter);//index of original parameter
+                    for (ConstructorDeclaration constructorDeclaration1 :
+                            className2CU.get(parameter.getTypeAsString()).getClassByName(parameter.getTypeAsString())
+                                    .get().getConstructors()) {
+                        List<Parameter> parameters2 = constructorDeclaration1.getParameters();
+                        if (parameters2.size() == 0) {//empty constructor
+                            result.add(new ConstructorPair(finalParams, parameters));//add with original type
+                        } else { //a constructor with parameters, add them all to list
+                            finalParams.remove(index);//remove original parameter
+                            finalParams.addAll(index, parameters2);
+                            //prevent doubles
+//                            if(!result.contains(finalParams)) result.add(new ConstructorPair(finalParams, parameters));
+                        }
+                    }
+                } else {//if other type
+                    //set will take care of duplicates
+                    result.add(
+                            new ConstructorPair(constructorDeclaration.getParameters(),
+                                    constructorDeclaration.getParameters())
+                    );
+                }
+            }
+        }
+        List<ConstructorPair> returnList = new ArrayList<>();
+        returnList.addAll(result);
+        return returnList;
+    }
+
+    /**
+     * Checks if list of types match the parameter types of a constructor
+     * @param resolvedConstructor
+     * @param targetTypes
+     * @return
+     */
+    public boolean checkParamTypes(List<Parameter> resolvedConstructor, List<String> targetTypes) {
+        int count = 0;
+        for (int i = 0; i < targetTypes.size(); i++) {
+            for (int j = 0; j < resolvedConstructor.size(); j++) {
+                if (targetTypes.get(i).equals(resolvedConstructor.get(j).getTypeAsString())) {
+                    count++;
+                }
+            }
+        }
+        if (count == targetTypes.size()) {
+            return true;
+        }
+        return false;
+    }
 }

@@ -13,12 +13,12 @@ public class vmStepDefs {
 
     VendingMachine vendingmachine;
 
-    @And("it has 10 {string} in its inventory")
-    public void itHas10ProductInItsInventory(String product) {
-        product = new Product(product);
+    @And("it has {int} {string} in its inventory")
+    public void itHasArg0ProductInItsInventory(int arg0, String product) {
+        inventoryitem = new InventoryItem(new Product(product), arg0);
     }
 
-    Product product;
+    InventoryItem inventoryitem;
 
     @When("inserts the {double} pounds")
     public void insertsTheMoneyPounds(double money) {
@@ -30,24 +30,14 @@ public class vmStepDefs {
         vendingmachine.setProduct(product);
     }
 
-    @Then("the stock reduces in 1 unit")
-    public void theStockReducesIn1Unit() {
+    @Then("the stock reduces in {int} unit")
+    public void theStockReducesInArg0Unit(int arg0) {
         Assert.assertTrue(vendingmachine.getInventoryQtyForThe() == 1);
     }
 
     @And("the {string} leaves the machine")
     public void theProductLeavesTheMachine(String product) {
         Assert.assertTrue(vendingmachine.getAmountMissingMessage());
-    }
-
-    @Given("there exists a vending machine")
-    public void thereExistsAVendingMachine() {
-        vendingmachine = new VendingMachine();
-    }
-
-    @And("it has 10 {string} in its inventory")
-    public void itHas10ProductInItsInventory(String product) {
-        product = new Product(product);
     }
 
     @When("the user inserts the {double} dollars")
@@ -60,29 +50,14 @@ public class vmStepDefs {
         vendingmachine.setProduct(product);
     }
 
-    @And("the {string} leaves the machine")
-    public void theProductLeavesTheMachine(String product) {
-        vendingmachine.setAmount(product);
-    }
-
-    @Then("the inventory stock must be 9 units")
-    public void theInventoryStockMustBe9Units() {
+    @Then("the inventory stock must be {int} units")
+    public void theInventoryStockMustBeArg0Units(int arg0) {
         Assert.assertTrue(vendingmachine.getInventoryQtyForThe() == 9);
     }
 
     @And("the vending machine gives {double} back")
     public void theVendingMachineGivesChangeBack(double change) {
         Assert.assertTrue(vendingmachine.getAmount() == change);
-    }
-
-    @Given("there exists a vending machine")
-    public void thereExistsAVendingMachine() {
-        vendingmachine = new VendingMachine();
-    }
-
-    @And("it has 10 {string} in its inventory")
-    public void itHas10ProductInItsInventory(String product) {
-        product = new Product(product);
     }
 
     @When("the user insert the {double}")

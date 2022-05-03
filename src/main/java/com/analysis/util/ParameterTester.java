@@ -4,9 +4,15 @@ public class ParameterTester {
 
     public ParameterTester() {}
 
-    public static boolean isDouble(String string) {
+    public String returnNumberType(String s) {
+        if (isInteger(s)) return "int";
+        if (isDouble(s)) return "double";
+        return "number";
+    }
+
+    public static boolean isDouble(String s) {
         try {
-            Double.parseDouble(string);
+            Double.parseDouble(s);
         } catch (NumberFormatException e) {
             return false;
         }

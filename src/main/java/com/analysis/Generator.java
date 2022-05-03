@@ -3,6 +3,7 @@ package com.analysis;
 import com.analysis.structures.Rule;
 import com.analysis.structures.Scenario;
 import com.analysis.structures.steps.Step;
+import com.analysis.util.ParameterTester;
 import com.analysis.util.StringFormatter;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
@@ -43,7 +44,7 @@ public class Generator {
     public void generate() throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
         NLPFileReader jsonResult = new NLPFileReader("src/main/resources/nlp_results.json",
                 "src/test/resources/features/vendingMachine.feature");
-//        "src/test/resources/features/BankAccount.feature");
+//        "src/returnNumberType/resources/features/BankAccount.feature");
         File targetDir = new File("src/main/java/com/vendingMachine");
 //        File targetDir = new File("src/main/java/com/bank");
         this.cu = new CompilationUnit();
@@ -75,6 +76,7 @@ public class Generator {
      */
     private void addImplementation(List<Scenario> matchResult) {
         CompilationUnit cu = getCU();
+        ParameterTester parameterTester = new ParameterTester();
 
         ClassOrInterfaceDeclaration declaration = cu.getClassByName(className).get();
         for (Scenario scenario : matchResult) {
@@ -85,8 +87,21 @@ public class Generator {
 
                 // create the step method
                 MethodDeclaration method;
-                if (step.getParameters().size() > 0) {
+                if (step.getNumbers().size() > 0) {
+                    List<String> numbers = step.getNumbers();
+                    for (int i = 0; i < numbers.size(); i++) {
+                        name = name.replace(numbers.get(i), "Arg"+i);
+                    }
                     method = declaration.addMethod(name, Modifier.Keyword.PUBLIC);
+                    for (int i = 0; i < numbers.size(); i++) {
+                        String type = parameterTester.returnNumberType(numbers.get(i));
+                        method.addParameter(type, "arg"+i);
+                        annotation[1] = annotation[1].replace(numbers.get(i), "{"+type+"}");
+                    }
+                } else {
+                    method = declaration.addMethod(name, Modifier.Keyword.PUBLIC);
+                }
+                if (step.getParameters().size() > 0) {
                     for (String param : step.getParameters()) {
                         method.addParameter(step.getParent().getTypeSolver().getParameterType(param), param);
                         String varType = "{"+step.getParent().getTypeSolver().getParameterType(param).toLowerCase()+"}";
@@ -94,10 +109,17 @@ public class Generator {
                     }
                     method.addSingleMemberAnnotation(annotation[0], new StringLiteralExpr(annotation[1]));
                 } else {
-                    method = declaration.addMethod(name, Modifier.Keyword.PUBLIC);
                     method.addSingleMemberAnnotation(annotation[0], new StringLiteralExpr(annotation[1]));
                 }
 
+                //Check if we already created this method based on its name and annotation
+                //If it exists, we remove the method we created
+                if (cu.getClassByName(className).get().getMethodsByName(method.getNameAsString()).size() > 1
+                    && cu.getClassByName(className).get().getMethodsByName(method.getNameAsString())
+                        .get(0).getAnnotation(0).equals(method.getAnnotation(0))) {
+                    cu.getClassByName(className).get().remove(method);
+                    continue;
+                }
 
                 Rule info = step.getMatchResult();
                 BlockStmt block;
@@ -202,6 +224,7 @@ public class Generator {
                     method.setBody(block);
 
                     block.addStatement("pass;");
+                    break;
                 }
 
 

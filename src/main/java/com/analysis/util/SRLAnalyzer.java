@@ -20,7 +20,7 @@ public class SRLAnalyzer {
             return null;
         }
         //TODO implement for all verbs
-        //TODO test if sanitation is needed on values (remove useless words: the, a, an, I, we, etc...)
+        //TODO returnNumberType if sanitation is needed on values (remove useless words: the, a, an, I, we, etc...)
         Map<String, String> advice = new HashMap<>();
         ArrayList<String> labels = getLabels(verbs.iterator().next());
         for (String label : labels) {

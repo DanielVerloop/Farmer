@@ -1,10 +1,12 @@
 package com.analysis;
 
-import com.analysis.structures.Rule;
-import com.analysis.structures.Scenario;
+import com.analysis.structures.*;
+import com.analysis.structures.constructor.Constructor;
+import com.analysis.structures.constructor.ConstructorPair;
 import com.analysis.structures.steps.*;
 import com.analysis.util.Advice;
 import com.analysis.util.ParameterParser;
+import com.analysis.util.ParameterTester;
 import com.analysis.util.StringFormatter;
 import com.analysis.util.distance.DiscoStringSimilarity;
 import com.github.javaparser.ast.body.Parameter;
@@ -12,12 +14,12 @@ import de.linguatools.disco.CorruptConfigFileException;
 import de.linguatools.disco.WrongWordspaceTypeException;
 import info.debatty.java.stringsimilarity.Cosine;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
+import javafx.util.Pair;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Text-to-Code Matcher
@@ -43,40 +45,41 @@ public class DistanceMatcher implements Matcher{
     @Override
     public List<Scenario> match(List<Scenario> scenarios, CodeAnalysis analysis) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
         for (Scenario scenario : scenarios) {
-            List<Rule> context = new ArrayList<>();
+            Context context = new Context();
             List<Step> steps = scenario.getSteps();
             for (Step step : steps) {
                 if (step instanceof GivenStep) {
                     Rule result = matchGiven((GivenStep) step, analysis, context);
                     step.setMatchResult(result);
-                    context.add(result);
+                    context.addMatchingRule(result);
+                    context.setMainClass(result.getClassName());
                     if (step.getAndSteps() != null && step.getAndSteps().size() > 0) {
                         for (Step sp: step.getAndSteps()) {
                             Rule andResult = matchAnd(sp, analysis, context);
                             sp.setMatchResult(andResult);
-                            context.add(result);
+                            context.addMatchingRule(result);
                         }
                     }
                 } else if (step instanceof WhenStep) {
                     Rule result = matchWhen((WhenStep) step, analysis, context);
                     step.setMatchResult(result);
-                    context.add(result);
+                    context.addMatchingRule(result);
                     if (step.getAndSteps() != null && step.getAndSteps().size() > 0) {
                         for (Step sp: step.getAndSteps()) {
                             Rule andResult = matchWhen((WhenStep) sp, analysis, context);
                             sp.setMatchResult(andResult);
-                            context.add(result);
+                            context.addMatchingRule(result);
                         }
                     }
                 } else if (step instanceof ThenStep) {
                     Rule result = matchThen((ThenStep) step, analysis, context);
                     step.setMatchResult(result);
-                    context.add(result);
+                    context.addMatchingRule(result);
                     if (step.getAndSteps() != null && step.getAndSteps().size() > 0) {
                         for (Step sp: step.getAndSteps()) {
                             Rule andResult = matchThen((ThenStep) sp, analysis, context);
                             sp.setMatchResult(andResult);
-                            context.add(result);
+                            context.addMatchingRule(result);
                         }
                     }
                 } else {
@@ -87,27 +90,58 @@ public class DistanceMatcher implements Matcher{
         return scenarios;
     }
 
-    private Rule matchAnd(Step step, CodeAnalysis analysis, List<Rule> context) throws FileNotFoundException {
-        String bestMatchedClass = findBestMatch(matchClass(step.getNouns(), analysis.getMapMethods2Classes()));
+    private Rule matchAnd(Step step, CodeAnalysis analysis, Context context) {
+        //TODO:change n into hyperparam.
+        List<String> bestMatchedClasses =  matchClass(step.getNouns(), analysis,
+                analysis.getMapMethods2Classes().keySet().size()/2);
+        Constructor constructorResolver = matchConstructor(bestMatchedClasses, analysis, step);
+        String bestMatchedClass = constructorResolver.getClassName();
 
-        String constructorResolver = MatchConstructor(bestMatchedClass, analysis, step);
-        System.out.println(constructorResolver);
-        if (constructorResolver == null) {//something went wrong, default to no params
-            new Rule(Advice.OBJECTI, bestMatchedClass, step.getParameters());
-        } else if (constructorResolver.equals("")) {//no param-constructor
-            new Rule(Advice.OBJECTI, bestMatchedClass, step.getParameters());
+        if (constructorResolver.getParameters().isEmpty()) {//no param-constructor
+            return new Rule(Advice.OBJECTI, bestMatchedClass, null);
         }
         // we were able to match parameters with a constructor
-        return new Rule(Advice.OBJECTI, bestMatchedClass, step.getParameters(), constructorResolver);
+        //Resolve mapping to correct parameter types
+        List<String> parameters = new ArrayList<>();
+        for (Iterator<Map.Entry<String, String>> iterator = constructorResolver.getParameters().entrySet().iterator(); iterator.hasNext(); ) {
+            Map.Entry<String, String> entry = iterator.next();
+            String type = entry.getValue();
+            if (analysis.getMapMethods2Classes().keySet().contains(type)) {
+                if (iterator.hasNext()) { //if multiple elements are left
+                    String params = "";
+                    boolean eqType = true;
+                    while (eqType && iterator.hasNext()) {
+                        Map.Entry<String, String> nextEntry = iterator.next();
+                        if (nextEntry.getValue().equals(type)) {
+                            if (!params.equals("")) {
+                                params += ", ";
+                            }
+                            params += nextEntry.getKey();
+                        } else {
+                            if (params.equals("")) {//1 parameter object
+                                parameters.add("new " + type + "("+ entry.getKey() +")");
+                            } else {
+                                parameters.add("new " + type + "("+ params +")");
+                            }
+                            eqType = false;
+                            parameters.add(nextEntry.getKey());
+                        }
+                    }
+                } else {//if object only contains last element
+                    parameters.add("new " + type + "("+ entry.getKey() +")");
+                }
+            }
+        }
+
+        return new Rule(Advice.OBJECTI, bestMatchedClass, parameters, "paramsUsed");
     }
 
-    private Rule matchGiven(Step step, CodeAnalysis analysis, List<Rule> context) throws FileNotFoundException {
+    private Rule matchGiven(Step step, CodeAnalysis analysis, Context context) throws FileNotFoundException {
         //Matched class
-        String bestMatchedClass = findBestMatch(matchClass(step.getNouns(), analysis.getMapMethods2Classes()));
+        String bestMatchedClass = matchClass(step.getNouns(), analysis, 1).get(0);
 
         //Get the matched parameter variables
-        String constructorResolver = MatchConstructor(bestMatchedClass, analysis, step);
-        System.out.println(constructorResolver);
+        String constructorResolver = matchConstructor(bestMatchedClass, analysis, step);
         if (constructorResolver == null || constructorResolver.equals("")) {//no parameters
             return new Rule(Advice.OBJECTI, bestMatchedClass, new ArrayList<>());
         }
@@ -124,12 +158,12 @@ public class DistanceMatcher implements Matcher{
         return new Rule(Advice.OBJECTI, bestMatchedClass, params, constructorResolver);
     }
 
-    private Rule matchWhen(WhenStep step, CodeAnalysis analysis, List<Rule> context) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
+    private Rule matchWhen(WhenStep step, CodeAnalysis analysis, Context context) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
         //TODO: for each verb analyse using srl
         // use ARG0, ARG1 and ARG2 to see what method is supposed to do
         // then use this to suggest method calls
         //Get class from given step
-        String matchedClass = context.get(0).getClassName();//get class from given-step
+        String matchedClass = context.getMainClass();//get class from given-step
         //get the methods of the most common class
         List<String> methods = analysis.getMapMethods2Classes().get(matchedClass);
         //find the closest method
@@ -152,14 +186,14 @@ public class DistanceMatcher implements Matcher{
         return new Rule(Advice.METHODI,matchedClass, param, matchedMethod);
     }
 
-    private Rule matchThen(ThenStep step, CodeAnalysis analysis, List<Rule> context) throws WrongWordspaceTypeException, IOException, CorruptConfigFileException {
+    private Rule matchThen(ThenStep step, CodeAnalysis analysis, Context context) throws WrongWordspaceTypeException, IOException {
         String compareValue = "";
         String assertStmt = "equals";
         List<String> parameters = new ArrayList<>();
-        String matchedClass = context.get(0).getClassName();
+        String matchedClass = context.getMainClass();
 
         if (step.getSrlLabels() == null) {
-            return new Rule(Advice.Pass, context.get(0).getClassName(), "", compareValue, assertStmt);
+            return new Rule(Advice.Pass, context.getMainClass(), "", compareValue, assertStmt);
         }
         //See if we can find a matching class field or method (if field does not exist)
         String fieldName = matchVar(analysis, step.getNouns());
@@ -214,9 +248,9 @@ public class DistanceMatcher implements Matcher{
             }
         }
         if (fieldName != null && fieldName != "") {
-            return new Rule(Advice.ASSERT, context.get(0).getClassName(), fieldName, compareValue, assertStmt);
+            return new Rule(Advice.ASSERT, context.getMainClass(), fieldName, compareValue, assertStmt);
         }
-        return new Rule(Advice.ASSERT, context.get(0).getClassName(), methodName, parameters, compareValue, assertStmt);
+        return new Rule(Advice.ASSERT, context.getMainClass(), methodName, parameters, compareValue, assertStmt);
     }
 
     /**
@@ -278,7 +312,7 @@ public class DistanceMatcher implements Matcher{
         HashMap<String, List<String>> classToMethods = codeAnalysis.getMapMethods2Classes();
 
         //first look if we can setMatchResult a class variable
-        //TODO: test on bigger target classes
+        //TODO: returnNumberType on bigger target classes
         classVariables.forEach((s, vars) -> {
             for (String noun : nouns) {
                 double smallestDist = Integer.MAX_VALUE;
@@ -297,8 +331,8 @@ public class DistanceMatcher implements Matcher{
                 .min(Comparator.comparingDouble(Map.Entry::getValue)).get().getKey();
     }
 
-    //TODO implement mathcer that uses all available numbers + params + advice + verbs + nouns
-    private String matchMethod(Map<String, String> advice, Set<String> verbs, Step step, CodeAnalysis analysis, String matchedClass) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
+    //TODO implement matcher that uses all available numbers + params + advice + verbs + nouns
+    private String matchMethod(Map<String, String> advice, Set<String> verbs, Step step, CodeAnalysis analysis, String matchedClass) throws IOException, WrongWordspaceTypeException {
         Map<String, Double> distances = new HashMap<>();
         List<String> methods = analysis.getMapMethods2Classes().get(matchedClass);
 
@@ -348,35 +382,106 @@ public class DistanceMatcher implements Matcher{
      * Matches a class to a step using only nouns
      * @param nouns
      * @param codeAnalysis
-     * @return class name
+     * @param n
+     * @return n best classname matches
      */
-    private HashMap<String, String> matchClass(List<String> nouns, HashMap<String, List<String>> codeAnalysis) {
-        HashMap<String, String> bestMatchedClass = new HashMap<>(); // {word=[suggested class]}
+    private List<String> matchClass(List<String> nouns, CodeAnalysis codeAnalysis, int n) {
+        HashMap<String, Double> similarity = new HashMap<>(); // {word=[suggested class]}
         for (String noun : nouns) {
             double smallestDist = Integer.MAX_VALUE;
             String matchedClass = "";
-            for (Map.Entry<String, List<String>> entry : codeAnalysis.entrySet()) {
-                String s = entry.getKey();
-                double dist = this.cosine.distance(s, noun) + this.levenshtein.distance(s, noun);
-                if (dist < smallestDist) {
-                    smallestDist = dist;
-                    matchedClass = s;
+            for (String className : codeAnalysis.getMapMethods2Classes().keySet()) {
+                double dist = this.cosine.distance(className, noun) +
+                        this.levenshtein.distance(className, noun);
+                similarity.merge(className, dist, Double::sum);
+            }
+
+        }
+        HashMap<String, Double> sortedOnSim = sortByValue(similarity);
+        List<String> result = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            result.add(sortedOnSim.keySet().toArray()[i].toString());
+        }
+        return result;
+    }
+
+    private Constructor matchConstructor(List<String> bestMatchedClasses, CodeAnalysis analysis, Step step) {
+        //first check if we have parameters to match
+        if (step.getNumbers().size() == 0 && step.getParameters().size() == 0) {
+            return new Constructor(bestMatchedClasses.get(0), new HashMap<>());
+        }
+
+        //list of parameter names in same ordering as types
+        List<String> parameterNames = new ArrayList<>();
+        //list of types we have to match
+        List<String> targetTypes = new ArrayList<>();
+        for (String param : step.getParameters()) { //use the ordering to remember names
+            targetTypes.add(parameterParser.getParameterType(param));
+        }
+        parameterNames.addAll(step.getParameters());
+        ParameterTester tester = new ParameterTester();
+        List<String> numbers = step.getNumbers();
+        for (int i = 0; i < numbers.size(); i++) {
+            String number = numbers.get(i);//care for floats
+            String type = tester.returnNumberType(number);
+            if (Arrays.asList("double", "int").contains(type)) {
+                targetTypes.add(type);
+                parameterNames.add("arg" + i);
+            }
+        }
+
+        //match the constructor
+        for (String className : bestMatchedClasses ) {
+            for (ConstructorPair resolvedConstructor : analysis.constructorParamResolver(className)) {
+                List<Parameter> baseTypeConstructor = resolvedConstructor.getBaseParams();
+                if (analysis.checkParamTypes(baseTypeConstructor, targetTypes) &&
+                    targetTypes.size() == baseTypeConstructor.size()) {//correct param types
+                    String[] parameters = new String[targetTypes.size()];
+
+                    //loop over all possible combination and match most likely param
+                    for (int i = 0; i < targetTypes.size(); i++) {
+                        double dist = Double.MAX_VALUE;
+                        for (int j = 0; j < baseTypeConstructor.size(); j++) {
+                            if (baseTypeConstructor.get(j).getTypeAsString().equals(targetTypes.get(i))) {
+                                double stringDist = this.levenshtein.distance(
+                                        baseTypeConstructor.get(j).getNameAsString(), parameterNames.get(i));
+                                if (stringDist < dist) {
+                                    parameters[j] = parameterNames.get(i);
+                                    dist = stringDist;
+                                }
+                            }
+                        }
+                    }
+                    //TODO:test if code below behaves correctly with more complex cases
+                    int original = 0;
+                    HashMap<String, String> params = new HashMap<>();
+                    for (int i = 0; i < resolvedConstructor.getOriginalParams().size(); i++) {
+                        for (int j = i; j < resolvedConstructor.getBaseParams().size(); j++) {
+                            if (resolvedConstructor.getBaseParams().get(i).equals(resolvedConstructor.getOriginalParams().get(j))) {
+                                for (int k = original; k < j; k++) {
+                                    params.put(parameters[k], resolvedConstructor.getOriginalParams().get(original).getTypeAsString());
+                                }
+                                params.put(parameterNames.get(i), resolvedConstructor.getOriginalParams().get(i).getTypeAsString());
+                                original = i;
+                            }
+                        }
+                    }
+                    return new Constructor(className, params);
                 }
             }
-            bestMatchedClass.put(noun, matchedClass);
         }
-        return bestMatchedClass;
+        return new Constructor(bestMatchedClasses.get(0), new HashMap<>());
     }
 
     /**
      * Matches which constructor of a class is used for object instantiation
-     * TODO: test if method works as intended
+     * TODO: returnNumberType if method works as intended
      * @param bestMatchedClass
      * @param analysis
      * @param step
      * @return null if no match could be made, or if we have no parameters in constructor, else constructor parameter variables
      */
-    private String MatchConstructor(String bestMatchedClass, CodeAnalysis analysis, Step step) {
+    private String matchConstructor(String bestMatchedClass, CodeAnalysis analysis, Step step) {
         //Get list of constructors
         List<String> paramParserResult = new ArrayList<>();
         List<List<Parameter>> constructors = analysis.getConstructors(bestMatchedClass);
@@ -400,7 +505,7 @@ public class DistanceMatcher implements Matcher{
                             }
                         } else { //find constructor of class object and make recursive call
                             String objectName = constructors.get(i).get(0).getType().getChildNodes().get(1).toString();
-                            System.out.println(MatchConstructor(objectName, analysis, step));
+                            System.out.println(matchConstructor(objectName, analysis, step));
                         }
                     }
                 }
@@ -425,19 +530,27 @@ public class DistanceMatcher implements Matcher{
         return null;
     }
 
-    private String findBestMatch(HashMap<String, String> bestMatchedClass) {
-        //if no parameters match only on nouns
-        Map<String, Long> counter = bestMatchedClass
-                .values()
-                .stream()
-                .collect(Collectors.groupingBy(s -> s, Collectors.counting()));
+    //from geeks4geeks sorting a hashmap on values
+    private static HashMap<String, Double> sortByValue(HashMap<String, Double> hm)  {
+        // Create a list from elements of HashMap
+        List<Map.Entry<String, Double> > list =
+                new LinkedList<>(hm.entrySet());
 
+        // Sort the list
+        Collections.sort(list, new Comparator<Map.Entry<String, Double> >() {
+            public int compare(Map.Entry<String, Double> o1,
+                               Map.Entry<String, Double> o2)
+            {
+                return (o1.getValue()).compareTo(o2.getValue());
+            }
+        });
 
-        String bestMatch = counter.entrySet().stream()
-                .max((entry1, entry2) -> entry1.getValue() > entry2.getValue() ? 1 : -1)
-                .get()
-                .getKey();
-        return bestMatch;
+        // put data from sorted list to hashmap
+        HashMap<String, Double> temp = new LinkedHashMap<>();
+        for (Map.Entry<String, Double> aa : list) {
+            temp.put(aa.getKey(), aa.getValue());
+        }
+        return temp;
     }
 
     public static void main(String[] args) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
