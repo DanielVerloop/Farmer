@@ -1,6 +1,8 @@
 package com.analysis;
 
-import com.analysis.structures.*;
+import com.analysis.structures.Context;
+import com.analysis.structures.Rule;
+import com.analysis.structures.Scenario;
 import com.analysis.structures.constructor.Constructor;
 import com.analysis.structures.constructor.ConstructorPair;
 import com.analysis.structures.steps.*;
@@ -16,7 +18,6 @@ import info.debatty.java.stringsimilarity.Cosine;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
@@ -25,11 +26,11 @@ import java.util.*;
  * This class uses String distance as base for matching text to code
  */
 public class DistanceMatcher implements Matcher{
-    private DiscoStringSimilarity model = new DiscoStringSimilarity();
-    private Cosine cosine = new Cosine();//All other text-code matching
-    private NormalizedLevenshtein levenshtein = new NormalizedLevenshtein();//Used for class matching
-    private ParameterParser parameterParser = new ParameterParser(new File("src/test/resources/features/vendingMachine.feature"));//TODO: move instantiation to constructor!
-    private List<Scenario> match;
+    private final DiscoStringSimilarity model = new DiscoStringSimilarity();
+    private final Cosine cosine = new Cosine();//All other text-code matching
+    private final NormalizedLevenshtein levenshtein = new NormalizedLevenshtein();//Used for class matching
+    private final ParameterParser parameterParser = new ParameterParser(new File("src/test/resources/features/vendingMachine.feature"));//TODO: move instantiation to constructor!
+    private final List<Scenario> match;
 
     @Override
     public List<Scenario> getMatch() {
@@ -42,19 +43,19 @@ public class DistanceMatcher implements Matcher{
     }
 
     @Override
-    public List<Scenario> match(List<Scenario> scenarios, CodeAnalysis analysis) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
+    public List<Scenario> match(List<Scenario> scenarios, CodeAnalysis analysis) throws IOException, WrongWordspaceTypeException {
         for (Scenario scenario : scenarios) {
             Context context = new Context();
             List<Step> steps = scenario.getSteps();
             for (Step step : steps) {
                 if (step instanceof GivenStep) {
-                    List<Rule> result = matchGiven((GivenStep) step, analysis, context);
+                    List<Rule> result = matchGiven(step, analysis, context);
                     step.setMatchResult(result);
                     context.addMatchingRule(result);
                     context.setMainClass(result.get(0).getClassName());
                     if (step.getAndSteps() != null && step.getAndSteps().size() > 0) {
                         for (Step sp: step.getAndSteps()) {
-                            List<Rule> andResult = matchAnd(sp, analysis, context);
+                            List<Rule> andResult = matchAnd((AndStep) sp, analysis, context);
                             sp.setMatchResult(andResult);
                             context.addMatchingRule(result);
                         }
@@ -89,7 +90,7 @@ public class DistanceMatcher implements Matcher{
         return scenarios;
     }
 
-    private List<Rule> matchAnd(Step step, CodeAnalysis analysis, Context context) {
+    private List<Rule> matchAnd(AndStep step, CodeAnalysis analysis, Context context) throws WrongWordspaceTypeException, IOException {
         List<Rule> matchResult =new ArrayList<>();
         List<String> bestMatchedClasses =  matchClass(step.getNouns(), analysis,
                 analysis.getMapMethods2Classes().keySet().size()/2);
@@ -98,9 +99,21 @@ public class DistanceMatcher implements Matcher{
 
         //check if we need to use method calls or object instantiations to couple the and step to given step.
         if (context.getMainClass().equals(bestMatchedClass)) {//method calls only
+            String matchedMethod = matchMethod(step.getSrlLabels(), step.getVerbs(), step, analysis, bestMatchedClass);
+            List<String> param = new ArrayList<>();
+            if (step.getParameters().size() > 0){
+                param.addAll(step.getParameters());
+            }
+            //TODO:find more organized way of transforming numbers to parameters
+            if (step.getNumbers().size() > 0) { // numbers are present
+                for (int i = 0; i < step.getNumbers().size(); i++) {
+                    param.add("arg"+i);
+                }
+            }
 
+            return Collections.singletonList(new Rule(Advice.METHODI, bestMatchedClass, param, matchedMethod));
         }
-
+        //for ordering of code add class instantiation first
         if (constructorResolver.getParameters().isEmpty()) {//no param-constructor
             matchResult.add(new Rule(Advice.OBJECTI, bestMatchedClass, null));
         } else {
@@ -109,11 +122,17 @@ public class DistanceMatcher implements Matcher{
             List<String> parameters = getParams(analysis, constructorResolver);
             matchResult.add(new Rule(Advice.OBJECTI, bestMatchedClass, parameters, "paramsUsed"));
         }
-
+        //find way to couple the two classes
+        String couplingMethod = matchCouplingMethod(step.getSrlLabels(), step.getVerbs(), step, analysis,
+                context.getMainClass(), bestMatchedClass);
+        if (!(couplingMethod == null)) {//if we found a method
+            matchResult.add(new Rule(Advice.METHODI, context.getMainClass(),
+                    Collections.singletonList(bestMatchedClass.toLowerCase()), couplingMethod));
+        }
         return matchResult;
     }
 
-    private List<Rule> matchGiven(Step step, CodeAnalysis analysis, Context context) throws FileNotFoundException {
+    private List<Rule> matchGiven(Step step, CodeAnalysis analysis, Context context) {
         //Matched class
         List<String> bestMatchedClasses =  matchClass(step.getNouns(), analysis,
                 analysis.getMapMethods2Classes().keySet().size()/2);
@@ -131,7 +150,7 @@ public class DistanceMatcher implements Matcher{
         return Arrays.asList(new Rule(Advice.OBJECTI, bestMatchedClass, parameters, "paramsUsed"));
     }
 
-    private List<Rule> matchWhen(WhenStep step, CodeAnalysis analysis, Context context) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
+    private List<Rule> matchWhen(WhenStep step, CodeAnalysis analysis, Context context) throws IOException, WrongWordspaceTypeException {
         //TODO: for each verb analyse using srl
         // use ARG0, ARG1 and ARG2 to see what method is supposed to do
         // then use this to suggest method calls
@@ -305,7 +324,52 @@ public class DistanceMatcher implements Matcher{
                 .min(Comparator.comparingDouble(Map.Entry::getValue)).get().getKey();
     }
 
-    //TODO implement matcher that uses all available numbers + params + advice + verbs + nouns
+    /**
+     * Used to find a method that uses a second class as parameter
+     * @param srlLabels
+     * @param verbs
+     * @param step
+     * @param analysis
+     * @param matchedClass
+     * @param newClass
+     * @return
+     */
+    private String matchCouplingMethod(Map<String, String> srlLabels, Set<String> verbs, AndStep step, CodeAnalysis analysis, String matchedClass, String newClass) throws WrongWordspaceTypeException, IOException {
+        Map<String, Double> distances = new HashMap<>();
+        List<String> methods = analysis.getMethodsWithParamtype(matchedClass, newClass);
+        if (methods.size() == 0) {
+            return null;
+        }
+        if (methods.size() == 1) {
+            return methods.get(0);
+        }
+        //do a srl/verb matching
+        for (String verb : verbs) {
+            String verbString = srlLabels.get("V") + srlLabels.get("ARG1");
+            for (String method : methods) {
+                String splitMethodName = new StringFormatter().splitMethodName(method);
+
+                //add levenshtein similarity
+                double dist = this.levenshtein.distance(verbString, splitMethodName);
+                if (dist >= 0 && dist <= 1) {
+                    distances.merge(method, dist, Double::sum);
+                }
+                //add cosine similarity
+                dist = this.cosine.distance(verbString, splitMethodName);
+                if (dist >= 0 && dist <= 1) {
+                    distances.merge(method, dist, Double::sum);
+                }
+                //add second order similarity
+                dist = this.model.distance(verbString, splitMethodName);
+                if (dist >= 0 && dist <= 1) {
+                    distances.merge(method, dist, Double::sum);
+                }
+            }
+        }
+        return distances.entrySet().stream()
+                .min(Comparator.comparingDouble(Map.Entry::getValue)).get().getKey();
+    }
+
     private String matchMethod(Map<String, String> advice, Set<String> verbs, Step step, CodeAnalysis analysis, String matchedClass) throws IOException, WrongWordspaceTypeException {
         Map<String, Double> distances = new HashMap<>();
         List<String> methods = analysis.getMapMethods2Classes().get(matchedClass);
@@ -461,7 +525,7 @@ public class DistanceMatcher implements Matcher{
         for (Iterator<Map.Entry<String, String>> iterator = constructorResolver.getParameters().entrySet().iterator(); iterator.hasNext(); ) {
             Map.Entry<String, String> entry = iterator.next();
             String type = entry.getValue();
-            if (analysis.getMapMethods2Classes().keySet().contains(type)) {
+            if (analysis.getMapMethods2Classes().containsKey(type)) {
                 if (iterator.hasNext()) { //if multiple elements are left
                     String params = "";
                     boolean eqType = true;

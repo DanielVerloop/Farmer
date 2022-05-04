@@ -43,19 +43,19 @@ public class Generator {
      */
     public void generate() throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
         NLPFileReader jsonResult = new NLPFileReader("src/main/resources/nlp_results.json",
-                "src/test/resources/features/vendingMachine.feature");
-//        "src/test/resources/features/BankAccount.feature");
-        File targetDir = new File("src/main/java/com/vendingMachine");
-//        File targetDir = new File("src/main/java/com/bank");
+//                "src/test/resources/features/vendingMachine.feature");
+        "src/test/resources/features/BankAccount.feature");
+//        File targetDir = new File("src/main/java/com/vendingMachine");
+        File targetDir = new File("src/main/java/com/bank");
         this.cu = new CompilationUnit();
-        this.className = "vmStepDefs";
-//        this.className = "bankStepDefs";
+//        this.className = "vmStepDefs";
+        this.className = "bankStepDefs";
 
         //Get setMatchResult info
-        List<Scenario> matchResult = new DistanceMatcher(
-                targetDir, jsonResult.getScenarios("vendingMachine.feature")).getMatch();
 //        List<Scenario> matchResult = new DistanceMatcher(
-//                targetDir, jsonResult.getScenarios("transactions.feature")).getMatch();
+//                targetDir, jsonResult.getScenarios("vendingMachine.feature")).getMatch();
+        List<Scenario> matchResult = new DistanceMatcher(
+                targetDir, jsonResult.getScenarios("transactions.feature")).getMatch();
 
         //Create skeleton template
         this.createTemplate(className);
@@ -122,16 +122,15 @@ public class Generator {
                 }
 
                 List<Rule> codeRules = step.getMatchResult();
-                BlockStmt block;
+                //code block variable and add it to the method
+                BlockStmt block = new BlockStmt();
+                method.setBody(block);
                 for (Rule code : codeRules) {
                     switch (code.getAdvice()) { //switch on first parameter
                         case OBJECTI:
                             String objectName = code.getClassName();
                             String varName = new StringFormatter().camelCase(objectName);
                             String params = new StringFormatter().parseParameters(code.getParameters());
-                            //code block variable and add it to the method
-                            block = new BlockStmt();
-                            method.setBody(block);
 
                             //add code to code block
                             ExpressionStmt stmt = new ExpressionStmt();
@@ -164,10 +163,6 @@ public class Generator {
                         case METHODI:
                             String var = new StringFormatter().camelCase(code.getClassName());
 
-                            //code block variable and add it to the method
-                            block = new BlockStmt();
-                            method.setBody(block);
-
                             //add method call to block-statement
                             MethodCallExpr methodCallExpr = new MethodCallExpr(
                                     new NameExpr(var),
@@ -181,9 +176,6 @@ public class Generator {
                             block.addStatement(methodCallExpr);
                             break;
                         case ASSERT:
-                            //code block variable and add it to the method
-                            block = new BlockStmt();
-                            method.setBody(block);
                             var = new StringFormatter().camelCase(code.getClassName());
 
                             //add assert call to block-statement

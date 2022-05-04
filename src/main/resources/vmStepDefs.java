@@ -16,6 +16,7 @@ public class vmStepDefs {
     @And("it has {int} {string} in its inventory")
     public void itHasArg0ProductInItsInventory(int arg0, String product) {
         inventoryitem = new InventoryItem(new Product(product), arg0);
+        vendingmachine.addItemToInventory(inventoryitem);
     }
 
     InventoryItem inventoryitem;

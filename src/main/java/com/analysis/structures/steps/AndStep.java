@@ -12,9 +12,22 @@ import java.util.Set;
  * Extends GivenStep
  */
 public class AndStep extends GivenStep {
-    private Step linkedStep;// step to keep track of (Given,When, Then)
     private Set<String> verbs;
     private Map<String, String> advice;//might be null
+    private Map<String, String> srlLabels;
+
+    public AndStep(String description, Map<String, List<String>> posResult, Map<String,
+            List<String>> srlSentence, Scenario parent) {
+        super(description, posResult, parent, null);
+        this.verbs = srlSentence.keySet();
+        this.advice = new SRLAnalyzer(srlSentence).generateAdvice();
+        this.srlLabels = new SRLAnalyzer(srlSentence).generateAdvice();
+
+    }
+
+    public Map<String, String> getSrlLabels() {
+        return srlLabels;
+    }
 
     public Set<String> getVerbs() {
         return verbs;
@@ -22,18 +35,6 @@ public class AndStep extends GivenStep {
 
     public Map<String, String> getAdvice() {
         return advice;
-    }
-
-    public Step getLinkedStep() {
-        return linkedStep;
-    }
-
-    public AndStep(String description, Map<String, List<String>> posResult, Map<String,
-            List<String>> srlSentence, Scenario parent) {
-        super(description, posResult, parent, null);
-        this.verbs = srlSentence.keySet();
-        this.advice = new SRLAnalyzer(srlSentence).generateAdvice();
-        this.linkedStep = linkedStep;
     }
 
     @Override

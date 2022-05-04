@@ -256,4 +256,21 @@ public class CodeAnalysis {
         }
         return false;
     }
+
+    public List<String> getMethodsWithParamtype(String className, String paramType) {
+        CompilationUnit cu = className2CU.get(className);
+        Set<String> set = new LinkedHashSet<>();//to only keep distinct values
+        List<String> result = new ArrayList<>();
+
+        cu.getClassByName(className).get().getMethods().stream().forEach(methodDeclaration -> {
+            for (Parameter param : methodDeclaration.getParameters()) {
+                if (param.getTypeAsString().equals(paramType)) {
+                    set.add(methodDeclaration.getNameAsString());
+                }
+            }
+        });
+        //return a list
+        result.addAll(set);
+        return result;
+    }
 }
