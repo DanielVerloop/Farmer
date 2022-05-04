@@ -6,7 +6,7 @@ import java.util.List;
 public class Context {
     private String mainClass;
     private String subClass;
-    private List<Rule> matchingRules = new ArrayList<>();
+    private List<List<Rule>> matchingRules = new ArrayList<>();
 
     public Context() {
     }
@@ -28,15 +28,11 @@ public class Context {
         this.subClass = subClass;
     }
 
-    public List<Rule> getMatchingRules() {
+    public List<List<Rule>> getMatchingRules() {
         return matchingRules;
     }
 
-    public void setMatchingRules(List<Rule> matchingRules) {
-        this.matchingRules = matchingRules;
-    }
-
-    public void addMatchingRule(Rule matchingRule) {
+    public void addMatchingRule(List<Rule> matchingRule) {
         this.matchingRules.add(matchingRule);
     }
 }

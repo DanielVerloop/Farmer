@@ -44,7 +44,7 @@ public class Generator {
     public void generate() throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
         NLPFileReader jsonResult = new NLPFileReader("src/main/resources/nlp_results.json",
                 "src/test/resources/features/vendingMachine.feature");
-//        "src/returnNumberType/resources/features/BankAccount.feature");
+//        "src/test/resources/features/BankAccount.feature");
         File targetDir = new File("src/main/java/com/vendingMachine");
 //        File targetDir = new File("src/main/java/com/bank");
         this.cu = new CompilationUnit();
@@ -121,113 +121,113 @@ public class Generator {
                     continue;
                 }
 
-                Rule info = step.getMatchResult();
+                List<Rule> codeRules = step.getMatchResult();
                 BlockStmt block;
-                switch (info.getAdvice()) { //switch on first parameter
-                case OBJECTI:
-                    String objectName = info.getClassName();
-                    String varName = new StringFormatter().camelCase(objectName);
-                    String params = new StringFormatter().parseParameters(info.getParameters());
-                    //code block variable and add it to the method
-                    block = new BlockStmt();
-                    method.setBody(block);
+                for (Rule code : codeRules) {
+                    switch (code.getAdvice()) { //switch on first parameter
+                        case OBJECTI:
+                            String objectName = code.getClassName();
+                            String varName = new StringFormatter().camelCase(objectName);
+                            String params = new StringFormatter().parseParameters(code.getParameters());
+                            //code block variable and add it to the method
+                            block = new BlockStmt();
+                            method.setBody(block);
 
-                    //add code to code block
-                    ExpressionStmt stmt = new ExpressionStmt();
-                    AssignExpr assignExpr;
-                    if (params == null) {
-                        assignExpr = new AssignExpr(
-                                new NameExpr(varName),
-                                new NameExpr("new " + objectName +"()"),
-                                AssignExpr.Operator.ASSIGN
-                        );
-                    } else if (info.getMethodName() == null) {
-                        assignExpr = new AssignExpr(
-                                new NameExpr(varName),
-                                new NameExpr("new " + objectName +"()"),
-                                AssignExpr.Operator.ASSIGN
-                        );
-                    } else {
-                        assignExpr = new AssignExpr(
-                                new NameExpr(varName),
-                                new NameExpr("new " + objectName +"(" + params + ")"),
-                                AssignExpr.Operator.ASSIGN
-                        );
+                            //add code to code block
+                            ExpressionStmt stmt = new ExpressionStmt();
+                            AssignExpr assignExpr;
+                            if (params == null) {
+                                assignExpr = new AssignExpr(
+                                        new NameExpr(varName),
+                                        new NameExpr("new " + objectName +"()"),
+                                        AssignExpr.Operator.ASSIGN
+                                );
+                            } else if (code.getMethodName() == null) {
+                                assignExpr = new AssignExpr(
+                                        new NameExpr(varName),
+                                        new NameExpr("new " + objectName +"()"),
+                                        AssignExpr.Operator.ASSIGN
+                                );
+                            } else {
+                                assignExpr = new AssignExpr(
+                                        new NameExpr(varName),
+                                        new NameExpr("new " + objectName +"(" + params + ")"),
+                                        AssignExpr.Operator.ASSIGN
+                                );
+                            }
+                            stmt.setExpression(assignExpr);
+                            block.addStatement(stmt);
+
+                            //add field variable if it does not exist yet
+                            this.addFieldToClass(objectName, varName);
+                            break;
+                        case METHODI:
+                            String var = new StringFormatter().camelCase(code.getClassName());
+
+                            //code block variable and add it to the method
+                            block = new BlockStmt();
+                            method.setBody(block);
+
+                            //add method call to block-statement
+                            MethodCallExpr methodCallExpr = new MethodCallExpr(
+                                    new NameExpr(var),
+                                    code.getMethodName());
+                            //handle method parameters
+                            if (code.getParameters() != null && code.getParameters().size() > 0) {
+                                for (String param : code.getParameters()) {
+                                    methodCallExpr.addArgument(param);
+                                }
+                            }
+                            block.addStatement(methodCallExpr);
+                            break;
+                        case ASSERT:
+                            //code block variable and add it to the method
+                            block = new BlockStmt();
+                            method.setBody(block);
+                            var = new StringFormatter().camelCase(code.getClassName());
+
+                            //add assert call to block-statement
+                            MethodCallExpr assertCallExpr = new MethodCallExpr(
+                                    new NameExpr("Assert"),
+                                    "assertTrue");
+                            String assertCompareVal;
+                            if (code.getParameters() != null &&
+                                    code.getParameters().contains(code.getCompareValue())) {//if we compare parameters
+                                String compareType = step.getParent().getTypeSolver().getParameterType(code.getCompareValue());
+                                if (compareType == "String") {
+                                    assertCompareVal = ".equals(" + code.getCompareValue() + ")";
+                                } else {
+                                    assertCompareVal = " " + code.getCompareValue();
+                                }
+                            } else {
+                                assertCompareVal = code.getCompareValue();
+                            }
+                            if (code.getFieldName() != null && !code.getFieldName().equals("")) {
+                                assertCallExpr.addArgument(
+                                        var + "."
+                                                + code.getFieldName() + " "
+                                                + this.operator(code.getAssertExpr()) + " "
+                                                + assertCompareVal
+                                );
+                            } else {
+                                assertCallExpr.addArgument(
+                                        var + "."
+                                                + code.getMethodName() + "() "
+                                                + this.operator(code.getAssertExpr())
+                                                + assertCompareVal
+                                );
+                            }
+
+                            block.addStatement(assertCallExpr);
+                            break;
+                        case Pass: //not able to create code
+                            block = new BlockStmt();
+                            method.setBody(block);
+
+                            block.addStatement("pass;");
+                            break;
                     }
-                    stmt.setExpression(assignExpr);
-                    block.addStatement(stmt);
-
-                    //add field variable if it does not exist yet
-                    this.addFieldToClass(objectName, varName);
-                    break;
-                case METHODI:
-                    String var = new StringFormatter().camelCase(info.getClassName());
-
-                    //code block variable and add it to the method
-                    block = new BlockStmt();
-                    method.setBody(block);
-
-                    //add method call to block-statement
-                    MethodCallExpr methodCallExpr = new MethodCallExpr(
-                            new NameExpr(var),
-                            info.getMethodName());
-                    //handle method parameters
-                    if (info.getParameters() != null && info.getParameters().size() > 0) {
-                        for (String param : info.getParameters()) {
-                            methodCallExpr.addArgument(param);
-                        }
-                    }
-                    block.addStatement(methodCallExpr);
-                    break;
-                case ASSERT:
-                    //code block variable and add it to the method
-                    block = new BlockStmt();
-                    method.setBody(block);
-                    var = new StringFormatter().camelCase(info.getClassName());
-
-                    //add assert call to block-statement
-                    MethodCallExpr assertCallExpr = new MethodCallExpr(
-                            new NameExpr("Assert"),
-                            "assertTrue");
-                    String assertCompareVal;
-                    if (info.getParameters() != null &&
-                            info.getParameters().contains(info.getCompareValue())) {//if we compare parameters
-                        String compareType = step.getParent().getTypeSolver().getParameterType(info.getCompareValue());
-                        if (compareType == "String") {
-                            assertCompareVal = ".equals(" + info.getCompareValue() + ")";
-                        } else {
-                            assertCompareVal = " " + info.getCompareValue();
-                        }
-                    } else {
-                        assertCompareVal = info.getCompareValue();
-                    }
-                    if (info.getFieldName() != null && !info.getFieldName().equals("")) {
-                        assertCallExpr.addArgument(
-                                var + "."
-                                + info.getFieldName() + " "
-                                + this.operator(info.getAssertExpr()) + " "
-                                + assertCompareVal
-                        );
-                    } else {
-                        assertCallExpr.addArgument(
-                                var + "."
-                                + info.getMethodName() + "() "
-                                + this.operator(info.getAssertExpr())
-                                + assertCompareVal
-                        );
-                    }
-
-                    block.addStatement(assertCallExpr);
-                    break;
-                case Pass: //not able to create code
-                    block = new BlockStmt();
-                    method.setBody(block);
-
-                    block.addStatement("pass;");
-                    break;
                 }
-
-
             }
         }
     }

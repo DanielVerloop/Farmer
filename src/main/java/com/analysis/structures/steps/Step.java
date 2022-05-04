@@ -16,7 +16,7 @@ public abstract class Step {
     private final List<String> parameters;
     private final Scenario parent;
     private final List<Step> andSteps;
-    private Rule matchResult;
+    private List<Rule> matchResult;
 
     public Step(String description, Map<String, List<String>> posResult, Scenario parent, List<Step> andSteps) {
         this.description = description;
@@ -48,7 +48,7 @@ public abstract class Step {
      * Method to set match result of each specific step
      * @param match
      */
-    public void setMatchResult(Rule match) {
+    public void setMatchResult(List<Rule> match) {
         this.matchResult = match;
     }
 
@@ -56,7 +56,7 @@ public abstract class Step {
      * Method get match result
      * @return
      */
-    public Rule getMatchResult() {
+    public List<Rule> getMatchResult() {
         return matchResult;
     }
 

@@ -32,7 +32,7 @@ public class vmStepDefs {
 
     @Then("the stock reduces in {int} unit")
     public void theStockReducesInArg0Unit(int arg0) {
-        Assert.assertTrue(vendingmachine.getInventoryQtyForThe() == 1);
+        Assert.assertTrue(vendingmachine.getInventoryQtyForThe() == arg0);
     }
 
     @And("the {string} leaves the machine")
@@ -52,7 +52,7 @@ public class vmStepDefs {
 
     @Then("the inventory stock must be {int} units")
     public void theInventoryStockMustBeArg0Units(int arg0) {
-        Assert.assertTrue(vendingmachine.getInventoryQtyForThe() == 9);
+        Assert.assertTrue(vendingmachine.getInventoryQtyForThe() == arg0);
     }
 
     @And("the vending machine gives {double} back")
