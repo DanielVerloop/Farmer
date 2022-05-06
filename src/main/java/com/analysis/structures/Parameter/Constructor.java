@@ -1,19 +1,19 @@
-package com.analysis.structures.constructor;
+package com.analysis.structures.Parameter;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class Constructor {
-    private String className;
+public class Parameter {
+    private String name;
     private Map<String, String> parameters = new HashMap<>();
 
-    public Constructor(String name, Map<String, String> parameters) {
-        this.className = name;
+    public Parameter(String name, Map<String, String> parameters) {
+        this.name = name;
         this.parameters = parameters;
     }
 
-    public String getClassName() {
-        return className;
+    public String getName() {
+        return name;
     }
 
     public Map<String, String> getParameters() {
@@ -27,7 +27,7 @@ public class Constructor {
     @Override
     public String toString() {
         return "Constructor{" +
-                "className='" + className + '\'' +
+                "className='" + name + '\'' +
                 ", parameters=" + parameters +
                 '}';
     }

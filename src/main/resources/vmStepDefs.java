@@ -43,7 +43,7 @@ public class vmStepDefs {
 
     @When("the user inserts the {double} dollars")
     public void theUserInsertsTheMoneyDollars(double money) {
-        vendingmachine.removeInventory(money);
+        vendingmachine.setProduct(money);
     }
 
     @And("selects the {string}")
@@ -51,14 +51,19 @@ public class vmStepDefs {
         vendingmachine.setProduct(product);
     }
 
-    @Then("the inventory stock must be {int} units")
-    public void theInventoryStockMustBeArg0Units(int arg0) {
-        Assert.assertTrue(vendingmachine.getInventoryQtyForThe() == arg0);
+    @And("the vending machine removes {string} from inventory")
+    public void theVendingMachineRemovesProductFromInventory(String product) {
+        vendingmachine.removeInventory(product);
+    }
+
+    @Then("the inventory stock of {string} must be equal to {int} units")
+    public void theInventoryStockOfProductMustBeEqualToArg0Units(String product, int arg0) {
+        Assert.assertTrue(vendingmachine.getInventoryQtyForThe(product) == arg0);
     }
 
     @And("the vending machine gives {double} back")
     public void theVendingMachineGivesChangeBack(double change) {
-        Assert.assertTrue(vendingmachine.getAmount() == change);
+        Assert.assertTrue(vendingmachine.getChange() == change);
     }
 
     @When("the user insert the {double}")

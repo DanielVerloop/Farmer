@@ -1,5 +1,8 @@
 package com.analysis.util;
 
+import com.analysis.structures.Parameter.DescriptionParameter;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -53,5 +56,31 @@ public class StringFormatter {
         String[] split = name.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])");
         String result = String.join(" ", split);
         return result.toLowerCase();
+    }
+
+    public List<String> orderParameters(String description, List<DescriptionParameter> parameters) {
+        List<DescriptionParameter> temp = new ArrayList<>(parameters);
+        List<String> result = new ArrayList<>();
+        String[] descr = description.split("\\s");
+        List<String> paramNames = new ArrayList<>();
+        for (int i = 0; i < parameters.size(); i++) {
+            paramNames.add(parameters.get(i).getName());
+        }
+        for (int i = 0; i < descr.length; i++) {
+            for (int j = 0; j < temp.size(); j++) {
+                if (temp.get(j).getValue() != null) {//number
+                    if (descr[i].equals(temp.get(j).getValue())) {
+                        result.add(temp.get(j).getType() + " " + temp.get(j).getName());
+                        temp.remove(j);
+                    }
+                } else {//other types
+                    if (descr[i].equals(temp.get(j).getName())) {
+                        result.add(temp.get(j).getType() + " " + temp.get(j).getName());
+                        temp.remove(j);
+                    }
+                }
+            }
+        }
+        return result;
     }
 }

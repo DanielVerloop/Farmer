@@ -1,5 +1,6 @@
 package com.analysis;
 
+import com.analysis.structures.Parameter.DescriptionParameter;
 import com.analysis.structures.Rule;
 import com.analysis.structures.Scenario;
 import com.analysis.structures.steps.Step;
@@ -22,6 +23,7 @@ import de.linguatools.disco.WrongWordspaceTypeException;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public class Generator {
@@ -43,19 +45,19 @@ public class Generator {
      */
     public void generate() throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
         NLPFileReader jsonResult = new NLPFileReader("src/main/resources/nlp_results.json",
-//                "src/test/resources/features/vendingMachine.feature");
-        "src/test/resources/features/BankAccount.feature");
-//        File targetDir = new File("src/main/java/com/vendingMachine");
-        File targetDir = new File("src/main/java/com/bank");
+                "src/test/resources/features/vendingMachine.feature");
+//        "src/test/resources/features/BankAccount.feature");
+        File targetDir = new File("src/main/java/com/vendingMachine");
+//        File targetDir = new File("src/main/java/com/bank");
         this.cu = new CompilationUnit();
-//        this.className = "vmStepDefs";
-        this.className = "bankStepDefs";
+        this.className = "vmStepDefs";
+//        this.className = "bankStepDefs";
 
         //Get setMatchResult info
-//        List<Scenario> matchResult = new DistanceMatcher(
-//                targetDir, jsonResult.getScenarios("vendingMachine.feature")).getMatch();
         List<Scenario> matchResult = new DistanceMatcher(
-                targetDir, jsonResult.getScenarios("transactions.feature")).getMatch();
+                targetDir, jsonResult.getScenarios("vendingMachine.feature")).getMatch();
+//        List<Scenario> matchResult = new DistanceMatcher(
+//                targetDir, jsonResult.getScenarios("transactions.feature")).getMatch();
 
         //Create skeleton template
         this.createTemplate(className);
@@ -87,15 +89,17 @@ public class Generator {
 
                 // create the step method
                 MethodDeclaration method;
+                List<DescriptionParameter> descriptionParameters = new ArrayList<>();
                 if (step.getNumbers().size() > 0) {
                     List<String> numbers = step.getNumbers();
                     for (int i = 0; i < numbers.size(); i++) {
                         name = name.replace(numbers.get(i), "Arg"+i);
                     }
                     method = declaration.addMethod(name, Modifier.Keyword.PUBLIC);
+
                     for (int i = 0; i < numbers.size(); i++) {
                         String type = parameterTester.returnNumberType(numbers.get(i));
-                        method.addParameter(type, "arg"+i);
+                        descriptionParameters.add(new DescriptionParameter("arg"+i, type, numbers.get(i)));
                         annotation[1] = annotation[1].replace(numbers.get(i), "{"+type+"}");
                     }
                 } else {
@@ -103,13 +107,20 @@ public class Generator {
                 }
                 if (step.getParameters().size() > 0) {
                     for (String param : step.getParameters()) {
-                        method.addParameter(step.getParent().getTypeSolver().getParameterType(param), param);
-                        String varType = "{"+step.getParent().getTypeSolver().getParameterType(param).toLowerCase()+"}";
+                        String type = step.getParent().getTypeSolver().getParameterType(param);
+                        descriptionParameters.add(new DescriptionParameter(param, type));
+                        String varType = "{"+type.toLowerCase()+"}";
                         annotation[1] = annotation[1].replace(param, varType);
                     }
                     method.addSingleMemberAnnotation(annotation[0], new StringLiteralExpr(annotation[1]));
                 } else {
                     method.addSingleMemberAnnotation(annotation[0], new StringLiteralExpr(annotation[1]));
+                }
+                //Parse parameters and add to method in correct order
+                List<String> methodParams = new StringFormatter().orderParameters(step.getDescription(), descriptionParameters);
+                for (String p: methodParams) {
+                    String[] split = p.split("\\s");
+                    method.addParameter(split[0], split[1]);
                 }
 
                 //Check if we already created this method based on its name and annotation
@@ -118,7 +129,7 @@ public class Generator {
                     && cu.getClassByName(className).get().getMethodsByName(method.getNameAsString())
                         .get(0).getAnnotation(0).equals(method.getAnnotation(0))) {
                     cu.getClassByName(className).get().remove(method);
-                    continue;
+                    continue;//go to next step
                 }
 
                 List<Rule> codeRules = step.getMatchResult();
@@ -182,14 +193,29 @@ public class Generator {
                             MethodCallExpr assertCallExpr = new MethodCallExpr(
                                     new NameExpr("Assert"),
                                     "assertTrue");
-                            String assertCompareVal;
-                            if (code.getParameters() != null &&
-                                    code.getParameters().contains(code.getCompareValue())) {//if we compare parameters
-                                String compareType = step.getParent().getTypeSolver().getParameterType(code.getCompareValue());
-                                if (compareType == "String") {
-                                    assertCompareVal = ".equals(" + code.getCompareValue() + ")";
-                                } else {
-                                    assertCompareVal = " " + code.getCompareValue();
+                            String assertCompareVal = null;
+                            StringBuilder parameters = new StringBuilder();
+                            //If parameters are used
+                            if (code.getParameters() != null && code.getParameters().size() > 0) {
+                                for (String param: code.getParameters()) {
+                                    if (param.equals(code.getCompareValue())) {
+                                        String compareType = step.getParent().getTypeSolver().getParameterType(code.getCompareValue());
+                                        if (compareType.equals("String")) {
+                                            assertCompareVal = ".equals(" + code.getCompareValue() + ")";
+                                        } else {
+                                            assertCompareVal = " " + code.getCompareValue();
+                                        }
+                                    } else {//add parameter to getter
+                                        if (!parameters.toString().equals("")) {
+                                            parameters.append(", ").append(param);
+                                        } else {
+                                            parameters.append(param);
+                                        }
+                                    }
+                                }
+                                //if no parameter is the desired value
+                                if (assertCompareVal == null) {
+                                    assertCompareVal = code.getCompareValue();
                                 }
                             } else {
                                 assertCompareVal = code.getCompareValue();
@@ -204,7 +230,7 @@ public class Generator {
                             } else {
                                 assertCallExpr.addArgument(
                                         var + "."
-                                                + code.getMethodName() + "() "
+                                                + code.getMethodName() + "(" + parameters + ") "
                                                 + this.operator(code.getAssertExpr())
                                                 + assertCompareVal
                                 );

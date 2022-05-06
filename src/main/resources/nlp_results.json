@@ -482,12 +482,14 @@
               ]
             },
             {
-              "description": "And the product leaves the machine",
+              "description": "And the vending machine removes product from inventory",
               "analysis": [
                 {
                   "nouns": [
+                    "vending machine",
+                    "machine",
                     "product",
-                    "machine"
+                    "inventory"
                   ],
                   "numbers": [],
                   "parameters": [
@@ -496,12 +498,13 @@
                 },
                 [
                   [
-                    "leav",
+                    "remov",
                     [
                       "ARGM-DIS: And",
-                      "ARG0: the  product",
-                      "V: leaves",
-                      "ARG1: the machine"
+                      "ARG0: the vending machine",
+                      "V: removes",
+                      "ARG1:  product",
+                      "ARG2: from inventory"
                     ]
                   ]
                 ]
@@ -509,28 +512,31 @@
             }
           ],
           "then": {
-            "description": "Then the inventory stock must be 9 units",
+            "description": "Then the inventory stock of product must be equal to 9 units",
             "analysis": [
               {
                 "nouns": [
                   "inventory stock",
                   "stock",
+                  "product",
                   "units"
                 ],
                 "numbers": [
                   9
                 ],
-                "parameters": []
+                "parameters": [
+                  "product"
+                ]
               },
               [
                 [
                   "be",
                   [
                     "ARGM-TMP: Then",
-                    "ARG1: the inventory stock",
+                    "ARG1: the inventory stock of  product",
                     "ARGM-MOD: must",
                     "V: be",
-                    "ARG2: 9 units"
+                    "ARG2: equal to 9 units"
                   ]
                 ]
               ]

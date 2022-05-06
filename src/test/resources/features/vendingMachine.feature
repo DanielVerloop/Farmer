@@ -28,8 +28,8 @@ Feature: Vending Machine
     And it has 10 <product> in its inventory
     When the user inserts the <money> dollars
     And selects the <product>
-    And the <product> leaves the machine
-    Then the inventory stock must be 9 units
+    And the vending machine removes <product> from inventory
+    Then the inventory stock of <product> must be equal to 9 units
     And the vending machine gives <change> back
 
     Examples:
@@ -43,16 +43,6 @@ Feature: Vending Machine
       | "coke"      |  3.00 |   0.75 |
       | "pepsi"     |  2.25 |   0.00 |
 
-    Examples:
-      | product     | money | change |
-      | "chips"     |  2.50 |   0.50 |
-      | "chocolate" |  3.50 |   1.00 |
-      | "cookie"    |  2.00 |   0.25 |
-      | "candy"     |  2.00 |   0.50 |
-      | "juice"     |  5.00 |   1.75 |
-      | "water"     |  3.00 |   1.50 |
-      | "coke"      |  3.00 |   0.75 |
-      | "pepsi"     |  2.25 |   0.00 |
 
   @tag3
   Scenario Outline: user give less money than the price of the product
