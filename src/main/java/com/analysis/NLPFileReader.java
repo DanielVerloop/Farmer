@@ -196,6 +196,7 @@ public class NLPFileReader {
         return result;
     }
 
+    //for testing only!!
     public static void main(String[] args) throws FileNotFoundException {
         List<Scenario> result = new NLPFileReader("src/main/resources/nlp_results.json", "src/returnNumberType/resources/features/vendingMachine.feature")
                 .getScenarios("vendingMachine.feature");

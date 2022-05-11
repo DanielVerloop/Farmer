@@ -1,4 +1,4 @@
-package com.analysis.structures.Parameter;
+package com.analysis.structures.parameter;
 
 /**
  * Class used to represent parameters in the code generator

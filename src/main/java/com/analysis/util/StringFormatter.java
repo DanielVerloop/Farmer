@@ -1,10 +1,9 @@
 package com.analysis.util;
 
-import com.analysis.structures.Parameter.DescriptionParameter;
+import com.analysis.structures.parameter.DescriptionParameter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * helper class to camelCase strings

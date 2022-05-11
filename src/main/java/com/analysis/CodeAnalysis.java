@@ -1,6 +1,9 @@
 package com.analysis;
 
-import com.analysis.structures.constructor.ConstructorPair;
+import com.analysis.structures.parameter.Method;
+import com.analysis.structures.parameter.ParameterPair;
+import com.analysis.structures.parameter.ParameterTree;
+import com.analysis.structures.parameter.ParameterTreeNode;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.AccessSpecifier;
 import com.github.javaparser.ast.CompilationUnit;
@@ -116,27 +119,6 @@ public class CodeAnalysis {
     }
 
     /**
-     * Gets a list of all parameter combinations of constructors of {@code className}
-     * @param className name of class
-     * @return all combinations
-     * TODO:check case of no parameter constructor
-     */
-    public List<List<Parameter>> getConstructors(String className) {
-        CompilationUnit cu = className2CU.get(className);
-        List<List<Parameter>> result = new ArrayList<>();
-
-        //Get Lists of all constructor parameter combinations
-        cu.getClassByName(className).get().getConstructors().stream().forEach(constructorDeclaration -> {
-            List<Parameter> temp = new ArrayList<>();
-            //Create list of parameters for constructor
-            constructorDeclaration.getParameters().forEach(parameter -> temp.add(parameter));
-            result.add(temp); //add to result
-        });
-
-        return result;
-    }
-
-    /**
      * Get all methods that are not of type void
      * @param className
      * @param type
@@ -147,8 +129,9 @@ public class CodeAnalysis {
         List<String> result = new ArrayList<>();
 
         //get all methods that have a return type containing type
+        //use lowercase to work around Double vs double kind of issues
         cu.getClassByName(className).get().getMethods().stream().forEach(methodDeclaration -> {
-            if (methodDeclaration.getType().toString().contains(type)) {
+            if (methodDeclaration.getType().toString().toLowerCase().contains(type.toLowerCase())) {
                 result.add(methodDeclaration.getNameAsString());
             }
         });
@@ -162,26 +145,33 @@ public class CodeAnalysis {
      * @param parameters list of parameter types
      * @return
      */
-    public List<String> filterMethodsOnParams(String className, List<String> parameters) {
+    public List<Method> filterMethodsOnParams(String className, List<String> parameters) {
         CompilationUnit cu = className2CU.get(className);
-        Set<String> set = new LinkedHashSet<>();//to only keep distinct values
-        List<String> result = new ArrayList<>();
+        Set<Method> set = new LinkedHashSet<>();//to only keep distinct values
+        List<Method> result = new ArrayList<>();
 
         //TODO: fine-tune filter accuracy
+        //TODO: allow for no filtering if parameters is empty
         cu.getClassByName(className).get().getMethods().stream().forEach(methodDeclaration -> {
-            if (methodDeclaration.getParameters().size() >= parameters.size()) {
-                set.add(methodDeclaration.getNameAsString());
-                for (Parameter param : methodDeclaration.getParameters()) {
-                    for (String type : parameters) {
-                        if (param.getType().toString().equals(type)) {
-                            set.add(methodDeclaration.getNameAsString());
+            List<ParameterPair> pairs = reduceObjectParameters(methodDeclaration.getParameters());
+            for (ParameterPair pair : pairs) {
+                if (parameters == null) {//default behaviour add all options
+                    set.add(new Method(methodDeclaration.getNameAsString(), pair));
+                } else if (pair.getBaseParams().size() == parameters.size()) {
+//                    set.add(new Method(methodDeclaration.getNameAsString(), pair));
+                    for (Parameter p : pair.getBaseParams()) {
+                        for (String type : parameters) {
+                            if (p.getTypeAsString().equals(type)) {
+                                set.add(new Method(methodDeclaration.getNameAsString(), pair));
+                            }
                         }
-                    }
-                    if (Arrays.asList("int", "double").contains(param.getType())) {
-                        set.add(methodDeclaration.getNameAsString());
+                        if (Arrays.asList("int", "double").contains(p.getTypeAsString())) {
+                            set.add(new Method(methodDeclaration.getNameAsString(), pair));
+                        }
                     }
                 }
             }
+
         });
         //return a list
         result.addAll(set);
@@ -189,51 +179,97 @@ public class CodeAnalysis {
     }
 
     /**
+     * Reduces list of parameters to only standard types (String, int, double, etc)
+     * Custom class object parameters are reduced to their constructor parameters
+     */
+    private List<ParameterPair> reduceObjectParameters(List<Parameter> parameters) {
+        List<ParameterPair> result = new ArrayList<>();//multiple constructors -> multiple choices
+        ParameterTree tree = new ParameterTree();//tree with all choices
+        for (Parameter parameter : parameters) {
+            if (this.classNames.contains(parameter.getTypeAsString())) {
+                tree.addNode(parseClassObject(parameter));
+            } else {//standard type param
+                ParameterTreeNode node = new ParameterTreeNode();
+                node.addParameterList(Arrays.asList(parameter));
+                tree.addNode(node);
+            }
+        }
+        result = tree.createPairList(parameters);
+        return result;
+    }
+
+
+    /**
+     * Helper function to parse a constructor to parameter object
+     */
+    private ParameterTreeNode parseClassObject(Parameter parameter) {
+        String name = parameter.getTypeAsString();
+        ParameterTreeNode node = new ParameterTreeNode();
+        for (ConstructorDeclaration constructorDeclaration : className2CU.get(name).getClassByName(name).get().getConstructors()) {
+            node.addParameterList(constructorDeclaration.getParameters());
+        }
+        return node;
+    }
+
+    /**
      * Simplifies constructor parameters to native types
      * @param className
      * @return a list of all possible combinations of native type parameters
      */
-    public List<ConstructorPair> constructorParamResolver(String className) {
-        Set<ConstructorPair> result = new HashSet<>();
+    public List<ParameterPair> constructorParamResolver(String className) {
+        Set<ParameterPair> result = new HashSet<>();
 
         for (ConstructorDeclaration constructorDeclaration : className2CU.get(className).getClassByName(className).get().getConstructors()) {
             if (constructorDeclaration.getParameters().size() == 0) {//handle no param constructors
                 result.add(
-                        new ConstructorPair(constructorDeclaration.getParameters(),
+                        new ParameterPair(constructorDeclaration.getParameters(),
                                 constructorDeclaration.getParameters())
                 );
             }
             List<Parameter> parameters = constructorDeclaration.getParameters();
             for (Parameter parameter : parameters) {
-                List<Parameter> finalParams = new ArrayList<>();//fix for concurrency errors
-                finalParams.addAll(parameters);
                 if (classNames.contains(parameter.getTypeAsString())) {//parameter is of custom class type
-                    int index = finalParams.indexOf(parameter);//index of original parameter
-                    for (ConstructorDeclaration constructorDeclaration1 :
-                            className2CU.get(parameter.getTypeAsString()).getClassByName(parameter.getTypeAsString())
-                                    .get().getConstructors()) {
-                        List<Parameter> parameters2 = constructorDeclaration1.getParameters();
-                        if (parameters2.size() == 0) {//empty constructor
-                            result.add(new ConstructorPair(finalParams, parameters));//add with original type
-                        } else { //a constructor with parameters, add them all to list
-                            finalParams.remove(index);//remove original parameter
-                            finalParams.addAll(index, parameters2);
-                            //prevent doubles
-//                            if(!result.contains(finalParams)) result.add(new ConstructorPair(finalParams, parameters));
-                        }
-                    }
+                    result.addAll(reduceObjectParameter(parameters, parameter));
                 } else {//if other type
                     //set will take care of duplicates
                     result.add(
-                            new ConstructorPair(constructorDeclaration.getParameters(),
+                            new ParameterPair(constructorDeclaration.getParameters(),
                                     constructorDeclaration.getParameters())
                     );
                 }
             }
         }
-        List<ConstructorPair> returnList = new ArrayList<>();
+        List<ParameterPair> returnList = new ArrayList<>();
         returnList.addAll(result);
         return returnList;
+    }
+
+    /**
+     * Method to reduce {@code parameter} from custom class type to only basic types (string, int, double, etc)
+     * @param parameters
+     * @param parameter
+     * @return
+     */
+    private Set<ParameterPair> reduceObjectParameter(List<Parameter> parameters, Parameter parameter) {
+        Set<ParameterPair> result = new HashSet<>();
+        List<Parameter> finalParams = new ArrayList<>();//fix for concurrency errors
+        finalParams.addAll(parameters);
+        int index = finalParams.indexOf(parameter);//index of original parameter
+        for (ConstructorDeclaration constructorDeclaration1 :
+                className2CU.get(parameter.getTypeAsString()).getClassByName(parameter.getTypeAsString())
+                        .get().getConstructors()) {
+            List<Parameter> parameters2 = constructorDeclaration1.getParameters();
+            if (parameters2.size() == 0) {//empty constructor
+                result.add(new ParameterPair(parameters, parameters));//add with original type
+            } else { //a constructor with parameters, add them all to list
+                finalParams.remove(index);//remove original parameter
+                finalParams.addAll(index, parameters2);
+                List<Parameter> resultParams = new ArrayList<>();
+                for (Parameter p : finalParams) resultParams.add(p);
+                result.add(new ParameterPair(resultParams,parameters));
+            }
+        }
+        return result;
     }
 
     /**
@@ -273,4 +309,12 @@ public class CodeAnalysis {
         result.addAll(set);
         return result;
     }
+
+    //for testing only!
+    public static void main(String[] args) throws FileNotFoundException {
+        CodeAnalysis analysis = new CodeAnalysis(new File("src/main/java/com/vendingmachine"));
+        analysis.filterMethodsOnParams("VendingMachine", Arrays.asList("String", "int"));
+
+    }
 }
+

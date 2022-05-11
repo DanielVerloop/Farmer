@@ -1,6 +1,6 @@
 package com.analysis;
 
-import com.analysis.structures.Parameter.DescriptionParameter;
+import com.analysis.structures.parameter.DescriptionParameter;
 import com.analysis.structures.Rule;
 import com.analysis.structures.Scenario;
 import com.analysis.structures.steps.Step;
@@ -23,7 +23,6 @@ import de.linguatools.disco.WrongWordspaceTypeException;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 
 public class Generator {

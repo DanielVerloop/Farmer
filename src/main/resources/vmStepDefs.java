@@ -28,7 +28,7 @@ public class vmStepDefs {
 
     @And("presses the button with the code for {string}")
     public void pressesTheButtonWithTheCodeForProduct(String product) {
-        vendingmachine.setProduct(product);
+        vendingmachine.setProduct(new Product(product));
     }
 
     @Then("the stock reduces in {int} unit")
@@ -43,12 +43,12 @@ public class vmStepDefs {
 
     @When("the user inserts the {double} dollars")
     public void theUserInsertsTheMoneyDollars(double money) {
-        vendingmachine.setProduct(money);
+        vendingmachine.setAmount(money);
     }
 
     @And("selects the {string}")
     public void selectsTheProduct(String product) {
-        vendingmachine.setProduct(product);
+        vendingmachine.setProduct(new Product(product));
     }
 
     @And("the vending machine removes {string} from inventory")

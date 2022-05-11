@@ -1,13 +1,12 @@
-package com.analysis.structures.Parameter;
+package com.analysis.structures.parameter;
 
-import java.util.HashMap;
 import java.util.Map;
 
-public class Parameter {
+public class Constructor {
     private String name;
-    private Map<String, String> parameters = new HashMap<>();
+    private Map<String, String> parameters;
 
-    public Parameter(String name, Map<String, String> parameters) {
+    public Constructor(String name, Map<String, String> parameters) {
         this.name = name;
         this.parameters = parameters;
     }
