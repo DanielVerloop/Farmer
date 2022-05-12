@@ -22,25 +22,10 @@ public class NLPFileReader {
         Object parsedJSONFile = null;
         try {
             parsedJSONFile = new JSONParser().parse(new FileReader(filepath));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
+        } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
         jsonFile = (JSONObject) parsedJSONFile;
-    }
-
-    public List<String> getFilenames() {
-        ArrayList<String> filenames = new ArrayList<String>();
-        JSONArray allFiles = (JSONArray) this.jsonFile.get("files");
-
-        for (Object allFile : allFiles) {
-            JSONObject file = (JSONObject) allFile;
-            filenames.add((String) file.get("name"));
-        }
-        return filenames;
     }
 
     /**
@@ -174,8 +159,8 @@ public class NLPFileReader {
     private List<String> transform2List(JSONArray arr) {
         if (arr == null) return null;
         List<String> result = new ArrayList<>();
-        for(int i=0; i< arr.size(); i++){
-            result.add(arr.get(i).toString());
+        for (Object o : arr) {
+            result.add(o.toString());
         }
         return result;
     }

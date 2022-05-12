@@ -699,6 +699,553 @@
           "tAnd": []
         }
       ]
+    },
+    {
+      "name": "vat.feature",
+      "scenarios": [
+        {
+          "given": {
+            "description": "Given I have a VAT calculator",
+            "analysis": [
+              {
+                "nouns": [
+                  "VAT calculator",
+                  "calculator"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When tax is calculated for \"diapers\" with 100 price",
+            "analysis": [
+              {
+                "nouns": [
+                  "tax",
+                  "diapers",
+                  "price"
+                ],
+                "numbers": [
+                  100
+                ],
+                "parameters": []
+              },
+              [
+                [
+                  "is",
+                  [
+                    "When tax V: is",
+                    "calculated for \" diapers \" with 100 price"
+                  ]
+                ],
+                [
+                  "calcul",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG1: tax",
+                    "is V: calculated",
+                    "ARGM-PRP: for \" diapers \"",
+                    "with 100 price"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the result should be 121",
+            "analysis": [
+              {
+                "nouns": [
+                  "result"
+                ],
+                "numbers": [
+                  121
+                ],
+                "parameters": []
+              },
+              [
+                [
+                  "be",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG1: the result",
+                    "ARGM-MOD: should",
+                    "V: be",
+                    "ARG2: 121"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        },
+        {
+          "given": {
+            "description": "Given I have a VAT calculator",
+            "analysis": [
+              {
+                "nouns": [
+                  "VAT calculator",
+                  "calculator"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When tax is calculated for \"bread\" with 100 price",
+            "analysis": [
+              {
+                "nouns": [
+                  "tax",
+                  "price"
+                ],
+                "numbers": [
+                  100
+                ],
+                "parameters": []
+              },
+              [
+                [
+                  "is",
+                  [
+                    "When tax V: is",
+                    "calculated for \" bread \" with 100 price"
+                  ]
+                ],
+                [
+                  "calcul",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG1: tax",
+                    "is V: calculated",
+                    "ARGM-PRD: for",
+                    "ARGM-PRP: \" bread \"",
+                    "ARG2: with 100 price"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the result should be 104",
+            "analysis": [
+              {
+                "nouns": [
+                  "result"
+                ],
+                "numbers": [
+                  104
+                ],
+                "parameters": []
+              },
+              [
+                [
+                  "be",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG1: the result",
+                    "ARGM-MOD: should",
+                    "V: be",
+                    "ARG2: 104"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        },
+        {
+          "given": {
+            "description": "Given I have a VAT calculator",
+            "analysis": [
+              {
+                "nouns": [
+                  "VAT calculator",
+                  "calculator"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When tax is calculated for \"wine\" with 100 price",
+            "analysis": [
+              {
+                "nouns": [
+                  "tax",
+                  "wine",
+                  "price"
+                ],
+                "numbers": [
+                  100
+                ],
+                "parameters": []
+              },
+              [
+                [
+                  "is",
+                  [
+                    "When tax V: is",
+                    "calculated for \" wine \" with 100 price"
+                  ]
+                ],
+                [
+                  "calcul",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG1: tax",
+                    "is V: calculated",
+                    "ARGM-PRD: for \" wine \" with 100 price"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the result should be 110",
+            "analysis": [
+              {
+                "nouns": [
+                  "result"
+                ],
+                "numbers": [
+                  110
+                ],
+                "parameters": []
+              },
+              [
+                [
+                  "be",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG1: the result",
+                    "ARGM-MOD: should",
+                    "V: be",
+                    "ARG2: 110"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        },
+        {
+          "given": {
+            "description": "Given I have a VAT calculator",
+            "analysis": [
+              {
+                "nouns": [
+                  "VAT calculator",
+                  "calculator"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When tax is calculated for \"<product>\" with price price",
+            "analysis": [
+              {
+                "nouns": [
+                  "tax",
+                  "product >",
+                  ">",
+                  "price price",
+                  "price"
+                ],
+                "numbers": [],
+                "parameters": [
+                  "price"
+                ]
+              },
+              [
+                [
+                  "is",
+                  [
+                    "When tax V: is",
+                    "calculated for \"  product  \" with  price  price"
+                  ]
+                ],
+                [
+                  "calcul",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG1: tax",
+                    "is V: calculated",
+                    "ARGM-PRP: for \"  product  \"",
+                    "ARGM-MNR: with  price  price"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the result should be result",
+            "analysis": [
+              {
+                "nouns": [
+                  "result",
+                  "result"
+                ],
+                "numbers": [],
+                "parameters": [
+                  "result"
+                ]
+              },
+              [
+                [
+                  "be",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG1: the result",
+                    "ARGM-MOD: should",
+                    "V: be",
+                    "ARG2: result"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        },
+        {
+          "given": {
+            "description": "Given I have a VAT calculator",
+            "analysis": [
+              {
+                "nouns": [
+                  "VAT calculator",
+                  "calculator"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When tax is calculated for \"panizo\" with 100 price",
+            "analysis": [
+              {
+                "nouns": [
+                  "tax",
+                  "panizo",
+                  "price"
+                ],
+                "numbers": [
+                  100
+                ],
+                "parameters": []
+              },
+              [
+                [
+                  "is",
+                  [
+                    "When tax V: is",
+                    "calculated for \" panizo \" with 100 price"
+                  ]
+                ],
+                [
+                  "calcul",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG1: tax",
+                    "is V: calculated",
+                    "ARGM-PRD: for",
+                    "\" C-ARG1: panizo",
+                    "\" ARGM-MNR: with 100 price"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the product rate is not found",
+            "analysis": [
+              {
+                "nouns": [
+                  "product rate",
+                  "rate"
+                ],
+                "numbers": [],
+                "parameters": []
+              },
+              [
+                [
+                  "is",
+                  [
+                    "Then the product rate V: is",
+                    "not found"
+                  ]
+                ],
+                [
+                  "found",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG1: the product rate",
+                    "is ARGM-NEG: not",
+                    "V: found"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        }
+      ]
+    },
+    {
+      "name": "calculator.feature",
+      "scenarios": [
+        {
+          "given": {
+            "description": "Given I have a calculator",
+            "analysis": [
+              {
+                "nouns": [
+                  "calculator"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When I add 2 and 3",
+            "analysis": [
+              {
+                "nouns": [],
+                "numbers": [
+                  2,
+                  3
+                ],
+                "parameters": []
+              },
+              [
+                [
+                  "add",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: I",
+                    "V: add",
+                    "ARG1: 2 and 3"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the result should be 5",
+            "analysis": [
+              {
+                "nouns": [
+                  "result"
+                ],
+                "numbers": [
+                  5
+                ],
+                "parameters": []
+              },
+              [
+                [
+                  "be",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG1: the result",
+                    "ARGM-MOD: should",
+                    "V: be",
+                    "ARG2: 5"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        },
+        {
+          "given": {
+            "description": "Given I have a calculator",
+            "analysis": [
+              {
+                "nouns": [
+                  "calculator"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When I subtract 5 and 3",
+            "analysis": [
+              {
+                "nouns": [],
+                "numbers": [
+                  5,
+                  3
+                ],
+                "parameters": []
+              },
+              [
+                [
+                  "subtract",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: I",
+                    "V: subtract",
+                    "ARG1: 5 and 3"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the result should be 2",
+            "analysis": [
+              {
+                "nouns": [
+                  "result"
+                ],
+                "numbers": [
+                  2
+                ],
+                "parameters": []
+              },
+              [
+                [
+                  "be",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG1: the result",
+                    "ARGM-MOD: should",
+                    "V: be",
+                    "ARG2: 2"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        }
+      ]
     }
   ]
 }

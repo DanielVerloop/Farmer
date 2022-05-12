@@ -37,26 +37,26 @@ public class Generator {
         this.cu = cu;
     }
 
+    public Generator(String fileName) {
+        this.className = fileName;
+    }
     /**
      * Test method only!
      * TODO: remove method
      * TODO: add multifile generation
      */
-    public void generate() throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
-        NLPFileReader jsonResult = new NLPFileReader("src/main/resources/nlp_results.json",
-                "src/test/resources/features/vendingMachine.feature");
-//        "src/test/resources/features/BankAccount.feature");
-        File targetDir = new File("src/main/java/com/vendingMachine");
-//        File targetDir = new File("src/main/java/com/bank");
+    public void generate(String featurfile, String featureFileLocation, String projdir) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
+        NLPFileReader jsonResult = new NLPFileReader(
+                "src/main/resources/nlp_results.json",
+                featureFileLocation
+        );
+        File targetDir = new File(projdir);
         this.cu = new CompilationUnit();
-        this.className = "vmStepDefs";
-//        this.className = "bankStepDefs";
+
 
         //Get setMatchResult info
         List<Scenario> matchResult = new DistanceMatcher(
-                targetDir, jsonResult.getScenarios("vendingMachine.feature")).getMatch();
-//        List<Scenario> matchResult = new DistanceMatcher(
-//                targetDir, jsonResult.getScenarios("transactions.feature")).getMatch();
+                targetDir, jsonResult.getScenarios(featurfile)).getMatch();
 
         //Create skeleton template
         this.createTemplate(className);
@@ -313,17 +313,8 @@ public class Generator {
         this.setCU(cu);
     }
 
-    /**
-     * Generate all stepfiles
-     * @param targetDir directory of target source code
-     * @param analysisNLP location of json of nlp analysis (from src dir)
-     */
-    public void generate(File targetDir, NLPFileReader analysisNLP) {
-        System.out.printf("Generating over directory %s%n:", targetDir.getPath());
-        System.out.println();
-    }
 
-    public static void main(String[] args) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
-        new Generator().generate();
-    }
+//    public static void main(String[] args) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
+//        new Generator().generate();
+//    }
 }

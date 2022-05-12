@@ -7,10 +7,7 @@ import com.analysis.structures.parameter.Constructor;
 import com.analysis.structures.parameter.Method;
 import com.analysis.structures.parameter.ParameterPair;
 import com.analysis.structures.steps.*;
-import com.analysis.util.Advice;
-import com.analysis.util.ParameterParser;
-import com.analysis.util.ParameterTester;
-import com.analysis.util.StringFormatter;
+import com.analysis.util.*;
 import com.analysis.util.distance.DiscoStringSimilarity;
 import com.github.javaparser.ast.body.Parameter;
 import de.linguatools.disco.CorruptConfigFileException;
@@ -489,7 +486,7 @@ public class DistanceMatcher implements Matcher{
                     targetTypes.size() == baseTypeParameter.size()) {//correct param types
 
                     //loop over all possible combinations and match most likely param
-                    HashMap<String, String> params = orderParameters(targetTypes, parameterNames, resolvedConstructor);
+                    Map<String, String> params = orderParameters(targetTypes, parameterNames, resolvedConstructor);
                     return new Constructor(className, params);
                 }
             }
@@ -500,25 +497,40 @@ public class DistanceMatcher implements Matcher{
     /**
      * Orders parameters in the correct order, outputs {name, type} pairs
      */
-    private HashMap<String, String> orderParameters(List<String> targetTypes, List<String> parameterNames, ParameterPair pair) {
+    private Map<String, String> orderParameters(List<String> parameterTypes, List<String> parameterNames, ParameterPair pair) {
         //loop over all possible combinations and match most likely param
-        String[] parameters = new String[targetTypes.size()];
-        for (int i = 0; i < targetTypes.size(); i++) {
-            double dist = Double.MAX_VALUE;
+        //TODO:find a stable parameter matcher
+        String[] parameters = new String[parameterTypes.size()];
+        for (int i = 0; i < parameterTypes.size(); i++) {
+            double[] distances = new double[parameterTypes.size()];
+            Arrays.fill(distances, -1.0);
             for (int j = 0; j < pair.getBaseParams().size(); j++) {
-                if (pair.getBaseParams().get(j).getTypeAsString().equals(targetTypes.get(i))) {
-                    double stringDist = this.levenshtein.distance(
-                            pair.getBaseParams().get(j).getNameAsString(), parameterNames.get(i));
-                    if (stringDist < dist) {
-                        parameters[j] = parameterNames.get(i);
-                        dist = stringDist;
+                if (parameterNames.get(i).startsWith("arg") && parameterNames.get(i).length() <= 5) {//matcher created variable
+                    if (pair.getBaseParams().get(j).getTypeAsString().equals(parameterTypes.get(i))) {
+                        distances[j] = 0.2;
+                        continue;
                     }
                 }
+                if (pair.getBaseParams().get(j).getTypeAsString().equals(parameterTypes.get(i))) {
+                    double stringDist = this.levenshtein.distance(
+                            pair.getBaseParams().get(j).getNameAsString(), parameterNames.get(i));
+                    distances[j] = stringDist;
+                }
             }
+            int[] sortedIndices = ArrayUtils.argsort(distances);
+            for (int j = 0; j < sortedIndices.length; j++) {
+                int index = sortedIndices[j];
+                if (distances[index] != -1.0 && parameters[index] == null) {
+                    parameters[index] = parameterNames.get(i);
+                    break;
+                }
+            }
+
         }
 
         int original = 0;
-        HashMap<String, String> params = new HashMap<>();
+        //LinkedHashMap is used to preserve insertion order
+        Map<String, String> params = new LinkedHashMap<>();
         for (int i = 0; i < pair.getOriginalParams().size(); i++) {
             for (int j = i; j < pair.getBaseParams().size(); j++) {
                 if (pair.getBaseParams().get(i).equals(pair.getOriginalParams().get(j))) {
