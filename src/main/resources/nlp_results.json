@@ -719,254 +719,18 @@
           },
           "gAnd": [],
           "when": {
-            "description": "When tax is calculated for \"diapers\" with 100 price",
+            "description": "When tax is calculated for product with price price",
             "analysis": [
               {
                 "nouns": [
                   "tax",
-                  "diapers",
-                  "price"
-                ],
-                "numbers": [
-                  100
-                ],
-                "parameters": []
-              },
-              [
-                [
-                  "is",
-                  [
-                    "When tax V: is",
-                    "calculated for \" diapers \" with 100 price"
-                  ]
-                ],
-                [
-                  "calcul",
-                  [
-                    "ARGM-TMP: When",
-                    "ARG1: tax",
-                    "is V: calculated",
-                    "ARGM-PRP: for \" diapers \"",
-                    "with 100 price"
-                  ]
-                ]
-              ]
-            ]
-          },
-          "wAnd": [],
-          "then": {
-            "description": "Then the result should be 121",
-            "analysis": [
-              {
-                "nouns": [
-                  "result"
-                ],
-                "numbers": [
-                  121
-                ],
-                "parameters": []
-              },
-              [
-                [
-                  "be",
-                  [
-                    "ARGM-TMP: Then",
-                    "ARG1: the result",
-                    "ARGM-MOD: should",
-                    "V: be",
-                    "ARG2: 121"
-                  ]
-                ]
-              ]
-            ]
-          },
-          "tAnd": []
-        },
-        {
-          "given": {
-            "description": "Given I have a VAT calculator",
-            "analysis": [
-              {
-                "nouns": [
-                  "VAT calculator",
-                  "calculator"
-                ],
-                "numbers": [],
-                "parameters": []
-              }
-            ]
-          },
-          "gAnd": [],
-          "when": {
-            "description": "When tax is calculated for \"bread\" with 100 price",
-            "analysis": [
-              {
-                "nouns": [
-                  "tax",
-                  "price"
-                ],
-                "numbers": [
-                  100
-                ],
-                "parameters": []
-              },
-              [
-                [
-                  "is",
-                  [
-                    "When tax V: is",
-                    "calculated for \" bread \" with 100 price"
-                  ]
-                ],
-                [
-                  "calcul",
-                  [
-                    "ARGM-TMP: When",
-                    "ARG1: tax",
-                    "is V: calculated",
-                    "ARGM-PRD: for",
-                    "ARGM-PRP: \" bread \"",
-                    "ARG2: with 100 price"
-                  ]
-                ]
-              ]
-            ]
-          },
-          "wAnd": [],
-          "then": {
-            "description": "Then the result should be 104",
-            "analysis": [
-              {
-                "nouns": [
-                  "result"
-                ],
-                "numbers": [
-                  104
-                ],
-                "parameters": []
-              },
-              [
-                [
-                  "be",
-                  [
-                    "ARGM-TMP: Then",
-                    "ARG1: the result",
-                    "ARGM-MOD: should",
-                    "V: be",
-                    "ARG2: 104"
-                  ]
-                ]
-              ]
-            ]
-          },
-          "tAnd": []
-        },
-        {
-          "given": {
-            "description": "Given I have a VAT calculator",
-            "analysis": [
-              {
-                "nouns": [
-                  "VAT calculator",
-                  "calculator"
-                ],
-                "numbers": [],
-                "parameters": []
-              }
-            ]
-          },
-          "gAnd": [],
-          "when": {
-            "description": "When tax is calculated for \"wine\" with 100 price",
-            "analysis": [
-              {
-                "nouns": [
-                  "tax",
-                  "wine",
-                  "price"
-                ],
-                "numbers": [
-                  100
-                ],
-                "parameters": []
-              },
-              [
-                [
-                  "is",
-                  [
-                    "When tax V: is",
-                    "calculated for \" wine \" with 100 price"
-                  ]
-                ],
-                [
-                  "calcul",
-                  [
-                    "ARGM-TMP: When",
-                    "ARG1: tax",
-                    "is V: calculated",
-                    "ARGM-PRD: for \" wine \" with 100 price"
-                  ]
-                ]
-              ]
-            ]
-          },
-          "wAnd": [],
-          "then": {
-            "description": "Then the result should be 110",
-            "analysis": [
-              {
-                "nouns": [
-                  "result"
-                ],
-                "numbers": [
-                  110
-                ],
-                "parameters": []
-              },
-              [
-                [
-                  "be",
-                  [
-                    "ARGM-TMP: Then",
-                    "ARG1: the result",
-                    "ARGM-MOD: should",
-                    "V: be",
-                    "ARG2: 110"
-                  ]
-                ]
-              ]
-            ]
-          },
-          "tAnd": []
-        },
-        {
-          "given": {
-            "description": "Given I have a VAT calculator",
-            "analysis": [
-              {
-                "nouns": [
-                  "VAT calculator",
-                  "calculator"
-                ],
-                "numbers": [],
-                "parameters": []
-              }
-            ]
-          },
-          "gAnd": [],
-          "when": {
-            "description": "When tax is calculated for \"<product>\" with price price",
-            "analysis": [
-              {
-                "nouns": [
-                  "tax",
-                  "product >",
-                  ">",
+                  "product",
                   "price price",
                   "price"
                 ],
                 "numbers": [],
                 "parameters": [
+                  "product",
                   "price"
                 ]
               },
@@ -975,7 +739,7 @@
                   "is",
                   [
                     "When tax V: is",
-                    "calculated for \"  product  \" with  price  price"
+                    "calculated for  product  with  price  price"
                   ]
                 ],
                 [
@@ -984,7 +748,7 @@
                     "ARGM-TMP: When",
                     "ARG1: tax",
                     "is V: calculated",
-                    "ARGM-PRP: for \"  product  \"",
+                    "ARGM-PRP: for  product",
                     "ARGM-MNR: with  price  price"
                   ]
                 ]
@@ -1014,91 +778,6 @@
                     "ARGM-MOD: should",
                     "V: be",
                     "ARG2: result"
-                  ]
-                ]
-              ]
-            ]
-          },
-          "tAnd": []
-        },
-        {
-          "given": {
-            "description": "Given I have a VAT calculator",
-            "analysis": [
-              {
-                "nouns": [
-                  "VAT calculator",
-                  "calculator"
-                ],
-                "numbers": [],
-                "parameters": []
-              }
-            ]
-          },
-          "gAnd": [],
-          "when": {
-            "description": "When tax is calculated for \"panizo\" with 100 price",
-            "analysis": [
-              {
-                "nouns": [
-                  "tax",
-                  "panizo",
-                  "price"
-                ],
-                "numbers": [
-                  100
-                ],
-                "parameters": []
-              },
-              [
-                [
-                  "is",
-                  [
-                    "When tax V: is",
-                    "calculated for \" panizo \" with 100 price"
-                  ]
-                ],
-                [
-                  "calcul",
-                  [
-                    "ARGM-TMP: When",
-                    "ARG1: tax",
-                    "is V: calculated",
-                    "ARGM-PRD: for",
-                    "\" C-ARG1: panizo",
-                    "\" ARGM-MNR: with 100 price"
-                  ]
-                ]
-              ]
-            ]
-          },
-          "wAnd": [],
-          "then": {
-            "description": "Then the product rate is not found",
-            "analysis": [
-              {
-                "nouns": [
-                  "product rate",
-                  "rate"
-                ],
-                "numbers": [],
-                "parameters": []
-              },
-              [
-                [
-                  "is",
-                  [
-                    "Then the product rate V: is",
-                    "not found"
-                  ]
-                ],
-                [
-                  "found",
-                  [
-                    "ARGM-TMP: Then",
-                    "ARG1: the product rate",
-                    "is ARGM-NEG: not",
-                    "V: found"
                   ]
                 ]
               ]
@@ -1193,13 +872,13 @@
           },
           "gAnd": [],
           "when": {
-            "description": "When I subtract 5 and 3",
+            "description": "When I subtract 3 from 5",
             "analysis": [
               {
                 "nouns": [],
                 "numbers": [
-                  5,
-                  3
+                  3,
+                  5
                 ],
                 "parameters": []
               },
@@ -1210,7 +889,8 @@
                     "ARGM-TMP: When",
                     "ARG0: I",
                     "V: subtract",
-                    "ARG1: 5 and 3"
+                    "ARG1: 3",
+                    "ARG2: from 5"
                   ]
                 ]
               ]
@@ -1239,6 +919,171 @@
                     "V: be",
                     "ARG2: 2"
                   ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        }
+      ]
+    },
+    {
+      "name": "MovieTest.feature",
+      "scenarios": [
+        {
+          "given": {
+            "description": "Given I want to setup a new movie",
+            "analysis": [
+              {
+                "nouns": [
+                  "movie"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When the movie has the name name",
+            "analysis": [
+              {
+                "nouns": [
+                  "movie",
+                  "name name",
+                  "name"
+                ],
+                "numbers": [],
+                "parameters": [
+                  "name"
+                ]
+              },
+              [
+                [
+                  "ha",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: the movie",
+                    "V: has",
+                    "ARG1: the name  name"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [
+            {
+              "description": "And the movie has a rating of rating",
+              "analysis": [
+                {
+                  "nouns": [
+                    "movie",
+                    "rating",
+                    "rating"
+                  ],
+                  "numbers": [],
+                  "parameters": [
+                    "rating"
+                  ]
+                },
+                [
+                  [
+                    "ha",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: the movie",
+                      "V: has",
+                      "ARG1: a rating of  rating"
+                    ]
+                  ]
+                ]
+              ]
+            },
+            {
+              "description": "And the duration of the movie is duration",
+              "analysis": [
+                {
+                  "nouns": [
+                    "duration",
+                    "movie",
+                    "duration"
+                  ],
+                  "numbers": [],
+                  "parameters": [
+                    "duration"
+                  ]
+                },
+                [
+                  [
+                    "is",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG1: the duration of the movie",
+                      "V: is",
+                      "ARG2:  duration"
+                    ]
+                  ]
+                ]
+              ]
+            },
+            {
+              "description": "And the cast of the movie is mainCast",
+              "analysis": [
+                {
+                  "nouns": [
+                    "cast",
+                    "movie"
+                  ],
+                  "numbers": [],
+                  "parameters": [
+                    "mainCast"
+                  ]
+                },
+                [
+                  [
+                    "is",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG1: the cast of the movie",
+                      "V: is",
+                      "ARG2:  mainCast"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ],
+          "then": {
+            "description": "Then I validate that the the new movie is setup correctly.",
+            "analysis": [
+              {
+                "nouns": [
+                  "movie"
+                ],
+                "numbers": [],
+                "parameters": []
+              },
+              [
+                [
+                  "valid",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG0: I",
+                    "V: validate",
+                    "ARG1: that the the new movie is setup correctly",
+                    "."
+                  ]
+                ],
+                [
+                  "is",
+                  [
+                    "Then I validate that the the new movie V: is",
+                    "setup correctly ."
+                  ]
+                ],
+                [
+                  "setup",
+                  []
                 ]
               ]
             ]

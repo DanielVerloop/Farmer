@@ -42,7 +42,6 @@ public class Generator {
     }
     /**
      * Test method only!
-     * TODO: remove method
      * TODO: add multifile generation
      */
     public void generate(String featurfile, String featureFileLocation, String projdir) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
@@ -55,8 +54,7 @@ public class Generator {
 
 
         //Get setMatchResult info
-        List<Scenario> matchResult = new DistanceMatcher(
-                targetDir, jsonResult.getScenarios(featurfile)).getMatch();
+        List<Scenario> matchResult = new DistanceMatcher(targetDir, jsonResult.getScenarios(featurfile), featureFileLocation).getMatch();
 
         //Create skeleton template
         this.createTemplate(className);
@@ -104,6 +102,7 @@ public class Generator {
                 } else {
                     method = declaration.addMethod(name, Modifier.Keyword.PUBLIC);
                 }
+                //TODO: fix bug where name of parameter also occurs in description as a word
                 if (step.getParameters().size() > 0) {
                     for (String param : step.getParameters()) {
                         String type = step.getParent().getTypeSolver().getParameterType(param);
@@ -227,12 +226,22 @@ public class Generator {
                                                 + assertCompareVal
                                 );
                             } else {
-                                assertCallExpr.addArgument(
-                                        var + "."
-                                                + code.getMethodName() + "(" + parameters + ") "
-                                                + this.operator(code.getAssertExpr())
-                                                + assertCompareVal
-                                );
+                                if (parameters == null || parameters.length() == 0) {
+                                    assertCallExpr.addArgument(
+                                            var + "."
+                                                    + code.getMethodName() + "() "
+                                                    + this.operator(code.getAssertExpr())
+                                                    + assertCompareVal
+                                    );
+                                } else {
+                                    assertCallExpr.addArgument(
+                                            var + "."
+                                                    + code.getMethodName() + "(" + parameters + ") "
+                                                    + this.operator(code.getAssertExpr())
+                                                    + assertCompareVal
+                                    );
+                                }
+
                             }
 
                             block.addStatement(assertCallExpr);

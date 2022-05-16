@@ -24,10 +24,10 @@ import java.util.*;
  * This class uses String distance as base for matching text to code
  */
 public class DistanceMatcher implements Matcher{
-    private final DiscoStringSimilarity model = new DiscoStringSimilarity();
-    private final Cosine cosine = new Cosine();//All other text-code matching
-    private final NormalizedLevenshtein levenshtein = new NormalizedLevenshtein();//Used for class matching
-    private final ParameterParser parameterParser = new ParameterParser(new File("src/test/resources/features/vendingMachine.feature"));//TODO: move instantiation to constructor!
+    private final DiscoStringSimilarity model;
+    private final Cosine cosine;//All other text-code matching
+    private final NormalizedLevenshtein levenshtein;//Used for class matching
+    private final ParameterParser parameterParser;
     private final List<Scenario> match;
 
     @Override
@@ -35,9 +35,13 @@ public class DistanceMatcher implements Matcher{
         return match;
     }
 
-    public DistanceMatcher(File targetDir, List<Scenario> scenarios) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
+    public DistanceMatcher(File targetDir, List<Scenario> scenarios, String featureFile) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
         CodeAnalysis analysis = new CodeAnalysis(targetDir);
-        match = this.match(scenarios, analysis);
+        this.model = new DiscoStringSimilarity();
+        this.cosine = new Cosine();
+        this.levenshtein = new NormalizedLevenshtein();
+        this.parameterParser = new ParameterParser(new File(featureFile));
+        this.match = this.match(scenarios, analysis);
     }
 
     @Override
@@ -184,7 +188,7 @@ public class DistanceMatcher implements Matcher{
     }
 
     private List<Rule> matchThen(ThenStep step, CodeAnalysis analysis, Context context) throws WrongWordspaceTypeException, IOException {
-        String compareValue = "";
+        String compareValue = "default";
         String assertStmt = "equals";
         List<String> parameters = new ArrayList<>();
         String matchedClass = context.getMainClass();
@@ -193,7 +197,7 @@ public class DistanceMatcher implements Matcher{
             return Arrays.asList(new Rule(Advice.Pass, context.getMainClass(), "", compareValue, assertStmt));
         }
         //See if we can find a matching class field or method (if field does not exist)
-        String fieldName = matchVar(analysis, step.getNouns());
+        String fieldName = matchVar(analysis, step.getNouns(), context);
         String methodName = matchGet(step.getSrlLabels(), step.getVerbs(), step, analysis, matchedClass);
 
         if (step.getNumbers().size() == 1) {
@@ -253,6 +257,11 @@ public class DistanceMatcher implements Matcher{
                 } else {//string comparison
                     assertStmt = "sequals";
                 }
+            } else {
+                //default -> test will generate but no semantically correct code
+                //TODO:implement this case
+                compareValue = "failed";
+                assertStmt = "equals";
             }
         }
         if (fieldName != null && !fieldName.equals("")) {
@@ -268,6 +277,7 @@ public class DistanceMatcher implements Matcher{
         HashMap<String, Double> distances = new HashMap<>(); //{"cls+method" = dist}
         Set<String> methods = new HashSet<>();
 
+        //TODO: change to work with same approach as constructor and when matching
         //find methods with correct return type
         if (step.getParameters().size() > 0) {
             for (String param : step.getParameters()) {
@@ -279,9 +289,12 @@ public class DistanceMatcher implements Matcher{
             methods.addAll(analysis.getMethodsWithReturnType(className, "int"));
             methods.addAll(analysis.getMethodsWithReturnType(className, "double"));
         }
+        if (methods.size() == 0) {//no numbers or params
+            methods.addAll(analysis.getMethodsWithReturnType(className, "String"));
+        }
         //the actual matching
         for (String verb : verbs) {
-            String verbString = advice.get("V") + advice.get("ARG1");
+            String verbString = advice.get("V") + " " + advice.get("ARG1");
             for (String method : methods) {
                 String splitMethodName = new StringFormatter().splitMethodName(method);
 
@@ -308,27 +321,26 @@ public class DistanceMatcher implements Matcher{
                 .min(Comparator.comparingDouble(Map.Entry::getValue)).get().getKey();
     }
 
-    private String matchVar(CodeAnalysis codeAnalysis, List<String> nouns) {
+    private String matchVar(CodeAnalysis codeAnalysis, List<String> nouns, Context context) {
         Map<String, Double> distances = new HashMap<>();
         HashMap<String, List<String>> classVariables = codeAnalysis.getClassFields();
-        HashMap<String, List<String>> classToMethods = codeAnalysis.getMapMethods2Classes();
+        List<String> variables = classVariables.get(context.getMainClass());
 
         //first look if we can setMatchResult a class variable
         //TODO: returnNumberType on bigger target classes
-        classVariables.forEach((s, vars) -> {
-            for (String noun : nouns) {
-                double smallestDist = Integer.MAX_VALUE;
-                String matchedVar = "";
-                for (String var: vars) {
-                    double dist = this.levenshtein.distance(var, noun);
-                    if (dist < smallestDist) {
-                        smallestDist = dist;
-                        matchedVar = var;
-                    }
+        for (String noun : nouns) {
+            double smallestDist = Integer.MAX_VALUE;
+            String matchedVar = "";
+            for (String var: variables) {
+                double dist = this.levenshtein.distance(var, noun);
+                if (dist < smallestDist) {
+                    smallestDist = dist;
+                    matchedVar = var;
                 }
-                distances.put(matchedVar, smallestDist);
             }
-        });
+            distances.put(matchedVar, smallestDist);
+        }
+
         return distances.entrySet().stream()
                 .min(Comparator.comparingDouble(Map.Entry::getValue)).get().getKey();
     }
@@ -503,7 +515,7 @@ public class DistanceMatcher implements Matcher{
         String[] parameters = new String[parameterTypes.size()];
         for (int i = 0; i < parameterTypes.size(); i++) {
             double[] distances = new double[parameterTypes.size()];
-            Arrays.fill(distances, -1.0);
+            Arrays.fill(distances, 10);
             for (int j = 0; j < pair.getBaseParams().size(); j++) {
                 if (parameterNames.get(i).startsWith("arg") && parameterNames.get(i).length() <= 5) {//matcher created variable
                     if (pair.getBaseParams().get(j).getTypeAsString().equals(parameterTypes.get(i))) {
@@ -608,11 +620,12 @@ public class DistanceMatcher implements Matcher{
         return temp;
     }
 
-    public static void main(String[] args) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
-        List<Scenario> scenarios = new NLPFileReader("src/main/resources/nlp_results.json",
-                "src/test/resources/features/vendingMachine.feature")
-                .getScenarios("vendingMachine.feature");
-        DistanceMatcher matcher = new DistanceMatcher(
-                new File("src/main/java/com/vendingmachine"), scenarios);
-    }
+//    TODO:REMOVE
+//    public static void main(String[] args) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
+//        List<Scenario> scenarios = new NLPFileReader("src/main/resources/nlp_results.json",
+//                "src/test/resources/features/vendingMachine.feature")
+//                .getScenarios("vendingMachine.feature");
+//        DistanceMatcher matcher = new DistanceMatcher(
+//                new File("src/main/java/com/vendingmachine"), scenarios);
+//    }
 }

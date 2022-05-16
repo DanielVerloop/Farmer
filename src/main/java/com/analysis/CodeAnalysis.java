@@ -311,10 +311,10 @@ public class CodeAnalysis {
     }
 
     //for testing only!
-    public static void main(String[] args) throws FileNotFoundException {
-        CodeAnalysis analysis = new CodeAnalysis(new File("src/main/java/com/vendingmachine"));
-        analysis.filterMethodsOnParams("VendingMachine", Arrays.asList("String", "int"));
-
-    }
+//    public static void main(String[] args) throws FileNotFoundException {
+//        CodeAnalysis analysis = new CodeAnalysis(new File("src/main/java/com/vendingmachine"));
+//        analysis.filterMethodsOnParams("VendingMachine", Arrays.asList("String", "int"));
+//
+//    }
 }
 
