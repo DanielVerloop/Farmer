@@ -188,7 +188,7 @@ public class DistanceMatcher implements Matcher{
     }
 
     private List<Rule> matchThen(ThenStep step, CodeAnalysis analysis, Context context) throws WrongWordspaceTypeException, IOException {
-        String compareValue = "default";
+        String compareValue = "";
         String assertStmt = "equals";
         List<String> parameters = new ArrayList<>();
         String matchedClass = context.getMainClass();
