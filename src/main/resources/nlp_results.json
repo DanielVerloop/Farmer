@@ -1091,6 +1091,557 @@
           "tAnd": []
         }
       ]
+    },
+    {
+      "name": "CoffeeMachine.feature",
+      "scenarios": [
+        {
+          "given": {
+            "description": "Given we have a coffee machine with 10 beans and 1 milk",
+            "analysis": [
+              {
+                "nouns": [
+                  "coffee machine",
+                  "machine",
+                  "beans",
+                  "milk"
+                ],
+                "numbers": [
+                  10,
+                  1
+                ],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When we brew a cup of coffee",
+            "analysis": [
+              {
+                "nouns": [
+                  "cup",
+                  "coffee"
+                ],
+                "numbers": [],
+                "parameters": []
+              },
+              [
+                [
+                  "brew",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: we",
+                    "V: brew",
+                    "ARG1: a cup of coffee"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the machine contains 9 beans",
+            "analysis": [
+              {
+                "nouns": [
+                  "machine",
+                  "beans"
+                ],
+                "numbers": [
+                  9
+                ],
+                "parameters": []
+              },
+              [
+                [
+                  "contain",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG0: the machine",
+                    "V: contains",
+                    "ARG1: 9 beans"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        },
+        {
+          "given": {
+            "description": "Given we have a coffee machine without milk or beans",
+            "analysis": [
+              {
+                "nouns": [
+                  "coffee machine",
+                  "machine",
+                  "milk",
+                  "beans"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [
+            {
+              "description": "And we put 5 beans into the machine",
+              "analysis": [
+                {
+                  "nouns": [
+                    "beans",
+                    "machine"
+                  ],
+                  "numbers": [
+                    5
+                  ],
+                  "parameters": []
+                },
+                [
+                  [
+                    "put",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: we",
+                      "V: put",
+                      "ARG1: 5 beans",
+                      "ARG2: into the machine"
+                    ]
+                  ]
+                ]
+              ]
+            },
+            {
+              "description": "And we put 2 milk into the machine",
+              "analysis": [
+                {
+                  "nouns": [
+                    "milk",
+                    "machine"
+                  ],
+                  "numbers": [
+                    2
+                  ],
+                  "parameters": []
+                },
+                [
+                  [
+                    "put",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: we",
+                      "V: put",
+                      "ARG1: 2 milk",
+                      "ARG2: into the machine"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ],
+          "when": {
+            "description": "When we make a cup of coffee",
+            "analysis": [
+              {
+                "nouns": [
+                  "cup",
+                  "coffee"
+                ],
+                "numbers": [],
+                "parameters": []
+              },
+              [
+                [
+                  "make",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: we",
+                    "V: make",
+                    "ARG1: a cup of coffee"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the machine contains 4 beans",
+            "analysis": [
+              {
+                "nouns": [
+                  "machine",
+                  "beans"
+                ],
+                "numbers": [
+                  4
+                ],
+                "parameters": []
+              },
+              [
+                [
+                  "contain",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG0: the machine",
+                    "V: contains",
+                    "ARG1: 4 beans"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        },
+        {
+          "given": {
+            "description": "Given we have a coffee machine with 7 beans and 1 milk",
+            "analysis": [
+              {
+                "nouns": [
+                  "coffee machine",
+                  "machine",
+                  "beans",
+                  "milk"
+                ],
+                "numbers": [
+                  7,
+                  1
+                ],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When we make a cappuccino",
+            "analysis": [
+              {
+                "nouns": [
+                  "cappuccino"
+                ],
+                "numbers": [],
+                "parameters": []
+              },
+              [
+                [
+                  "make",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: we",
+                    "V: make",
+                    "ARG1: a cappuccino"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the machine contains 6 beans",
+            "analysis": [
+              {
+                "nouns": [
+                  "machine",
+                  "beans"
+                ],
+                "numbers": [
+                  6
+                ],
+                "parameters": []
+              },
+              [
+                [
+                  "contain",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG0: the machine",
+                    "V: contains",
+                    "ARG1: 6 beans"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": [
+            {
+              "description": "And the machine contains 0 milk",
+              "analysis": [
+                {
+                  "nouns": [
+                    "machine",
+                    "milk"
+                  ],
+                  "numbers": [
+                    0
+                  ],
+                  "parameters": []
+                },
+                [
+                  [
+                    "contain",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: the machine",
+                      "V: contains",
+                      "ARG1: 0 milk"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bar.feature",
+      "scenarios": [
+        {
+          "given": {
+            "description": "Given there is a bar with a coffee machine",
+            "analysis": [
+              {
+                "nouns": [
+                  "bar",
+                  "coffee machine",
+                  "machine"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [
+            {
+              "description": "And the coffee machine contains 5 beans and 3 milk",
+              "analysis": [
+                {
+                  "nouns": [
+                    "coffee machine",
+                    "machine",
+                    "beans",
+                    "milk"
+                  ],
+                  "numbers": [
+                    5,
+                    3
+                  ],
+                  "parameters": []
+                },
+                [
+                  [
+                    "contain",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: the coffee machine",
+                      "V: contains",
+                      "ARG1: 5 beans and 3 milk"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ],
+          "when": {
+            "description": "When the client orders a coffee",
+            "analysis": [
+              {
+                "nouns": [
+                  "client orders",
+                  "orders",
+                  "coffee"
+                ],
+                "numbers": [],
+                "parameters": []
+              },
+              [
+                [
+                  "order",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: the client",
+                    "V: orders",
+                    "ARG1: a coffee"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then there is 3 milk left in the machine at the bar",
+            "analysis": [
+              {
+                "nouns": [
+                  "milk",
+                  "machine",
+                  "bar"
+                ],
+                "numbers": [
+                  3
+                ],
+                "parameters": []
+              },
+              [
+                [
+                  "is",
+                  [
+                    "ARGM-TMP: Then",
+                    "there V: is",
+                    "ARG1: 3 milk left in the machine at the bar"
+                  ]
+                ],
+                [
+                  "left",
+                  [
+                    "Then there is ARG1: 3 milk",
+                    "V: left",
+                    "ARGM-LOC: in the machine at the bar"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": [
+            {
+              "description": "And there are 4 beans left in the machine at the bar",
+              "analysis": [
+                {
+                  "nouns": [
+                    "beans",
+                    "machine",
+                    "bar"
+                  ],
+                  "numbers": [
+                    4
+                  ],
+                  "parameters": []
+                },
+                [
+                  [
+                    "are",
+                    [
+                      "ARGM-DIS: And",
+                      "there V: are",
+                      "ARG1: 4 beans left in the machine at the bar"
+                    ]
+                  ],
+                  [
+                    "left",
+                    [
+                      "And there are ARG1: 4 beans",
+                      "V: left",
+                      "ARGM-LOC: in the machine at the bar"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "given": {
+            "description": "Given there is a bar with a coffee machine",
+            "analysis": [
+              {
+                "nouns": [
+                  "bar",
+                  "coffee machine",
+                  "machine"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [
+            {
+              "description": "And the coffee machine contains 7 beans and 4 milk",
+              "analysis": [
+                {
+                  "nouns": [
+                    "coffee machine",
+                    "machine",
+                    "beans",
+                    "milk"
+                  ],
+                  "numbers": [
+                    7,
+                    4
+                  ],
+                  "parameters": []
+                },
+                [
+                  [
+                    "contain",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: the coffee machine",
+                      "V: contains",
+                      "ARG1: 7 beans and 4 milk"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ],
+          "when": {
+            "description": "When the client orders a coffee",
+            "analysis": [
+              {
+                "nouns": [
+                  "client orders",
+                  "orders",
+                  "coffee"
+                ],
+                "numbers": [],
+                "parameters": []
+              },
+              [
+                [
+                  "order",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: the client",
+                    "V: orders",
+                    "ARG1: a coffee"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the client can still order another coffee",
+            "analysis": [
+              {
+                "nouns": [
+                  "client",
+                  "order",
+                  "coffee"
+                ],
+                "numbers": [],
+                "parameters": []
+              },
+              [
+                [
+                  "order",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG0: the client",
+                    "ARGM-MOD: can",
+                    "ARGM-TMP: still",
+                    "V: order",
+                    "ARG1: another coffee"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        }
+      ]
     }
   ]
 }

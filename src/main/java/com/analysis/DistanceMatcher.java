@@ -203,21 +203,6 @@ public class DistanceMatcher implements Matcher{
         if (step.getNumbers().size() == 1) {
             //highly likely a number parameter
             //if arg2 refers to the number then this is highly likely the desired value
-            if (step.getSrlLabels().get("ARG2") != null) {
-                if (step.getSrlLabels().get("ARG2").contains(step.getNumbers().get(0))) {
-                    compareValue = "arg0";//TODO:find better way to process this
-                }
-                //Get the type of assert statement
-                if (step.getSrlLabels().get("ARG2").contains("higher")) assertStmt = "higher";
-                else if (step.getSrlLabels().get("ARG2").contains("lower")) assertStmt = "lower";
-                else if (step.getSrlLabels().get("V").equals("be") || step.getSrlLabels().get("ARG2").contains(" equal")) {
-                    assertStmt = "equals";
-                }
-            } else {
-                //TODO: use arg1 and arg0
-                assertStmt = "equals";
-                compareValue = "something";
-            }
             if (step.getParameters().size() > 0) {
                 for (String param : step.getParameters()) {
                     if (step.getSrlLabels().get("ARG2") != null &&
@@ -226,6 +211,24 @@ public class DistanceMatcher implements Matcher{
                     }
                     if (step.getSrlLabels().get("ARG1") != null && step.getSrlLabels().get("ARG1").contains(param)) {
                         parameters.add(param);
+                    }
+                }
+            } else {
+                if (step.getSrlLabels().get("ARG2") != null) {
+                    if (step.getSrlLabels().get("ARG2").contains(step.getNumbers().get(0))) {
+                        compareValue = "arg0";//TODO:find better way to process this
+                    }
+                    //Get the type of assert statement
+                    if (step.getSrlLabels().get("ARG2").contains("higher")) assertStmt = "higher";
+                    else if (step.getSrlLabels().get("ARG2").contains("lower")) assertStmt = "lower";
+                    else if (step.getSrlLabels().get("V").equals("be") || step.getSrlLabels().get("ARG2").contains(" equal")) {
+                        assertStmt = "equals";
+                    }
+                } else {
+                    //TODO: use arg1
+                    if (step.getSrlLabels().get("ARG1").contains(step.getNumbers().get(0))) {
+                        compareValue = "arg0";
+                        assertStmt = "equals";
                     }
                 }
             }
@@ -402,8 +405,12 @@ public class DistanceMatcher implements Matcher{
                 methods = analysis.filterMethodsOnParams(matchedClass, null);
             }
         } else if (step.getNumbers().size() > 0) {//numbers are present but no tables
-            //TODO: filter methods on double, int parameters
-
+            List<String> types = new ArrayList<>();
+            ParameterTester tester = new ParameterTester();
+            for (String number: step.getNumbers()) {
+                types.add(tester.returnNumberType(number));
+            }
+            methods = analysis.filterMethodsOnParams(matchedClass, types);
         }
         //do the matching on the remaining methods
         List<String> methodNames = new ArrayList<>();

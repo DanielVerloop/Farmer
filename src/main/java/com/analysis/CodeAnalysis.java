@@ -280,10 +280,13 @@ public class CodeAnalysis {
      */
     public boolean checkParamTypes(List<Parameter> resolvedConstructor, List<String> targetTypes) {
         int count = 0;
+        List<Parameter> temp = new ArrayList<>(resolvedConstructor);
         for (int i = 0; i < targetTypes.size(); i++) {
-            for (int j = 0; j < resolvedConstructor.size(); j++) {
-                if (targetTypes.get(i).equals(resolvedConstructor.get(j).getTypeAsString())) {
+            for (int j = 0; j < temp.size(); j++) {
+                if (targetTypes.get(i).equals(temp.get(j).getTypeAsString())) {
                     count++;
+                    temp.remove(j);
+                    break;
                 }
             }
         }
