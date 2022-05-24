@@ -263,7 +263,7 @@ public class DistanceMatcher implements Matcher{
             } else {
                 //default -> test will generate but no semantically correct code
                 //TODO:implement this case
-                compareValue = "failed";
+                compareValue = "true";
                 assertStmt = "equals";
             }
         }
@@ -294,6 +294,7 @@ public class DistanceMatcher implements Matcher{
         }
         if (methods.size() == 0) {//no numbers or params
             methods.addAll(analysis.getMethodsWithReturnType(className, "String"));
+            methods.addAll(analysis.getMethodsWithReturnType(className, "boolean"));
         }
         //the actual matching
         for (String verb : verbs) {
@@ -455,14 +456,19 @@ public class DistanceMatcher implements Matcher{
      */
     private List<String> matchClass(List<String> nouns, CodeAnalysis codeAnalysis, int n) {
         HashMap<String, Double> similarity = new HashMap<>(); // {word=[suggested class]}
+        HashMap<String, Integer> matchCounter = new HashMap<>();
         for (String noun : nouns) {
             for (String className : codeAnalysis.getMapMethods2Classes().keySet()) {
                 double dist = this.cosine.distance(className, noun) +
                         this.levenshtein.distance(className, noun);
                 similarity.merge(className, dist, Double::sum);
+                matchCounter.merge(className, 1, Integer::sum);
             }
-
         }
+        matchCounter.forEach((s, counter) ->
+            similarity.merge(s, 0.0, (a, b) -> (a+b)/counter)
+        );
+
         HashMap<String, Double> sortedOnSim = sortByValue(similarity);
         List<String> result = new ArrayList<>();
         List<String> setIterable = new ArrayList<>(sortedOnSim.keySet());

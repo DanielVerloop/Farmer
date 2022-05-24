@@ -1399,13 +1399,11 @@
       "scenarios": [
         {
           "given": {
-            "description": "Given there is a bar with a coffee machine",
+            "description": "Given there is a bar",
             "analysis": [
               {
                 "nouns": [
-                  "bar",
-                  "coffee machine",
-                  "machine"
+                  "bar"
                 ],
                 "numbers": [],
                 "parameters": []
@@ -1470,13 +1468,13 @@
           },
           "wAnd": [],
           "then": {
-            "description": "Then there is 3 milk left in the machine at the bar",
+            "description": "Then the machine at the bar contains 3 milk",
             "analysis": [
               {
                 "nouns": [
-                  "milk",
                   "machine",
-                  "bar"
+                  "bar",
+                  "milk"
                 ],
                 "numbers": [
                   3
@@ -1485,19 +1483,12 @@
               },
               [
                 [
-                  "is",
+                  "contain",
                   [
                     "ARGM-TMP: Then",
-                    "there V: is",
-                    "ARG1: 3 milk left in the machine at the bar"
-                  ]
-                ],
-                [
-                  "left",
-                  [
-                    "Then there is ARG1: 3 milk",
-                    "V: left",
-                    "ARGM-LOC: in the machine at the bar"
+                    "ARG0: the machine at the bar",
+                    "V: contains",
+                    "ARG1: 3 milk"
                   ]
                 ]
               ]
@@ -1505,13 +1496,13 @@
           },
           "tAnd": [
             {
-              "description": "And there are 4 beans left in the machine at the bar",
+              "description": "And the machine at the bar contains 4 beans",
               "analysis": [
                 {
                   "nouns": [
-                    "beans",
                     "machine",
-                    "bar"
+                    "bar",
+                    "beans"
                   ],
                   "numbers": [
                     4
@@ -1520,19 +1511,12 @@
                 },
                 [
                   [
-                    "are",
+                    "contain",
                     [
                       "ARGM-DIS: And",
-                      "there V: are",
-                      "ARG1: 4 beans left in the machine at the bar"
-                    ]
-                  ],
-                  [
-                    "left",
-                    [
-                      "And there are ARG1: 4 beans",
-                      "V: left",
-                      "ARGM-LOC: in the machine at the bar"
+                      "ARG0: the machine at the bar",
+                      "V: contains",
+                      "ARG1: 4 beans"
                     ]
                   ]
                 ]
@@ -1542,13 +1526,100 @@
         },
         {
           "given": {
-            "description": "Given there is a bar with a coffee machine",
+            "description": "Given there is a bar",
             "analysis": [
               {
                 "nouns": [
-                  "bar",
-                  "coffee machine",
-                  "machine"
+                  "bar"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [
+            {
+              "description": "And a coffee machine with 1 beans and 1 milk",
+              "analysis": [
+                {
+                  "nouns": [
+                    "coffee machine",
+                    "machine",
+                    "beans",
+                    "milk"
+                  ],
+                  "numbers": [
+                    1,
+                    1
+                  ],
+                  "parameters": []
+                },
+                []
+              ]
+            }
+          ],
+          "when": {
+            "description": "When the client purchases a cappuccino",
+            "analysis": [
+              {
+                "nouns": [
+                  "client purchases",
+                  "purchases",
+                  "cappuccino"
+                ],
+                "numbers": [],
+                "parameters": []
+              },
+              [
+                [
+                  "purchas",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: the client",
+                    "V: purchases",
+                    "ARG1: a cappuccino"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the client can not order another coffee",
+            "analysis": [
+              {
+                "nouns": [
+                  "client",
+                  "order",
+                  "coffee"
+                ],
+                "numbers": [],
+                "parameters": []
+              },
+              [
+                [
+                  "order",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG0: the client",
+                    "ARGM-MOD: can",
+                    "ARGM-NEG: not",
+                    "V: order",
+                    "ARG1: another coffee"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        },
+        {
+          "given": {
+            "description": "Given there is a bar",
+            "analysis": [
+              {
+                "nouns": [
+                  "bar"
                 ],
                 "numbers": [],
                 "parameters": []
@@ -1634,6 +1705,562 @@
                     "ARGM-TMP: still",
                     "V: order",
                     "ARG1: another coffee"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        },
+        {
+          "given": {
+            "description": "Given there is a bar",
+            "analysis": [
+              {
+                "nouns": [
+                  "bar"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [
+            {
+              "description": "And the bar has a soda machine with liters of soda",
+              "analysis": [
+                {
+                  "nouns": [
+                    "bar",
+                    "soda machine",
+                    "machine",
+                    "liters",
+                    "soda"
+                  ],
+                  "numbers": [],
+                  "parameters": [
+                    "liters",
+                    "soda"
+                  ]
+                },
+                [
+                  [
+                    "ha",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: the bar",
+                      "V: has",
+                      "ARG1: a soda machine with  liters  of  soda"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ],
+          "when": {
+            "description": "When the client purchases a soda",
+            "analysis": [
+              {
+                "nouns": [
+                  "client purchases",
+                  "purchases",
+                  "soda"
+                ],
+                "numbers": [],
+                "parameters": [
+                  "soda"
+                ]
+              },
+              [
+                [
+                  "purchas",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: the client",
+                    "V: purchases",
+                    "ARG1: a  soda"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the machine contains amount liters of soda",
+            "analysis": [
+              {
+                "nouns": [
+                  "machine",
+                  "liters",
+                  "soda"
+                ],
+                "numbers": [],
+                "parameters": [
+                  "amount",
+                  "soda"
+                ]
+              },
+              [
+                [
+                  "contain",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG0: the machine",
+                    "V: contains",
+                    "ARG1:  amount  liters of  soda"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        },
+        {
+          "given": {
+            "description": "Given there is a bar",
+            "analysis": [
+              {
+                "nouns": [
+                  "bar"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [
+            {
+              "description": "And the bar has an empty soda machine",
+              "analysis": [
+                {
+                  "nouns": [
+                    "bar",
+                    "soda machine",
+                    "machine"
+                  ],
+                  "numbers": [],
+                  "parameters": []
+                },
+                [
+                  [
+                    "ha",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: the bar",
+                      "V: has",
+                      "ARG1: an empty soda machine"
+                    ]
+                  ]
+                ]
+              ]
+            },
+            {
+              "description": "And the bar has an empty coffee machine",
+              "analysis": [
+                {
+                  "nouns": [
+                    "bar",
+                    "coffee machine",
+                    "machine"
+                  ],
+                  "numbers": [],
+                  "parameters": []
+                },
+                [
+                  [
+                    "ha",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: the bar",
+                      "V: has",
+                      "ARG1: an empty coffee machine"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ],
+          "when": {
+            "description": "When we add amount of soda to the soda machine",
+            "analysis": [
+              {
+                "nouns": [
+                  "amount",
+                  "soda",
+                  "soda machine",
+                  "machine"
+                ],
+                "numbers": [],
+                "parameters": [
+                  "amount",
+                  "soda"
+                ]
+              },
+              [
+                [
+                  "add",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: we",
+                    "V: add",
+                    "ARG1:  amount  of  soda",
+                    "ARG2: to the soda machine"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [
+            {
+              "description": "And we add a volume of coffee beans to the coffee machine",
+              "analysis": [
+                {
+                  "nouns": [
+                    "volume",
+                    "coffee beans",
+                    "beans",
+                    "coffee machine",
+                    "machine"
+                  ],
+                  "numbers": [],
+                  "parameters": [
+                    "volume"
+                  ]
+                },
+                [
+                  [
+                    "add",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: we",
+                      "V: add",
+                      "ARG1: a  volume  of coffee beans",
+                      "ARG2: to the coffee machine"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ],
+          "then": {
+            "description": "Then the coffee machine contains volume beans",
+            "analysis": [
+              {
+                "nouns": [
+                  "coffee machine",
+                  "machine",
+                  "volume beans",
+                  "beans"
+                ],
+                "numbers": [],
+                "parameters": [
+                  "volume"
+                ]
+              },
+              [
+                [
+                  "contain",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG0: the coffee machine",
+                    "V: contains",
+                    "ARG1:  volume  beans"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": [
+            {
+              "description": "And the soda machine contains amount of soda",
+              "analysis": [
+                {
+                  "nouns": [
+                    "soda machine",
+                    "machine",
+                    "amount",
+                    "soda"
+                  ],
+                  "numbers": [],
+                  "parameters": [
+                    "amount",
+                    "soda"
+                  ]
+                },
+                [
+                  [
+                    "contain",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: the soda machine",
+                      "V: contains",
+                      "ARG1:  amount  of  soda"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SodaMachine.feature",
+      "scenarios": [
+        {
+          "given": {
+            "description": "Given we have a soda machine with amount of soda",
+            "analysis": [
+              {
+                "nouns": [
+                  "soda machine",
+                  "machine",
+                  "amount",
+                  "soda"
+                ],
+                "numbers": [],
+                "parameters": [
+                  "amount",
+                  "soda"
+                ]
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When we serve a soda to a client",
+            "analysis": [
+              {
+                "nouns": [
+                  "soda",
+                  "client"
+                ],
+                "numbers": [],
+                "parameters": [
+                  "soda"
+                ]
+              },
+              [
+                [
+                  "serv",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: we",
+                    "V: serve",
+                    "ARG1: a  soda",
+                    "ARG2: to a client"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the machine contains liters of soda",
+            "analysis": [
+              {
+                "nouns": [
+                  "machine",
+                  "liters",
+                  "soda"
+                ],
+                "numbers": [],
+                "parameters": [
+                  "liters",
+                  "soda"
+                ]
+              },
+              [
+                [
+                  "contain",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG0: the machine",
+                    "V: contains",
+                    "ARG1:  liters  of  soda"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        },
+        {
+          "given": {
+            "description": "Given we have a soda machine with amount of soda",
+            "analysis": [
+              {
+                "nouns": [
+                  "soda machine",
+                  "machine",
+                  "amount",
+                  "soda"
+                ],
+                "numbers": [],
+                "parameters": [
+                  "amount",
+                  "soda"
+                ]
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When we add amount of soda to the machine",
+            "analysis": [
+              {
+                "nouns": [
+                  "amount",
+                  "soda",
+                  "machine"
+                ],
+                "numbers": [],
+                "parameters": [
+                  "amount",
+                  "soda"
+                ]
+              },
+              [
+                [
+                  "add",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: we",
+                    "V: add",
+                    "ARG1:  amount  of  soda",
+                    "ARG2: to the machine"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [],
+          "then": {
+            "description": "Then the machine contains liters of soda",
+            "analysis": [
+              {
+                "nouns": [
+                  "machine",
+                  "liters",
+                  "soda"
+                ],
+                "numbers": [],
+                "parameters": [
+                  "liters",
+                  "soda"
+                ]
+              },
+              [
+                [
+                  "contain",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG0: the machine",
+                    "V: contains",
+                    "ARG1:  liters  of  soda"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "tAnd": []
+        },
+        {
+          "given": {
+            "description": "Given we have an empty soda machine",
+            "analysis": [
+              {
+                "nouns": [
+                  "soda machine",
+                  "machine"
+                ],
+                "numbers": [],
+                "parameters": []
+              }
+            ]
+          },
+          "gAnd": [],
+          "when": {
+            "description": "When we add amount of soda to the machine",
+            "analysis": [
+              {
+                "nouns": [
+                  "amount",
+                  "soda",
+                  "machine"
+                ],
+                "numbers": [],
+                "parameters": [
+                  "amount",
+                  "soda"
+                ]
+              },
+              [
+                [
+                  "add",
+                  [
+                    "ARGM-TMP: When",
+                    "ARG0: we",
+                    "V: add",
+                    "ARG1:  amount  of  soda",
+                    "ARG2: to the machine"
+                  ]
+                ]
+              ]
+            ]
+          },
+          "wAnd": [
+            {
+              "description": "And we serve a soda to a client",
+              "analysis": [
+                {
+                  "nouns": [
+                    "soda",
+                    "client"
+                  ],
+                  "numbers": [],
+                  "parameters": [
+                    "soda"
+                  ]
+                },
+                [
+                  [
+                    "serv",
+                    [
+                      "ARGM-DIS: And",
+                      "ARG0: we",
+                      "V: serve",
+                      "ARG1: a  soda",
+                      "ARG2: to a client"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ],
+          "then": {
+            "description": "Then the machine contains liters of soda",
+            "analysis": [
+              {
+                "nouns": [
+                  "machine",
+                  "liters",
+                  "soda"
+                ],
+                "numbers": [],
+                "parameters": [
+                  "liters",
+                  "soda"
+                ]
+              },
+              [
+                [
+                  "contain",
+                  [
+                    "ARGM-TMP: Then",
+                    "ARG0: the machine",
+                    "V: contains",
+                    "ARG1:  liters  of  soda"
                   ]
                 ]
               ]
