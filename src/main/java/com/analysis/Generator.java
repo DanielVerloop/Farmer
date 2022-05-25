@@ -82,7 +82,7 @@ public class Generator {
             List<Step> steps = getAllSteps(scenario.getSteps());
             for (Step step : steps) {
                 String[] annotation = step.getDescription().split("\\s", 2);
-                String name = new StringFormatter().camelCase(annotation[1]);
+                String name = new StringFormatter().camelCase(annotation[1].replace("<", "").replace(">", ""));
 
                 // create the step method
                 MethodDeclaration method;
@@ -108,7 +108,7 @@ public class Generator {
                         String type = step.getParent().getTypeSolver().getParameterType(param);
                         descriptionParameters.add(new DescriptionParameter(param, type));
                         String varType = "{"+type.toLowerCase()+"}";
-                        annotation[1] = annotation[1].replace(param, varType);
+                        annotation[1] = annotation[1].replace("<"+param+">", varType);
                     }
                     method.addSingleMemberAnnotation(annotation[0], new StringLiteralExpr(annotation[1]));
                 } else {
