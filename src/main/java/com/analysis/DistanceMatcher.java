@@ -213,6 +213,12 @@ public class DistanceMatcher implements Matcher{
                         parameters.add(param);
                     }
                 }
+                if (step.getSrlLabels().get("ARG1").contains(step.getNumbers().get(0))) {
+                    //TODO:implement when we find a good test case
+                }
+                if (step.getSrlLabels().get("ARG2").contains(step.getNumbers().get(0))) {
+                    compareValue = step.getNumbers().get(0);
+                }
             } else {
                 if (step.getSrlLabels().get("ARG2") != null) {
                     if (step.getSrlLabels().get("ARG2").contains(step.getNumbers().get(0))) {
@@ -562,7 +568,7 @@ public class DistanceMatcher implements Matcher{
                     for (int k = original; k < j; k++) {
                         params.put(parameters[k], pair.getOriginalParams().get(original).getTypeAsString());
                     }
-                    params.put(parameterNames.get(i), pair.getOriginalParams().get(i).getTypeAsString());
+                    params.put(parameters[i], pair.getOriginalParams().get(i).getTypeAsString());
                     original = i;
                 }
                 //special case only custom class parameter to fix
@@ -570,7 +576,7 @@ public class DistanceMatcher implements Matcher{
                     for (int k = 0; k < j; k++) {
                         params.put(parameters[k], pair.getOriginalParams().get(original).getTypeAsString());
                     }
-                    params.put(parameterNames.get(i), pair.getOriginalParams().get(i).getTypeAsString());
+                    params.put(parameters[i], pair.getOriginalParams().get(i).getTypeAsString());
                 }
             }
         }
