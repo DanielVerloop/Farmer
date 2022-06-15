@@ -45,6 +45,7 @@ public class Farmer {
 //                "src/test/resources/features/MovieTest.feature",
 //                "C:/Users/danielv/Documents/Git test projects/cinema-with-cucumber-master/src/test/java/com/gr/cinema/domain"
 //        );
+
 //        Generator generator = new Generator("CoffeeMachineStepDefs");
 //        generator.generate(
 //                "CoffeeMachine.feature",
@@ -52,19 +53,19 @@ public class Farmer {
 //                "C:/Users/danielv/Documents/GitHub/CoffeeMachine/src/main/java"
 //        );
 
-//        Generator generator = new Generator("BarStepDefs");
-//        generator.generate(
-//                "Bar.feature",
-//                "C:/Users/danielv/Documents/GitHub/CoffeeMachine/src/test/resources/Bar.feature",
-//                "C:/Users/danielv/Documents/GitHub/CoffeeMachine/src/main/java"
-//        );
-
-        Generator generator = new Generator("SodaMachineStepDefs");
+        Generator generator = new Generator("BarStepDefs");
         generator.generate(
-                "SodaMachine.feature",
-                "C:/Users/danielv/Documents/GitHub/CoffeeMachine/src/test/resources/SodaMachine.feature",
+                "Bar.feature",
+                "C:/Users/danielv/Documents/GitHub/CoffeeMachine/src/test/resources/Bar.feature",
                 "C:/Users/danielv/Documents/GitHub/CoffeeMachine/src/main/java"
         );
+
+//        Generator generator = new Generator("SodaMachineStepDefs");
+//        generator.generate(
+//                "SodaMachine.feature",
+//                "C:/Users/danielv/Documents/GitHub/CoffeeMachine/src/test/resources/SodaMachine.feature",
+//                "C:/Users/danielv/Documents/GitHub/CoffeeMachine/src/main/java"
+//        );
 
     }
 

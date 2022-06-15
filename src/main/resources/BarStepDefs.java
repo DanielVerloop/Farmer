@@ -57,21 +57,21 @@ public class BarStepDefs {
         Assert.assertTrue(bar.askForCoffee() == true);
     }
 
-    @And("the bar has a {string} machine with {double} of {string}")
-    public void theBarHasASodaMachineWithLitersOfSoda(String soda, double liters) {
-        sodamachine = new SodaMachine(liters, soda);
+    @And("the bar has a soda machine with {double} of {string}")
+    public void theBarHasASodaMachineWithLitersOfSoda(String soda) {
+        sodamachine = new SodaMachine(soda, liters);
         bar.setSodaMachine(sodamachine);
     }
 
     SodaMachine sodamachine;
 
     @When("the client purchases a {string}")
-    public void theClientPurchasesASoda(String soda) {
+    public void theClientPurchasesASoda() {
         bar.orderSoda(soda);
     }
 
     @Then("the machine contains {double} liters of {string}")
-    public void theMachineContainsAmountLitersOfSoda(double amount, String soda) {
+    public void theMachineContainsAmountLitersOfSoda() {
         Assert.assertTrue(bar.askForSoda(amount).equals(soda));
     }
 
@@ -87,23 +87,23 @@ public class BarStepDefs {
         bar.setCoffeeMachine(coffeemachine);
     }
 
-    @When("we add {double} of {string} to the {string} machine")
-    public void weAddAmountOfSodaToTheSodaMachine(double amount, String soda) {
-        bar.fillSodaMachine(amount, soda);
+    @When("we add {double} of {string} to the soda machine")
+    public void weAddAmountOfSodaToTheSodaMachine(String soda) {
+        bar.fillSodaMachine(soda, amount);
     }
 
     @And("we add a {int} of coffee beans to the coffee machine")
-    public void weAddAVolumeOfCoffeeBeansToTheCoffeeMachine(int volume) {
+    public void weAddAVolumeOfCoffeeBeansToTheCoffeeMachine() {
         bar.getCoffeeMachine();
     }
 
     @Then("the coffee machine contains {int} beans")
-    public void theCoffeeMachineContainsVolumeBeans(int volume) {
+    public void theCoffeeMachineContainsVolumeBeans() {
         Assert.assertTrue(bar.askForSoda() == volume);
     }
 
-    @And("the {string} machine contains {double} of {string}")
-    public void theSodaMachineContainsAmountOfSoda(String soda, double amount) {
+    @And("the soda machine contains {double} of {string}")
+    public void theSodaMachineContainsAmountOfSoda(String soda) {
         Assert.assertTrue(bar.askForSoda(amount).equals(soda));
     }
 }

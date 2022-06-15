@@ -29,6 +29,10 @@ public class CodeAnalysis {
         return classFields;
     }
 
+    public List<String> getClassNames() {
+        return classNames;
+    }
+
     /**
      * analyse a complete directory
      * @param dir path to directory

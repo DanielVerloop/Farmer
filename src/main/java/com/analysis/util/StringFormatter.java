@@ -82,4 +82,25 @@ public class StringFormatter {
         }
         return result;
     }
+
+    public String splitCamelCase(String name) {
+        String[] split = name.split("(?<!(^|[A-Z0-9*]))(?=[A-Z0-9*])|(?<!^)(?=[A-Z0-9*][a-z])");
+        String result = String.join(" ", split);
+        return result.toLowerCase();
+    }
+
+    public String toCamelCase(String functionName) {
+        String[] words = functionName.split("[\\W_]+");
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < words.length; i++) {
+            String word = words[i];
+            if (i == 0) {
+                word = word.isEmpty() ? word : word.toLowerCase();
+            } else {
+                word = word.isEmpty() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1).toLowerCase();
+            }
+            builder.append(word);
+        }
+        return builder.toString();
+    }
 }

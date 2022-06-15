@@ -29,6 +29,7 @@ public class DistanceMatcher implements Matcher{
     private final NormalizedLevenshtein levenshtein;//Used for class matching
     private final ParameterParser parameterParser;
     private final List<Scenario> match;
+    private final UnitTestCrawler crawler;
 
     @Override
     public List<Scenario> getMatch() {
@@ -41,6 +42,14 @@ public class DistanceMatcher implements Matcher{
         this.cosine = new Cosine();
         this.levenshtein = new NormalizedLevenshtein();
         this.parameterParser = new ParameterParser(new File(featureFile));
+        //TODO:parametrize the object below
+        crawler = new UnitTestCrawler(
+                "C:/Users/danielv/Documents/GitHub/CoffeeMachine/src/test/java/BarTest.java",
+                analysis.getClassNames()
+        );
+
+
+        //initialize the matching process
         this.match = this.match(scenarios, analysis);
     }
 
@@ -49,6 +58,7 @@ public class DistanceMatcher implements Matcher{
         for (Scenario scenario : scenarios) {
             Context context = new Context();
             List<Step> steps = scenario.getSteps();
+            context.setInitClasses(crawler.getSetOfClasses(scenario));
             for (Step step : steps) {
                 if (step instanceof GivenStep) {
                     List<Rule> result = matchGiven(step, analysis, context);
@@ -94,8 +104,8 @@ public class DistanceMatcher implements Matcher{
 
     private List<Rule> matchAnd(AndStep step, CodeAnalysis analysis, Context context) throws WrongWordspaceTypeException, IOException {
         List<Rule> matchResult =new ArrayList<>();
-        List<String> bestMatchedClasses =  matchClass(step.getNouns(), analysis,
-                analysis.getMapMethods2Classes().keySet().size()/2);
+        List<String> bestMatchedClasses =  matchClass(step.getNouns(), analysis, context,
+                analysis.getMapMethods2Classes().keySet().size());
         Constructor constructorResolver = matchConstructor(bestMatchedClasses, analysis, step);
         String bestMatchedClass = constructorResolver.getName();
 
@@ -136,8 +146,8 @@ public class DistanceMatcher implements Matcher{
 
     private List<Rule> matchGiven(Step step, CodeAnalysis analysis, Context context) {
         //Matched class
-        List<String> bestMatchedClasses =  matchClass(step.getNouns(), analysis,
-                analysis.getMapMethods2Classes().keySet().size()/2);
+        List<String> bestMatchedClasses =  matchClass(step.getNouns(), analysis, context,
+                analysis.getMapMethods2Classes().keySet().size());
         Constructor constructorResolver = matchConstructor(bestMatchedClasses, analysis, step);
         String bestMatchedClass = constructorResolver.getName();
 
@@ -460,11 +470,20 @@ public class DistanceMatcher implements Matcher{
     /**
      * Matches a class to a step using only nouns
      */
-    private List<String> matchClass(List<String> nouns, CodeAnalysis codeAnalysis, int n) {
+    private List<String> matchClass(List<String> nouns, CodeAnalysis codeAnalysis, Context context, int n) {
         HashMap<String, Double> similarity = new HashMap<>(); // {word=[suggested class]}
         HashMap<String, Integer> matchCounter = new HashMap<>();
+
+        //first retain only classes that are used in context
+        List<String> filteredClasses = new ArrayList<>();
+        for (String name: codeAnalysis.getClassNames()) {
+            if (context.getInitClasses().contains(name)) {
+                filteredClasses.add(name);
+            }
+        }
+
         for (String noun : nouns) {
-            for (String className : codeAnalysis.getMapMethods2Classes().keySet()) {
+            for (String className : filteredClasses) {
                 double dist = this.cosine.distance(className, noun) +
                         this.levenshtein.distance(className, noun);
                 similarity.merge(className, dist, Double::sum);
@@ -476,12 +495,12 @@ public class DistanceMatcher implements Matcher{
         );
 
         HashMap<String, Double> sortedOnSim = sortByValue(similarity);
-        List<String> result = new ArrayList<>();
+        List<String> result = new ArrayList<>(sortedOnSim.keySet());
         List<String> setIterable = new ArrayList<>(sortedOnSim.keySet());
-        if (n == 0) n = 1;//edge case due to integer division
-        for (int i = 0; i < n; i++) {
-            result.add(setIterable.get(i));
-        }
+//        if (n == 0) n = 1;//edge case due to integer division
+//        for (int i = 0; i < n; i++) {
+//            result.add(setIterable.get(i));
+//        }
         return result;
     }
 
