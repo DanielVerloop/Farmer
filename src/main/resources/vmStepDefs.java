@@ -58,7 +58,7 @@ public class vmStepDefs {
 
     @Then("the inventory stock of {string} must be equal to {int} units")
     public void theInventoryStockOfProductMustBeEqualToArg0Units(String product, int arg0) {
-        Assert.assertTrue(vendingmachine.getInventoryQtyForThe(product) == arg0);
+        Assert.assertTrue(vendingmachine.getInventoryQtyForThe(product) == 9);
     }
 
     @And("the vending machine gives {double} back")

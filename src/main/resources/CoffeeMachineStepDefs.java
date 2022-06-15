@@ -30,12 +30,14 @@ public class CoffeeMachineStepDefs {
 
     @And("we put {int} beans into the machine")
     public void wePutArg0BeansIntoTheMachine(int arg0) {
-        coffeemachine.setCoffeeBeans(arg0);
+        sodamachine = new SodaMachine();
     }
+
+    SodaMachine sodamachine;
 
     @And("we put {int} milk into the machine")
     public void wePutArg0MilkIntoTheMachine(int arg0) {
-        coffeemachine.setMilk(arg0);
+        sodamachine = new SodaMachine();
     }
 
     @When("we make a cup of coffee")

@@ -23,8 +23,8 @@ public class calcStepDefs {
         Assert.assertTrue(calculator.currentValue() == arg0);
     }
 
-    @When("I subtract {int} and {int}")
-    public void iSubtractArg0AndArg1(int arg0, int arg1) {
+    @When("I subtract {int} from {int}")
+    public void iSubtractArg0FromArg1(int arg0, int arg1) {
         calculator.subtract(arg0, arg1);
     }
 }

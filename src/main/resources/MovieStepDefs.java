@@ -35,6 +35,6 @@ public class MovieStepDefs {
 
     @Then("I validate that the the new movie is setup correctly.")
     public void iValidateThatTheTheNewMovieIsSetupCorrectly.() {
-        Assert.assertTrue(movie.getMovieId() == failed);
+        Assert.assertTrue(movie.getMovieId() == true);
     }
 }

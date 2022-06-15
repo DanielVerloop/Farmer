@@ -246,7 +246,7 @@
           },
           "gAnd": [
             {
-              "description": "And it has 10 product in its inventory",
+              "description": "And it has 10 <product> in its inventory",
               "analysis": [
                 {
                   "nouns": [
@@ -276,7 +276,7 @@
             }
           ],
           "when": {
-            "description": "When inserts the money pounds",
+            "description": "When inserts the <money> pounds",
             "analysis": [
               {
                 "nouns": [
@@ -302,7 +302,7 @@
           },
           "wAnd": [
             {
-              "description": "And presses the button with the code for product",
+              "description": "And presses the button with the code for <product>",
               "analysis": [
                 {
                   "nouns": [
@@ -357,7 +357,7 @@
           },
           "tAnd": [
             {
-              "description": "And the product leaves the machine",
+              "description": "And the <product> leaves the machine",
               "analysis": [
                 {
                   "nouns": [
@@ -400,7 +400,7 @@
           },
           "gAnd": [
             {
-              "description": "And it has 10 product in its inventory",
+              "description": "And it has 10 <product> in its inventory",
               "analysis": [
                 {
                   "nouns": [
@@ -430,7 +430,7 @@
             }
           ],
           "when": {
-            "description": "When the user inserts the money dollars",
+            "description": "When the user inserts the <money> dollars",
             "analysis": [
               {
                 "nouns": [
@@ -458,7 +458,7 @@
           },
           "wAnd": [
             {
-              "description": "And selects the product",
+              "description": "And selects the <product>",
               "analysis": [
                 {
                   "nouns": [
@@ -482,7 +482,7 @@
               ]
             },
             {
-              "description": "And the vending machine removes product from inventory",
+              "description": "And the vending machine removes <product> from inventory",
               "analysis": [
                 {
                   "nouns": [
@@ -512,7 +512,7 @@
             }
           ],
           "then": {
-            "description": "Then the inventory stock of product must be equal to 9 units",
+            "description": "Then the inventory stock of <product> must be equal to 9 units",
             "analysis": [
               {
                 "nouns": [
@@ -544,7 +544,7 @@
           },
           "tAnd": [
             {
-              "description": "And the vending machine gives change back",
+              "description": "And the vending machine gives <change> back",
               "analysis": [
                 {
                   "nouns": [
@@ -588,7 +588,7 @@
           },
           "gAnd": [
             {
-              "description": "And it has 10 product in its inventory",
+              "description": "And it has 10 <product> in its inventory",
               "analysis": [
                 {
                   "nouns": [
@@ -618,7 +618,7 @@
             }
           ],
           "when": {
-            "description": "When the user insert the money",
+            "description": "When the user insert the <money>",
             "analysis": [
               {
                 "nouns": [
@@ -670,7 +670,7 @@
             }
           ],
           "then": {
-            "description": "Then the vending machine asks for missing dollars",
+            "description": "Then the vending machine asks for <missing> dollars",
             "analysis": [
               {
                 "nouns": [
@@ -719,7 +719,7 @@
           },
           "gAnd": [],
           "when": {
-            "description": "When tax is calculated for product with price price",
+            "description": "When tax is calculated for <product> with <price> price",
             "analysis": [
               {
                 "nouns": [
@@ -757,7 +757,7 @@
           },
           "wAnd": [],
           "then": {
-            "description": "Then the result should be result",
+            "description": "Then the result should be <result>",
             "analysis": [
               {
                 "nouns": [
@@ -945,7 +945,7 @@
           },
           "gAnd": [],
           "when": {
-            "description": "When the movie has the name name",
+            "description": "When the movie has the name <name>",
             "analysis": [
               {
                 "nouns": [
@@ -973,7 +973,7 @@
           },
           "wAnd": [
             {
-              "description": "And the movie has a rating of rating",
+              "description": "And the movie has a rating of <rating>",
               "analysis": [
                 {
                   "nouns": [
@@ -1000,7 +1000,7 @@
               ]
             },
             {
-              "description": "And the duration of the movie is duration",
+              "description": "And the duration of the movie is <duration>",
               "analysis": [
                 {
                   "nouns": [
@@ -1027,7 +1027,7 @@
               ]
             },
             {
-              "description": "And the cast of the movie is mainCast",
+              "description": "And the cast of the movie is <mainCast>",
               "analysis": [
                 {
                   "nouns": [
@@ -1727,7 +1727,7 @@
           },
           "gAnd": [
             {
-              "description": "And the bar has a soda machine with liters of soda",
+              "description": "And the bar has a soda machine with <liters> of <soda>",
               "analysis": [
                 {
                   "nouns": [
@@ -1758,7 +1758,7 @@
             }
           ],
           "when": {
-            "description": "When the client purchases a soda",
+            "description": "When the client purchases a <soda>",
             "analysis": [
               {
                 "nouns": [
@@ -1786,7 +1786,7 @@
           },
           "wAnd": [],
           "then": {
-            "description": "Then the machine contains amount liters of soda",
+            "description": "Then the machine contains <amount> liters of <soda>",
             "analysis": [
               {
                 "nouns": [
@@ -1881,7 +1881,7 @@
             }
           ],
           "when": {
-            "description": "When we add amount of soda to the soda machine",
+            "description": "When we add <amount> of <soda> to the soda machine",
             "analysis": [
               {
                 "nouns": [
@@ -1912,7 +1912,7 @@
           },
           "wAnd": [
             {
-              "description": "And we add a volume of coffee beans to the coffee machine",
+              "description": "And we add a <volume> of coffee beans to the coffee machine",
               "analysis": [
                 {
                   "nouns": [
@@ -1943,7 +1943,7 @@
             }
           ],
           "then": {
-            "description": "Then the coffee machine contains volume beans",
+            "description": "Then the coffee machine contains <volume> beans",
             "analysis": [
               {
                 "nouns": [
@@ -1972,7 +1972,7 @@
           },
           "tAnd": [
             {
-              "description": "And the soda machine contains amount of soda",
+              "description": "And the soda machine contains <amount> of <soda>",
               "analysis": [
                 {
                   "nouns": [
@@ -2009,7 +2009,7 @@
       "scenarios": [
         {
           "given": {
-            "description": "Given we have a soda machine with amount of soda",
+            "description": "Given we have a soda machine with <amount> of <soda>",
             "analysis": [
               {
                 "nouns": [
@@ -2028,7 +2028,7 @@
           },
           "gAnd": [],
           "when": {
-            "description": "When we serve a soda to a client",
+            "description": "When we serve a <soda> to a client",
             "analysis": [
               {
                 "nouns": [
@@ -2056,7 +2056,7 @@
           },
           "wAnd": [],
           "then": {
-            "description": "Then the machine contains liters of soda",
+            "description": "Then the machine contains <liters> of <soda>",
             "analysis": [
               {
                 "nouns": [
@@ -2087,7 +2087,7 @@
         },
         {
           "given": {
-            "description": "Given we have a soda machine with amount of soda",
+            "description": "Given we have a soda machine with <amount> of <soda>",
             "analysis": [
               {
                 "nouns": [
@@ -2106,7 +2106,7 @@
           },
           "gAnd": [],
           "when": {
-            "description": "When we add amount of soda to the machine",
+            "description": "When we add <amount> of <soda> to the machine",
             "analysis": [
               {
                 "nouns": [
@@ -2136,7 +2136,7 @@
           },
           "wAnd": [],
           "then": {
-            "description": "Then the machine contains liters of soda",
+            "description": "Then the machine contains <liters> of <soda>",
             "analysis": [
               {
                 "nouns": [
@@ -2181,7 +2181,7 @@
           },
           "gAnd": [],
           "when": {
-            "description": "When we add amount of soda to the machine",
+            "description": "When we add <amount> of <soda> to the machine",
             "analysis": [
               {
                 "nouns": [
@@ -2211,7 +2211,7 @@
           },
           "wAnd": [
             {
-              "description": "And we serve a soda to a client",
+              "description": "And we serve a <soda> to a client",
               "analysis": [
                 {
                   "nouns": [
@@ -2239,7 +2239,7 @@
             }
           ],
           "then": {
-            "description": "Then the machine contains liters of soda",
+            "description": "Then the machine contains <liters> of <soda>",
             "analysis": [
               {
                 "nouns": [

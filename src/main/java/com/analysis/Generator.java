@@ -102,7 +102,7 @@ public class Generator {
                 } else {
                     method = declaration.addMethod(name, Modifier.Keyword.PUBLIC);
                 }
-                //TODO: fix bug where name of parameter also occurs in description as a word
+                //add parameters to step function
                 if (step.getParameters().size() > 0) {
                     for (String param : step.getParameters()) {
                         String type = step.getParent().getTypeSolver().getParameterType(param);
