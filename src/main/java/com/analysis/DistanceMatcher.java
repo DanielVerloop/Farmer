@@ -44,7 +44,7 @@ public class DistanceMatcher implements Matcher{
         this.parameterParser = new ParameterParser(new File(featureFile));
         //TODO:parametrize the object below
         crawler = new UnitTestCrawler(
-                "C:/Users/danielv/Documents/GitHub/CoffeeMachine/src/test/java/BarTest.java",
+                "C:/Users/danielv/Documents/GitHub/CoffeeMachine/src/test/java/CoffeeMachineTest.java",
                 analysis.getClassNames()
         );
 
