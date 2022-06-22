@@ -67,13 +67,14 @@ public class StringFormatter {
         }
         for (int i = 0; i < descr.length; i++) {
             for (int j = 0; j < temp.size(); j++) {
-                if (temp.get(j).getValue() != null) {//number
+                if (temp.get(j).getValue() != null) {//cardinal digits
                     if (descr[i].equals(temp.get(j).getValue())) {
                         result.add(temp.get(j).getType() + " " + temp.get(j).getName());
                         temp.remove(j);
                     }
-                } else {//other types
-                    if (descr[i].equals(temp.get(j).getName())) {
+                } else {//table parameters
+
+                    if (descr[i].equals("<"+temp.get(j).getName()+">")) {
                         result.add(temp.get(j).getType() + " " + temp.get(j).getName());
                         temp.remove(j);
                     }

@@ -7,24 +7,24 @@ import org.junit.Assert;
 public class SodaMachineStepDefs {
 
     @Given("we have a soda machine with {double} of {string}")
-    public void weHaveASodaMachineWithAmountOfSoda(String soda) {
+    public void weHaveASodaMachineWithAmountOfSoda(double amount, String soda) {
         sodamachine = new SodaMachine(soda, amount);
     }
 
     SodaMachine sodamachine;
 
     @When("we serve a {string} to a client")
-    public void weServeASodaToAClient() {
+    public void weServeASodaToAClient(String soda) {
         sodamachine.serveDrink(soda);
     }
 
     @Then("the machine contains {int} of {string}")
-    public void theMachineContainsLitersOfSoda() {
-        Assert.assertTrue(sodamachine.checkInventory(liters).equals(soda));
+    public void theMachineContainsLitersOfSoda(int liters, String soda) {
+        Assert.assertTrue(sodamachine.hashCode(liters).equals(soda));
     }
 
     @When("we add {double} of {string} to the machine")
-    public void weAddAmountOfSodaToTheMachine() {
+    public void weAddAmountOfSodaToTheMachine(double amount, String soda) {
         sodamachine.inputSoda(soda, amount);
     }
 
@@ -34,7 +34,7 @@ public class SodaMachineStepDefs {
     }
 
     @And("we serve a {string} to a client")
-    public void weServeASodaToAClient() {
+    public void weServeASodaToAClient(String soda) {
         sodamachine.serveDrink(soda);
     }
 }

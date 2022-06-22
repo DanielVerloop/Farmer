@@ -11,6 +11,7 @@ import com.analysis.util.*;
 import com.analysis.util.distance.DiscoStringSimilarity;
 import com.github.javaparser.ast.body.Parameter;
 import de.linguatools.disco.CorruptConfigFileException;
+import de.linguatools.disco.DISCO;
 import de.linguatools.disco.WrongWordspaceTypeException;
 import info.debatty.java.stringsimilarity.Cosine;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
@@ -24,7 +25,7 @@ import java.util.*;
  * This class uses String distance as base for matching text to code
  */
 public class DistanceMatcher implements Matcher{
-    private final DiscoStringSimilarity model;
+    private DiscoStringSimilarity model;
     private final Cosine cosine;//All other text-code matching
     private final NormalizedLevenshtein levenshtein;//Used for class matching
     private final ParameterParser parameterParser;
@@ -638,13 +639,4 @@ public class DistanceMatcher implements Matcher{
         }
         return temp;
     }
-
-//    TODO:REMOVE
-//    public static void main(String[] args) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
-//        List<Scenario> scenarios = new NLPFileReader("src/main/resources/nlp_results.json",
-//                "src/test/resources/features/vendingMachine.feature")
-//                .getScenarios("vendingMachine.feature");
-//        DistanceMatcher matcher = new DistanceMatcher(
-//                new File("src/main/java/com/vendingmachine"), scenarios);
-//    }
 }

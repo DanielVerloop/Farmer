@@ -74,6 +74,7 @@
             <artifactId>disco</artifactId>
             <version>v3.0.0</version>
         </dependency>
+
     </dependencies>
 
 </project>
