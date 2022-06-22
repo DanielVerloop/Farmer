@@ -58,7 +58,7 @@ public class BarStepDefs {
     }
 
     @And("the bar has a soda machine with {double} of {string}")
-    public void theBarHasASodaMachineWithLitersOfSoda(Double liters, String soda) {
+    public void theBarHasASodaMachineWithLitersOfSoda(double liters, String soda) {
         sodamachine = new SodaMachine(soda, liters);
         bar.setSodaMachine(sodamachine);
     }
@@ -88,7 +88,7 @@ public class BarStepDefs {
     }
 
     @When("we add {double} of {string} to the soda machine")
-    public void weAddAmountOfSodaToTheSodaMachine(Double amount, String soda) {
+    public void weAddAmountOfSodaToTheSodaMachine(double amount, String soda) {
         bar.fillSodaMachine(soda, amount);
     }
 
@@ -103,7 +103,7 @@ public class BarStepDefs {
     }
 
     @And("the soda machine contains {double} of {string}")
-    public void theSodaMachineContainsAmountOfSoda(Double amount, String soda) {
+    public void theSodaMachineContainsAmountOfSoda(double amount, String soda) {
         Assert.assertTrue(bar.askForSoda(amount).equals(soda));
     }
 }

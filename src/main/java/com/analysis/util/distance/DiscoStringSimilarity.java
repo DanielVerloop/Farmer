@@ -20,9 +20,9 @@ public class DiscoStringSimilarity {
     }
 
     public static void main(String[] args) throws IOException, CorruptConfigFileException, WrongWordspaceTypeException {
-//        DiscoStringSimilarity model = new DiscoStringSimilarity();
+        DiscoStringSimilarity model = new DiscoStringSimilarity();
         Cosine sim = new Cosine();
-//        System.out.println(model.distance("insert", "input amount"));
+        System.out.println(model.distance("insert", "input amount"));
 //        System.out.println(model.distance("inserts", "set amount"));
 //        System.out.println(model.distance("insert", "setAmount"));
 //        double result = model.distance("insert", "set product");

@@ -120,6 +120,9 @@ public class Generator {
                     String[] split = p.split("\\s");
                     method.addParameter(split[0], split[1]);
                 }
+//                for (DescriptionParameter p : descriptionParameters) {
+//                    method.addParameter(p.getType(), p.getName());
+//                }
 
                 //Check if we already created this method based on its name and annotation
                 //If it exists, we remove the method we created
