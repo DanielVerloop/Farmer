@@ -9,6 +9,7 @@ import com.github.javaparser.ast.AccessSpecifier;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 
 import java.io.File;
@@ -16,10 +17,10 @@ import java.io.FileNotFoundException;
 import java.util.*;
 
 public class CodeAnalysis {
-    private HashMap<String, List<String>> mapMethods2Classes = new HashMap<>();
-    private HashMap<String, List<String>> classFields = new HashMap<>();
-    private List<String> classNames;
-    private Map<String, CompilationUnit> className2CU = new HashMap<>();//TODO: make all methods use this for perfomance optimization
+    private final HashMap<String, List<String>> mapMethods2Classes = new HashMap<>();
+    private final HashMap<String, List<String>> classFields = new HashMap<>();
+    private final List<String> classNames;
+    private final Map<String, CompilationUnit> className2CU = new HashMap<>();//TODO: make all methods use this for perfomance optimization
 
     public HashMap<String, List<String>> getMapMethods2Classes() {
         return mapMethods2Classes;
@@ -97,7 +98,6 @@ public class CodeAnalysis {
      * maps classes to their methods
      * @param file
      * @param names allows for a restriction of the used classes
-     * @throws FileNotFoundException
      */
     public void mapMethods2Classes(File file, List<String> names) throws FileNotFoundException {
         if (names.size() < 1) {
@@ -120,9 +120,6 @@ public class CodeAnalysis {
 
     /**
      * Get all methods that are not of type void
-     * @param className
-     * @param type
-     * @return
      */
     public List<String> getMethodsWithReturnType(String className, String type) {
         CompilationUnit cu = className2CU.get(className);
@@ -141,18 +138,16 @@ public class CodeAnalysis {
 
     /**
      * Reduces the method search space for a class
-     * @param className
+     * @param className name of targeted class
      * @param parameters list of parameter types
-     * @return
      */
     public List<Method> filterMethodsOnParams(String className, List<String> parameters) {
-        CompilationUnit cu = className2CU.get(className);
         Set<Method> set = new LinkedHashSet<>();//to only keep distinct values
         List<Method> result = new ArrayList<>();
 
-        //TODO: fine-tune filter accuracy
-        //TODO: allow for no filtering if parameters is empty
-        cu.getClassByName(className).get().getMethods().stream().forEach(methodDeclaration -> {
+        List<MethodDeclaration> methods = getAllMethodsFromClass(className);
+
+        methods.stream().forEach(methodDeclaration -> {
             List<ParameterPair> pairs = reduceObjectParameters(methodDeclaration.getParameters());
             for (ParameterPair pair : pairs) {
                 if (parameters == null) {//default behaviour add all options
@@ -176,6 +171,47 @@ public class CodeAnalysis {
         //return a list
         result.addAll(set);
         return result;
+    }
+
+    /**
+     * Finds all public methods that can be called on a certain class object.
+     * @param className
+     * @return all public methods of class + superclasses
+     */
+    private List<MethodDeclaration> getAllMethodsFromClass(String className) {
+        CompilationUnit cu = className2CU.get(className);
+        List<MethodDeclaration> methods = new ArrayList<>();
+
+        //Add all methods from current class
+        for (MethodDeclaration m : cu.getClassByName(className).get().getMethods()) {
+            if (m.getAccessSpecifier().equals(AccessSpecifier.PUBLIC)) {
+                methods.add(m);
+            }
+        }
+
+        // Check if class is a subclass
+        if (cu.getClassByName(className).get().getExtendedTypes().size() > 0) {
+            String superClassName = cu.getClassByName(className).get().
+                    getExtendedTypes().getFirst().get().getNameAsString();
+
+            //Only add not-overridden methods
+            for (MethodDeclaration md : getAllMethodsFromClass(superClassName)) {
+                if (!checkMethodEquals(md, methods)) {
+                    methods.add(md);
+                }
+            }
+        }
+
+        return methods;
+    }
+
+    private boolean checkMethodEquals(MethodDeclaration m, List<MethodDeclaration> methods) {
+        for (MethodDeclaration mtd: methods) {
+            if (mtd.getNameAsString().equals(m.getNameAsString())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -290,10 +326,7 @@ public class CodeAnalysis {
                 }
             }
         }
-        if (count == targetTypes.size()) {
-            return true;
-        }
-        return false;
+        return count == targetTypes.size();
     }
 
     public List<String> getMethodsWithParamtype(String className, String paramType) {
